@@ -4,7 +4,7 @@ Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scale
 
 Date: 16/04/21
 
-Version: 0.1
+Version: 0.1.1
 
 # Contents
 
@@ -57,7 +57,34 @@ EZShop is a software application to:
 # Context Diagram and interfaces
 
 ## Context Diagram
-<img src="https://i.ibb.co/1rMFCjc/context-diagram.png" alt="Context Diagram image">
+```plantuml
+left to right direction
+ 
+actor "User" as u
+actor "Shop Owner\n    (Admin)" as so
+actor "Cashier" as c
+actor "Warehouse Worker" as ww
+actor "Shelf Stocker" as ss
+actor "Barcode Reader" as br
+actor "Cash Register" as cr
+actor "POS" as p
+actor "Supplier" as s
+ 
+rectangle System {
+    usecase EZShop
+}
+ 
+so --|> u
+c --|> u
+ww --|> u
+ss --|> u
+ 
+u -- EZShop
+EZShop -- br
+EZShop -- cr
+EZShop -- p
+s - EZShop
+```
 
 ## Interfaces
 | Actor 			| Logical Interface | Physical Interface  	|
@@ -88,10 +115,6 @@ Henry is 36, he is the manager of the shop. He mostly needs to have access to th
 # Functional and non functional requirements
 
 ## Functional Requirements
-
-\<In the form DO SOMETHING, or VERB NOUN, describe high level capabilities of the system>
-
-\<they match to high level use cases>
 
 | ID        	| Description  	|
 | ------------- |:-------------:| 
@@ -138,7 +161,50 @@ Henry is 36, he is the manager of the shop. He mostly needs to have access to th
 
 
 ## Use case diagram
-<img src="https://i.ibb.co/n1g9zpc/use-case-diagram.png" alt="Use Cases Diagram image">
+```plantuml
+actor "Shop Owner" as so
+actor "Cashier" as c
+actor "Warehouse Worker" as ww
+actor "Shelf Stocker" as ss
+actor "Barcode Reader" as br
+actor "Cash Register" as cr
+actor "Supplier" as s
+ 
+rectangle EZShop {
+    usecase "Authenticate an user" as F1
+    usecase "Manage an user" as F2
+    usecase "Manage sales" as F3
+    usecase "Manage inventory" as F4
+    usecase "Reorder" as F4.4
+    usecase "Manage customers" as F5
+    usecase "Support accounting " as F6
+}
+ 
+F1 <.. F2 : <<include>>
+F1 <.. F3 : <<include>>
+F1 <.. F4 : <<include>>
+F1 <.. F5 : <<include>>
+F1 <.. F6 : <<include>>
+ 
+F4.4 ..> F4 : <<extend>>
+ 
+F2 <-- so
+ 
+F3 <-- c
+F3 --> cr
+F3 ---> br
+ 
+F4 ---> br
+F4 <-- ww
+F4 <-- ss
+ 
+F4.4 -> s
+ 
+F5 <-- c
+F5 ---> br
+ 
+F6 <-- so
+```
 
 ### Use case 1, UC1 - Authenticate an user
 | Actors Involved        | Shop Owner, Cashier, Warehouse Worker, Shelf Stocker |
@@ -270,6 +336,20 @@ Henry is 36, he is the manager of the shop. He mostly needs to have access to th
 
 # Deployment Diagram 
 
-<img src="https://i.ibb.co/Hd5L9t1/deployment-diagram.png" alt="Deployment Diagram image">
+
+
+```plantuml
+skinparam defaultTextAlignment center
+ 
+artifact "EZShop Application" as EZShop
+ 
+node "Application\nServer" as s
+node "PC\nClient" as c1
+node "Smartphone\nClient" as c2
+ 
+EZShop -[dotted]-> s : <<deploy>>
+s -- "*" c1 : LAN
+s -- "*" c2 : LAN
+```
 
 
