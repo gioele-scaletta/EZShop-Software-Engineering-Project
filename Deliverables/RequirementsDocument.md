@@ -156,12 +156,12 @@ Jordan is 45, he is the business manager of the shop. He mostly needs to have ac
 
 | ID        	| Type (efficiency, reliability, ..)           | Description  | Refers to |
 | ------------- |:-------------:| :-----:| -----:|
-|  NFR1     	| Performance	| All functions should have response time < 0.5 sec  | |
-|  NFR2     	| Usability		| Implementation of intuitive GUI | |
-|  NFR3     	| Portability	| Responsive GUI for smartphone usage| |
-|  NFR4 		| Localization	| Add different currencies and separators| |
-|  NFR5 		| Usability		| Remote IT support| |
-|  NFR6         | Security      | Only authorized users can access the application. Safety from hacker attacks| | 
+|  NFR1     	| Performance	| All functions should have response time < 0.5 sec  | All FR |
+|  NFR2     	| Usability		| Implementation of intuitive GUI | All FR |
+|  NFR3     	| Portability	| Responsive GUI for smartphone usage| FR4 |
+|  NFR4 		| Localization	| Add different currencies and separators| FR3, FR4 and FR6 |
+|  NFR5 		| Usability		| Remote IT support| All FR |
+|  NFR6         | Security      | Only authorized users can access the application. Safety from hacker attacks| All FR | 
 
 # Use case diagram and use cases
 
