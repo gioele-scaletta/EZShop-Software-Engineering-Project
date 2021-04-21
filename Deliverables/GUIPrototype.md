@@ -6,11 +6,11 @@ Date: 21/04/2021
 
 Version: 0.1
 
-## Use Case 1 - Authenticate an user
+## Use Case 1 - Authenticate a user
 
 ![Use Case 1](./images/UC-1.png)
 
-## Use Case 2/3 - Manage an user
+## Use Case 2/3 - Manage a user
 
 ![Use Case 2/3](./images/UC-23.png)
 
@@ -37,6 +37,6 @@ Version: 0.1
 
 ![Use Case 8](./images/UC-8.png)
 
-## Use Case 9 - Authenticate an user
+## Use Case 9 - Authenticate a user
 
 ![Use Case 9](./images/UC-9.png)

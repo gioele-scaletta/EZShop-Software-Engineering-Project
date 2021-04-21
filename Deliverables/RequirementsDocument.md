@@ -98,10 +98,10 @@ s - EZShop
 |   Shelf Stocker   |GUI 				|Screen and mouse/keyboard on PC, Touchscreen on smartphone |
 |   Business Manager|GUI 				|Screen and mouse/keyboard on PC, Touchscreen on smartphone |
 |   Supplier     	|Web Service		|Internet connection 										|
-|   Barcode Reader  |API  				|Local Area Network  										|
-|   Cash Register   |API  				|Local Area Network  										|
+|   Barcode Reader  |API  				|Wire/Local Area Network  					     			|
+|   Cash Register   |API  				|Wire                   									|
 |   POS     		|API				|Wire/Wireless/Telephone line  								|
-|   Card Printer	|API				|Wire								|
+|   Card Printer	|API				|Wire								                        |
 
 
 # Stories and personas
@@ -113,7 +113,7 @@ Josh is 27, he is a cashier, he wants to offer the best possible service even du
 
 Chadwick is 65, he has been the inventory manager of a shop since he was 35. He is a bit reluctant to change and not very good with computers, but he is the best at his job. His tasks include updating the current inventory availability when new orders arrive and keeping track of their product position, both in shop's aisles or warehouse sections.
 
-Henry is 36, he is the owner of the shop. His employees are his bigger resource. For this reason he wants to be sure that every of his employees has all of the tools to perform its daily job in the most efficient way. So he needs a reliable application that supports all of the shop's processes and allows him to delegate all the tasks in the most efficient way. He also wants to have a general overview of his financial situation. 
+Henry is 36, he is the owner of the shop. His employees are his bigger resource. For this reason he wants to be sure that every of his employees has all of the tools to perform its daily job in the most efficient way. So he needs a reliable application that supports all of the shop's processes and allows him to assign different roles to his employees with flexibility. He also wants to have a general overview of the accounting situation. 
 
 Jordan is 45, he is the business manager of the shop. He mostly needs to have access to the accounting and sales information to perform his management duties. As a matter of fact, he likes analytics and he always wants to have everything under control in order to make his decision by having simpler and more aware processes. He wants to have a document ready to send to the tax regulator agency for fiscal declarations.
 
@@ -669,10 +669,13 @@ Shelf_stocker --|> User
 
 
 
-class Sale_transaction{
+class Sale{
     int n_products
+    int timestamp
+    int tot_discount_perc
+    int n_receipt
     int tot_amount
-    Boolean loyalty
+    Boolean fidelity
 
 
 }
@@ -687,11 +690,9 @@ class Supplier{
 class Product{
     int Quantityshelves
     int Quantitywarehouse
-    String Supplier
     String Productname
     int EAN
-    int discount
-    int fidelitydiscount
+    int discount_perc
     int price
 }
 
@@ -708,10 +709,7 @@ class Fidelity_card{
 }
 
 
-class IT_support{
-    int suport_num
-    String suppirt_mail
-}
+
 
 
 class Sales_Tab
@@ -735,7 +733,6 @@ Warehouse_worker -- Inventory_Tab
 Shelf_stocker -- Inventory_Tab
 Sales_Tab -- Cashier
 Sales_Tab -- Sale_transaction
-User - IT_support
 Admin - Accounting_Tab
 Accounting_Tab --"*" Sale_transaction
 
