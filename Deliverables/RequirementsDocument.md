@@ -4,7 +4,7 @@ Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scale
 
 Date: 21/04/21
 
-Version: 1.5
+Version: 1.6
 
 # Contents
 
@@ -721,16 +721,16 @@ User "*"-- Users_Tab
 Admin -- Users_Tab
 Inventory_Tab - Product
 Product "*"- Supplier
-Sale_transaction - Fidelity_card
-Sale_transaction -- "*" Product
+Sale - Fidelity_card
+Sale -- "*" Product
 Cashier - Customer_Tab
 Customer_Tab - Fidelity_card
 Warehouse_worker -- Inventory_Tab
 Shelf_stocker -- Inventory_Tab
 Sales_Tab -- Cashier
-Sales_Tab -- Sale_transaction
+Sales_Tab -- Sale
 Admin - Accounting_Tab
-Accounting_Tab --"*" Sale_transaction
+Accounting_Tab --"*" Sale
 
 
 ```
