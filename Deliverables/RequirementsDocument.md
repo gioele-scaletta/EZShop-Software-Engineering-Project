@@ -2,9 +2,9 @@
 
 Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scaletta
 
-Date: 16/04/21
+Date: 21/04/21
 
-Version: 0.2
+Version: 0.2.1
 
 # Contents
 
@@ -97,6 +97,7 @@ s - EZShop
 |   Shop Owner     	|GUI				|Screen and mouse/keyboard on PC, Touchscreen on smartphone |
 |   Warehouse Worker|GUI				|Screen and mouse/keyboard on PC, Touchscreen on smartphone |
 |   Shelf Stocker   |GUI 				|Screen and mouse/keyboard on PC, Touchscreen on smartphone |
+|   Business Manager|GUI 				|Screen and mouse/keyboard on PC, Touchscreen on smartphone |
 |   Supplier     	|Web Service		|Internet connection 										|
 |   Barcode Reader  |API  				|Local Area Network  										|
 |   Cash Register   |API  				|Local Area Network  										|
@@ -298,7 +299,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 2.1 - Edit a user profile
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | A user with "user" permission is logged in to the application (scenario 1.1) |
+|  Precondition         | A user with "user" permission set is logged in to the application (scenario 1.1) |
 |                       | A person has a user profile (Scenario 3.1)|
 |  Post condition       | A user profile has been edited |
 |  Step #               | Description |
@@ -313,7 +314,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 2.2 - Delete a user profile
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | A user with "user" permission is logged in to the application (scenario 1.1) |
+|  Precondition         | A user with "user" permission set is logged in to the application (scenario 1.1) |
 |                       | A person has a user profile (Scenario 3.1)|
 |  Post condition       | A user profile has been edited |
 |  Step #               | Description |
@@ -334,7 +335,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 3.1 - Create a user
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | A user with "user" permission is logged in to the application (scenario 1.1) |
+|  Precondition         | A user with "user" permission set is logged in to the application (scenario 1.1) |
 |  Post condition       | A new user profile is created and added to the application |
 |  Step #               | Description |
 |  1                    | Access the users tab|
@@ -362,7 +363,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 4.1 - Checkout at the cash desk
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | The cashier has an user profile with "sales" permission and is logged into the application (scenario 1.1) |
+|  Precondition         | The cashier has an user profile with "sales" set permission and is logged into the application (scenario 1.1) |
 |                       | The cash register is connected to the application|
 |                       | The barcode reader is connected to the application|
 |                       | The POS is connected to the application|
@@ -383,7 +384,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 4.2 - Checkout at the cash desk with refused credit card
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | The cashier has an user profile with "sales" permission and is logged into the application (scenario 1.1) |
+|  Precondition         | The cashier has an user profile with "sales" permission set and is logged into the application (scenario 1.1) |
 |                       | The cash register is connected to the application|
 |                       | The barcode reader is connected to the application|
 |                       | The POS is connected to the application|
@@ -410,7 +411,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 5.1 - Scan of a new incoming shipment
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | The warehouse worker has an user profile with "inventory" permission and is logged into the application (scenario 1.1) |
+|  Precondition         | The warehouse worker has an user profile with "inventory" permission set and is logged into the application (scenario 1.1) |
 |                       | An order has been done in precedence and is registered in the orders list|
 |                       | The barcode reader is connected to the application|
 |  Post condition       | The inventory information is updated|
@@ -436,7 +437,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 6.1 - Move products from warehouse to shelf
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | The warehouse worker has a user profile  with "inventory" permission  and is logged in to the application (scenario 1.1) |
+|  Precondition         | The warehouse worker has a user profile  with "inventory" permission set and is logged in to the application (scenario 1.1) |
 |                       | The barcode reader is connected to the application|
 |  Post condition       | Product information are updated|
 |  Step #               | Description |
@@ -461,7 +462,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 7.1 - Order products manually from supplier
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | The warehouse worker has a user profile with "inventory" permission and is logged in to the application (scenario 1.1)|
+|  Precondition         | The warehouse worker has a user profile with "inventory" permission set and is logged in to the application (scenario 1.1)|
 |                       | The barcode reader is connected to the application|
 |  Post condition       | New order is sent to suppliers; Orders list is updated|
 |  Step #               | Description |
@@ -478,7 +479,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 7.2 - Set automatic order from suppliers
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | The warehouse worker has a user profile  with "inventory" permission  and is logged in to the application (scenario 1.1) |
+|  Precondition         | The warehouse worker has a user profile  with "inventory" permission set and is logged in to the application (scenario 1.1) |
 |                       | The barcode reader is connected to the application|
 |  Post condition       | Automatic order is set|
 |  Step #               | Description |
@@ -492,7 +493,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 7.3 - Add a new supplier for a product
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | The warehouse worker has a user profile  with "inventory" permission  and is logged in to the application (scenario 1.1) |
+|  Precondition         | The warehouse worker has a user profile  with "inventory" permission set and is logged in to the application (scenario 1.1) |
 |                       | The barcode reader is connected to the application|
 |  Post condition       | Product information are updated|
 |  Step #               | Description |
@@ -518,7 +519,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 8.1 - A fidelity card is created (print)
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | The cashier has a user profile  with "inventory" permission  and is logged in to the application (scenario 1.1) |
+|  Precondition         | The cashier has a user profile  with "inventory" permission set and is logged in to the application (scenario 1.1) |
 |                       | The card printer is connected to the application|
 |  Post condition       | A new customer is registered with a fidelity card|
 |  Step #               | Description |
@@ -532,7 +533,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 8.2 - A fidelity card is created (manually inserted)
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | The cashier has a user profile  with "inventory" permission  and is logged in to the application (scenario 1.1) |
+|  Precondition         | The cashier has a user profile  with "inventory" permission set and is logged in to the application (scenario 1.1) |
 |                       | The barcode reader is connected to the application|
 |  Post condition       | A new customer is registered with a fidelity card|
 |  Step #               | Description |
@@ -548,7 +549,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 8.3 - Edit customer information
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | The cashier has a user profile  with "inventory" permission  and is logged in to the application (scenario 1.1) |
+|  Precondition         | The cashier has a user profile  with "inventory" permission set and is logged in to the application (scenario 1.1) |
 |                       | The barcode reader is connected to the application|
 |  Post condition       | Customer information is updated|
 |  Step #               | Description |
@@ -562,7 +563,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 8.4 - Delete customer information
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | The cashier has a user profile  with "inventory" permission  and is logged in to the application (scenario 1.1) |
+|  Precondition         | The cashier has a user profile  with "inventory" permission set and is logged in to the application (scenario 1.1) |
 |                       | The barcode reader is connected to the application|
 |  Post condition       | Customer information is updated|
 |  Step #               | Description |
@@ -572,6 +573,39 @@ nor ..> Mpi : <<extend>>
 |  4                    | Click on "Delete"|
 |  5                    | Click on "Yes"|
 |  6                    | Success page is prompted. Click on "Ok"|
+
+### Use case 9, UC9 - Support accounting
+| Actors Involved       | Business Manager |
+| ----------------------|:-----------------------------------------------------------------------| 
+|  Precondition         | The business manager has a user profile and is logged in to the application|
+|                       | The business manager can use some taxes and financial instruments |
+|  Post condition       | The business manager reviews some statistics |
+|  Nominal Scenario     | The cashier adds a customer to the application and provides him a fidelity card by inserting his personal information in the application;|
+|  Variants             | Different filters are used depending on the needs of the owner for each moment|
+|                       | The business manager downloads accounting information in tabular format in a csv file|
+
+##### Scenario 9.1 - Apply filters to accounting data
+|||
+| ----------------------|:-----------------------------------------------------------------------| 
+|  Precondition         | The business manager has a user profile  with "accounting" permission set and is logged in to the application (scenario 1.1)|
+|  Post condition       | The displayed accounting data are filtered based on the set filters|
+|  Step #               | Description |
+|  1                    | Access the accounting tab|
+|  2                    | Click on "Filters"|
+|  3                    | Set the desired filters|
+|  4                    | Click on "Apply"|
+|  5                    | The filtered accounting data is displayed|
+
+##### Scenario 9.2 - Download a .csv financial report
+|||
+| ----------------------|:-----------------------------------------------------------------------| 
+|  Precondition         | The business manager has a user profile  with "accounting" permission set and is logged in to the application (scenario 1.1)|
+|  Post condition       | The displayed accounting data are filtered based on the set filters|
+|  Step #               | Description |
+|  1                    | Access the accounting tab|
+|  2                    | Set eventual filters (Scenario 9.1)|
+|  3                    | Click on "Download CSV"|
+|  4                    | The financial report is downloaded to the system|
 
 # Glossary
 
