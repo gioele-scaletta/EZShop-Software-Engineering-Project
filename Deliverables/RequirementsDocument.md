@@ -4,7 +4,7 @@ Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scale
 
 Date: 21/04/21
 
-Version: 1.3
+Version: 1.4
 
 # Contents
 
@@ -67,6 +67,7 @@ actor "Shelf Stocker" as ss
 actor "Barcode Reader" as br
 actor "Cash Register" as cr
 actor "POS" as p
+actor "Card Printer" as cp
 actor "Supplier" as s
 actor "Business Manager" as bm
  
@@ -173,7 +174,7 @@ actor "Warehouse Worker" as ww
 actor "Shelf Stocker" as ss
 actor "Barcode Reader" as br
 actor "Cash Register" as cr
-actor "Card Printer" as cp
+
 actor "Supplier" as s
 actor "Business Manager" as bm
  
