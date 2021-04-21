@@ -161,6 +161,7 @@ Jordan is 45, he is the business manager of the shop. He mostly needs to have ac
 |  NFR4 		| Localization	| Add different currencies and separators| FR3, FR4 and FR6 |
 |  NFR5 		| Usability		| Remote IT support| All FR |
 |  NFR6         | Security      | Only authorized users can access the application. Safety from hacker attacks| All FR | 
+|  NFR7         | Localization  | Language support| All FR |
 
 # Use case diagram and use cases
 
@@ -181,7 +182,6 @@ rectangle EZShop {
     usecase "Manage an user" as F2
     usecase "Manage sales" as F3
     usecase "Manage inventory" as F4
-    usecase "Reorder" as F4.4
     usecase "Manage customers" as F5
     usecase "Support accounting " as F6
 }
@@ -191,8 +191,7 @@ F1 <.. F3 : <<include>>
 F1 <.. F4 : <<include>>
 F1 <.. F5 : <<include>>
 F1 <.. F6 : <<include>>
- 
-F4.4 ..> F4 : <<extend>>
+
  
 F2 <-- so
  
@@ -204,7 +203,7 @@ F4 ---> br
 F4 <-- ww
 F4 <-- ss
  
-F4.4 -> s
+F4 -> s
  
 F5 <-- c
 F5 ---> br
@@ -235,9 +234,9 @@ F6 <-- so
 (Modify user) as (Mu)
 
 
-(New shipment) as (Ns)
-(Modify product information) as (Mpi)
-(Move product from warehouse to shelves) as (ws)
+(Register incoming shipment) as (Ns)
+(Product information management) as (Mpi)
+(Order Products) as (ws)
 (Create new Loyalty card) as (nlc)
 (Modify Loyalty card) as (mlc)
 
@@ -300,7 +299,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 2.1 - Edit a user profile
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | A user with "user" permission set is logged in to the application (scenario 1.1) |
+|  Precondition         | A user with "admin" permission set is logged in to the application (scenario 1.1) |
 |                       | A person has a user profile (Scenario 3.1)|
 |  Post condition       | A user profile has been edited |
 |  Step #               | Description |
@@ -315,9 +314,9 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 2.2 - Delete a user profile
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | A user with "user" permission set is logged in to the application (scenario 1.1) |
+|  Precondition         | A user with "admin" permission set is logged in to the application (scenario 1.1) |
 |                       | A person has a user profile (Scenario 3.1)|
-|  Post condition       | A user profile has been edited |
+|  Post condition       | A user profile has been delited |
 |  Step #               | Description |
 |  1                    | Access the users tab|
 |  2                    | Search for an user's username on the search bar|
@@ -336,7 +335,7 @@ nor ..> Mpi : <<extend>>
 ##### Scenario 3.1 - Create a user
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
-|  Precondition         | A user with "user" permission set is logged in to the application (scenario 1.1) |
+|  Precondition         | A user with "admin" permission set is logged in to the application (scenario 1.1) |
 |  Post condition       | A new user profile is created and added to the application |
 |  Step #               | Description |
 |  1                    | Access the users tab|
@@ -435,7 +434,7 @@ nor ..> Mpi : <<extend>>
 |  Nominal Scenario     | The shelf stocker or the warehouse worker scans an EAN barcode or searches for the product in the inventory; The selected product information is edited and updated in the inventory|
 |  Variants             | The EAN barcode of a scanned product is not found in the inventory; an error is displayed|
 
-##### Scenario 6.1 - Move products from warehouse to shelf
+##### Scenario 6.1 - Move products from warehouse to shelves
 |||
 | ----------------------|:-----------------------------------------------------------------------| 
 |  Precondition         | The warehouse worker has a user profile  with "inventory" permission set and is logged in to the application (scenario 1.1) |
@@ -444,11 +443,11 @@ nor ..> Mpi : <<extend>>
 |  Step #               | Description |
 |  1                    | Access the inventory tab|
 |  2                    | Search for a product on the search bar (or scan its EAN barcode with the barcode read by clicking on "Search by scanning barcode")|
-|  3                    | Click on the product that has to be moved from the warehouse to the shelf|
+|  3                    | Click on the product that has to be moved from the warehouse to the shelves|
 |  4                    | Modify the quantities in warehouse and shelves accordingly|
 |  5                    | Click on "Confirm"|
 |  6                    | The product's information is updated. Success page is prompted. Click on "Ok"|
-|  7                    | Products are moved from the warehouse to the shelf|
+|  7                    | Products are moved from the warehouse to the shelves|
 
 ### Use case 7, UC7 -  Order products
 | Actors Involved       | Warehouse Worker, Barcode Reader, Suppliers|
