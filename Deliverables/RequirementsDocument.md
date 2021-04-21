@@ -4,7 +4,7 @@ Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scale
 
 Date: 21/04/21
 
-Version: 1.4
+Version: 1.5
 
 # Contents
 
@@ -168,23 +168,23 @@ Jordan is 45, he is the business manager of the shop. He mostly needs to have ac
 
 ## Use case diagram
 ```plantuml
+actor "Cash Register" as cr
 actor "Shop Owner" as so
+actor "Business Manager" as bm
 actor "Cashier" as c
 actor "Warehouse Worker" as ww
 actor "Shelf Stocker" as ss
 actor "Barcode Reader" as br
-actor "Cash Register" as cr
-
+actor "Card Printer" as cp
 actor "Supplier" as s
-actor "Business Manager" as bm
- 
+
 rectangle EZShop {
     usecase "Authenticate an user" as F1
-    usecase "Manage an user" as F2
     usecase "Manage sales" as F3
-    usecase "Manage inventory" as F4
     usecase "Manage customers" as F5
+    usecase "Manage inventory" as F4
     usecase "Support accounting " as F6
+    usecase "Manage an user" as F2
 }
  
 F1 <.. F2 : <<include>>
@@ -192,26 +192,24 @@ F1 <.. F3 : <<include>>
 F1 <.. F4 : <<include>>
 F1 <.. F5 : <<include>>
 F1 <.. F6 : <<include>>
-
  
 F2 <-- so
 
-F3 <-- c
+F3 <--- c
 F3 --> cr
-F3 ---> br
+F3 ----> br
  
-F4 ---> br
-F4 <-- ww
-F4 <-- ss
- 
+F4 ----> br
+F4 <--- ww
+F4 <--- ss
 F4 --> s
  
-F5 <-- c
-F5 ---> br
+F5 <--- c
+F5 --> cp
+F5 ----> br
  
 F6 <-- bm
 F6 <-- so
-
 ```
 
 ```plantuml
