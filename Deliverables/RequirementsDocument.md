@@ -49,7 +49,7 @@ EZShop is a software application to:
 |   Supplier    	|   It supplies the shop with the products. It receives orders from the shop via email.          |
 |   POS    			|   An electronic device that allows to interface with payment cards to make electronic funds transactions.|
 |   Cash Register   |   The machine at the cash desk that registers sales, prints receipts and stores money. It is at the cash desk. |
-|   Barcode Reader  |   The device that allows to reading EAN barcodes of, barcodes products of shipping order in entrance and fidelity cards. It can be a scanner device or a smartphone.        |
+|   Barcode Reader  |   The device that allows reading EAN barcodes of products and fidelity cards. It can be a scanner device or a smartphone.        |
 |   Fidelity Card   |   A card that allows customers to participate to fidelity programs of the shop by accumulating points, access to special discounts and exchanging points for rewards. They can be read via barcode reader. They can be printed by a card printer or be bought from card sellers by the shop owner.|
 |Card Printer| An electronic device that can print fidelity cards.|
 
