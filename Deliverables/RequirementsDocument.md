@@ -4,7 +4,7 @@ Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scale
 
 Date: 21/04/21
 
-Version: 0.2.1
+Version: 1.0
 
 # Contents
 
