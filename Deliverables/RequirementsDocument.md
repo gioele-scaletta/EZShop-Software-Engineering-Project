@@ -41,7 +41,7 @@ EZShop is a software application to:
 | ----------------- |:-----------|
 |   Customer     	|    He is indirectly involved in the software usage. He expects a smooth shop experience, which relies on the staff and his equipment. Including the software.         |
 |   Cashier     	|   He manages the shop sales at the cash desk. He wants to have a reliable and intuitive software that supports his daily job.          |
-| Warehouse Worker	| He is in charge of managing the warehouse. He is interested in keeping all the data of the warehouse in a detailed and accurate way, and the needs to order products easily from the suppliers.            |
+| Warehouse Worker	| He is in charge of managing the warehouse. He is interested in keeping all the data of the warehouse in a detailed and accurate way, as well as to order products easily from the suppliers.            |
 |   Shop Owner    	| He is the buyer of the software. He needs to control every aspect of his shop, and for this reason, he needs a complete application for him and his employees. He takes care of keeping track of the revenue and expenditure of its shop.          |
 |   Section Head    |  He manages a section of the shop. He needs reliable data about his section to support his daily job and the statistical analysis of the purchases. He is also interested in having the possibility of giving/removing rights to his subordinates. This figure may coincide with the shop owner or the shelf stocker depending on the shop.        |
 |   Shelf Stocker   |   He is the person in charge of setting up the shelves and assist to the customer's requests in aisles. He needs a software that helps him in his daily tasks and increment his productivity.          |
@@ -195,7 +195,7 @@ F1 <.. F6 : <<include>>
 
  
 F2 <-- so
-F5 <--cp
+
 F3 <-- c
 F3 --> cr
 F3 ---> br
