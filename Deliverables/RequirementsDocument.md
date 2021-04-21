@@ -21,7 +21,6 @@ Version: 0.2.1
 - [Use case diagram and use cases](#use-case-diagram-and-use-cases)
 	+ [Use case diagram](#use-case-diagram)
 	+ [Use cases](#use-cases)
-    	+ [Relevant scenarios](#relevant-scenarios)
 - [Glossary](#glossary)
 - [Deployment diagram](#deployment-diagram)
 
@@ -255,6 +254,8 @@ Mc .> nlc : <<include>>
 Mc ..> mlc : <<include>>
 nor ..> Mpi : <<extend>>
 ```
+
+## Use cases
 
 ### Use case 1, UC1 - Authenticate an user
 | Actors Involved       | Shop Owner, Cashier, Warehouse Worker, Shelf Stocker, Business Manager |
