@@ -111,6 +111,7 @@ class Return_payment{
 class Return_Transaction {
     -__transactionId
     -__ticketNumber
+    -__Map<String, Integer>(productCode, quantity)   
     -amount_tmp
     -returnId
     -quantity
