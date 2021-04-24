@@ -56,8 +56,6 @@ class EZ_Shop{
     public Integer startReturnTransaction(Integer ticketNumber)
     public List<ProductType> getAllProductTypes()
     public List<ProductType> getProductTypesByDescription(String description)
-    public boolean addProductToSale(Integer transactionId, String productCode, int amount)
-    public boolean deleteProductFromSale(Integer transactionId, String productCode, int amount)
 }
 
 
@@ -93,7 +91,8 @@ class Sale_Transaction {
     -sale_discountRate
     -__Map<String, Integer>(productCode, quantity)   
 
-
+    public boolean addProductToSale(Integer transactionId, String productCode, int amount)
+    public boolean deleteProductFromSale(Integer transactionId, String productCode, int amount)
     public boolean applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate)
     public boolean applyDiscountRateToSale(Integer transactionId, double discountRate)
     public int computePointsForSale(Integer transactionId)
