@@ -33,10 +33,144 @@ The design must satisfy the Official Requirements document, notably functional a
 
 <for each package, report class diagram>
 
+<UC6 and UC7 (Gioele part)>
+
+```plantuml
+left to right direction
+
+class Financial_Transaction {
+    -description
+    -amount
+    -date
+    -time
 
 
+    public double computeBalance()
+    public List<BalanceOperation> getCreditsAndDebits(LocalDate from, LocalDate to)
+    public boolean recordBalanceUpdate(double toBeAdded)
+}
+
+class Sale_payment{
+    -ticketNumber
+    -paymentType
+    -__transactionId
+    -creditCard
+
+    public Ticket getTicketByNumber(Integer ticketNumber)
+    public boolean deleteSaleTicket(Integer ticketNumber)
+    public double receiveCashPayment(Integer ticketNumber, double cash)
+    public boolean receiveCreditCardPayment(Integer ticketNumber, String creditCard)
+
+    public Integer getTransactionId(Integer ticketNumber)
+}
 
 
+Order "1"--"1" Order_payment
+Sale_Transaction "1" - "1" Sale_payment
+Sale_payment "1"--"0...*" Return_Transaction
+Return_payment "1" -- "1" Return_Transaction
+Sale_payment --|> Financial_Transaction
+Return_payment --|> Financial_Transaction
+Order_payment --|> Financial_Transaction
+
+
+class Sale_Transaction {
+    -transactionId
+    -__ticketNumber
+    -__card_ID
+    -amount_tmp
+    -sale_discountRate
+    -__Map<String, Integer>(productCode, quantity)   
+
+
+    public Integer startSaleTransaction()
+    public boolean addProductToSale(Integer transactionId, String productCode, int amount)
+    public boolean deleteProductFromSale(Integer transactionId, String productCode, int amount)
+    public boolean applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate)
+    public boolean applyDiscountRateToSale(Integer transactionId, double discountRate)
+    public boolean closeSaleTransaction(Integer transactionId)
+    public int computePointsForSale(Integer transactionId)
+    public Ticket getSaleTicket(Integer transactionId)
+}
+Sale_Transaction - "*" Product_Type
+
+class Return_payment{
+    __returnID
+    -creditCard
+
+    public double returnCreditCardPayment(Integer returnId, String creditCard)
+    public double returnCashPayment(Integer returnId)
+}
+
+class Return_Transaction {
+    -__transactionId
+    -__ticketNumber
+    -amount_tmp
+    -returnId
+    -quantity
+    -returnedValue
+
+    public Integer startReturnTransaction(Integer ticketNumber)
+    public boolean returnProduct(Integer returnId, String productCode, int amount)
+    public boolean endReturnTransaction(Integer returnId, boolean commit)
+    public boolean deleteReturnTransaction(Integer returnId)
+}
+
+class Quantity {
+    -quantity
+}
+
+(Sale_Transaction, Product_Type)  .. Quantity
+
+class Product_Type{
+    -productCode
+    -barCode
+    -description
+    -sellPrice
+    -inventory_quantity
+    -product_discountRate
+    -notes
+
+    public Integer createProductType(String description, String productCode, double pricePerUnit, String note)
+    public boolean updateProduct(Integer id, String newDescription, String newCode, double newPrice, String newNote)
+    public boolean deleteProductType(Integer id)
+    public List<ProductType> getAllProductTypes()
+    public ProductType getProductTypeByBarCode(String barCode)
+    public List<ProductType> getProductTypesByDescription(String description)
+
+    public void updateProductQuantity(Map<String, Integer>(productCode, quantity))
+    public void updateProductQuantity(String ProductType, Integer quantity)
+}
+
+class Loyalty_Card {
+    -card_ID
+    -points
+    -name
+    -surname
+    
+}
+
+Sale_Transaction "1...*" -- "0..1" Loyalty_Card
+
+class Order {
+    -order_Id
+    -supplier
+    -pricePerUnit
+    -quantity
+    -status
+}
+
+class Order_payment{
+    -__orderId
+}
+
+Order "*" - Product_Type
+
+Return_Transaction "0...*" - "1" Sale_Transaction
+Return_Transaction "0...*" - "1...*" Product_Type
+
+
+```
 
 
 

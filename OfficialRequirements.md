@@ -55,6 +55,7 @@ EZShop is a software application to
 ## Context Diagram
 
 ```plantuml
+
 top to bottom direction
 actor Administrator as a
 actor Cashier as ch
@@ -66,6 +67,7 @@ mngr -up-|> ch
 ch -> (EZShop)
  (EZShop) --> cc
  (EZShop) --> sp
+
 ```
 
 ## Interfaces
