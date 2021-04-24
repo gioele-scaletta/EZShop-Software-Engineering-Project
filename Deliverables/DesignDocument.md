@@ -44,11 +44,23 @@ class Financial_Transaction {
     -date
     -time
 
+    public boolean recordBalanceUpdate(double toBeAdded)
+ 
+}
 
+
+class EZ_Shop{
+    public Integer startSaleTransaction()
     public double computeBalance()
     public List<BalanceOperation> getCreditsAndDebits(LocalDate from, LocalDate to)
-    public boolean recordBalanceUpdate(double toBeAdded)
+    public Integer startReturnTransaction(Integer ticketNumber)
+    public List<ProductType> getAllProductTypes()
+    public List<ProductType> getProductTypesByDescription(String description)
+    public boolean addProductToSale(Integer transactionId, String productCode, int amount)
+    public boolean deleteProductFromSale(Integer transactionId, String productCode, int amount)
 }
+
+
 
 class Sale_payment{
     -ticketNumber
@@ -60,7 +72,6 @@ class Sale_payment{
     public boolean deleteSaleTicket(Integer ticketNumber)
     public double receiveCashPayment(Integer ticketNumber, double cash)
     public boolean receiveCreditCardPayment(Integer ticketNumber, String creditCard)
-
     public Integer getTransactionId(Integer ticketNumber)
 }
 
@@ -83,12 +94,8 @@ class Sale_Transaction {
     -__Map<String, Integer>(productCode, quantity)   
 
 
-    public Integer startSaleTransaction()
-    public boolean addProductToSale(Integer transactionId, String productCode, int amount)
-    public boolean deleteProductFromSale(Integer transactionId, String productCode, int amount)
     public boolean applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate)
     public boolean applyDiscountRateToSale(Integer transactionId, double discountRate)
-    public boolean closeSaleTransaction(Integer transactionId)
     public int computePointsForSale(Integer transactionId)
     public Ticket getSaleTicket(Integer transactionId)
 }
@@ -110,7 +117,6 @@ class Return_Transaction {
     -quantity
     -returnedValue
 
-    public Integer startReturnTransaction(Integer ticketNumber)
     public boolean returnProduct(Integer returnId, String productCode, int amount)
     public boolean endReturnTransaction(Integer returnId, boolean commit)
     public boolean deleteReturnTransaction(Integer returnId)
@@ -134,12 +140,10 @@ class Product_Type{
     public Integer createProductType(String description, String productCode, double pricePerUnit, String note)
     public boolean updateProduct(Integer id, String newDescription, String newCode, double newPrice, String newNote)
     public boolean deleteProductType(Integer id)
-    public List<ProductType> getAllProductTypes()
     public ProductType getProductTypeByBarCode(String barCode)
-    public List<ProductType> getProductTypesByDescription(String description)
 
-    public void updateProductQuantity(Map<String, Integer>(productCode, quantity))
-    public void updateProductQuantity(String ProductType, Integer quantity)
+    public void updateProductQuantity(Map<Integer, Integer>(productCode, quantity))
+    public void updateProductQuantity(Integer , Integer quantity)
 }
 
 class Loyalty_Card {
