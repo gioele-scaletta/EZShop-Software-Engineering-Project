@@ -47,6 +47,7 @@ class EZShop{
     -ordersList: List<Order>
     -salesList: List<SaleTransaction>
     -returnsList: List<ReturnTransaction>
+    -productsList: List<ProductType>
     -balanceOperationsList: List<BalanceOperation>
 
     +void reset();
@@ -139,6 +140,7 @@ class Order {
     -quantity: Integer
     -status: enum Status{PAYED, ISSUED, ORDERED, COMPLETED}
 
+    -orderOperationRecord: BalanceOperation
     -product: ProductType
 }
 
@@ -160,6 +162,7 @@ class SaleTransaction {
 
     -ListOfProductsSale: Map<ProductType, Integer>()
     -transactionCard: LoyaltyCard
+    -saleOperationRecord: BalanceOperation
 }
 
 
@@ -168,6 +171,7 @@ class ReturnTransaction {
     -returnId: Integer
 
     -originalTransaction: SaleTransaction
+    -retOperationRecord: BalanceOperation
     -ListOfProductsReturn: Map<ProductType, Integer>()
 }
 
@@ -192,6 +196,7 @@ EZShop ->"*" SaleTransaction
 EZShop ->"*" ReturnTransaction
 EZShop ->"*" ProductType
 EZShop ->"*" User
+EZShop ->"*" BalanceOperation
 
 
 Order "*"--> ProductType
