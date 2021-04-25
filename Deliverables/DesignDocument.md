@@ -33,145 +33,180 @@ The design must satisfy the Official Requirements document, notably functional a
 
 <for each package, report class diagram>
 
-<UC6 and UC7 (Gioele part)>
+<"!" used to signal inconsistency in function parameter>
+
+<"In each class, methods or connections attributes have been separated with a space">
 
 ```plantuml
 left to right direction
 
-class Financial_Transaction {
-    -description
-    -amount
-    -date
-    -time
 
-    public boolean recordBalanceUpdate(double toBeAdded)
- 
-}
+class EZShop{
 
+    -customersList: List<Customer>
+    -ordersList: List<Order>
+    -salesList: List<SaleTransaction>
+    -returnsList: List<ReturnTransaction>
+    -balanceOperationsList: List<BalanceOperation>
 
-class EZ_Shop{
-    public Integer startSaleTransaction()
-    public double computeBalance()
-    public List<BalanceOperation> getCreditsAndDebits(LocalDate from, LocalDate to)
-    public Integer startReturnTransaction(Integer ticketNumber)
-    public List<ProductType> getAllProductTypes()
-    public List<ProductType> getProductTypesByDescription(String description)
-}
+    +void reset();
 
+    +List<User> getAllUsers()
+    +User login(String username, String password)
+    +boolean logout();
+    +Integer createUser(String username, String password, String role)
+    +boolean deleteUser(Integer id)
+    +User getUser(Integer id)
+    +boolean updateUserRights(Integer id, String role)
 
-
-class Sale_payment{
-    -ticketNumber
-    -paymentType
-    -__transactionId
-    -creditCard
-
-    public Ticket getTicketByNumber(Integer ticketNumber)
-    public boolean deleteSaleTicket(Integer ticketNumber)
-    public double receiveCashPayment(Integer ticketNumber, double cash)
-    public boolean receiveCreditCardPayment(Integer ticketNumber, String creditCard)
-    public Integer getTransactionId(Integer ticketNumber)
-}
-
-
-Order "1"--"1" Order_payment
-Sale_Transaction "1" - "1" Sale_payment
-Sale_payment "1"--"0...*" Return_Transaction
-Return_payment "1" -- "1" Return_Transaction
-Sale_payment --|> Financial_Transaction
-Return_payment --|> Financial_Transaction
-Order_payment --|> Financial_Transaction
-
-
-class Sale_Transaction {
-    -transactionId
-    -__ticketNumber
-    -__card_ID
-    -amount_tmp
-    -sale_discountRate
-    -__Map<String, Integer>(productCode, quantity)   
-
-    public boolean addProductToSale(Integer transactionId, String productCode, int amount)
-    public boolean deleteProductFromSale(Integer transactionId, String productCode, int amount)
-    public boolean applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate)
-    public boolean applyDiscountRateToSale(Integer transactionId, double discountRate)
-    public int computePointsForSale(Integer transactionId)
-    public Ticket getSaleTicket(Integer transactionId)
-}
-Sale_Transaction - "*" Product_Type
-
-class Return_payment{
-    __returnID
-    -creditCard
-
-    public double returnCreditCardPayment(Integer returnId, String creditCard)
-    public double returnCashPayment(Integer returnId)
-}
-
-class Return_Transaction {
-    -__transactionId
-    -__ticketNumber
-    -__Map<String, Integer>(productCode, quantity)   
-    -amount_tmp
-    -returnId
-    -quantity
-    -returnedValue
-
-    public boolean returnProduct(Integer returnId, String productCode, int amount)
-    public boolean endReturnTransaction(Integer returnId, boolean commit)
-    public boolean deleteReturnTransaction(Integer returnId)
-}
-
-class Quantity {
-    -quantity
-}
-
-(Sale_Transaction, Product_Type)  .. Quantity
-
-class Product_Type{
-    -productCode
-    -barCode
-    -description
-    -sellPrice
-    -inventory_quantity
-    -product_discountRate
-    -notes
-
-    public Integer createProductType(String description, String productCode, double pricePerUnit, String note)
-    public boolean updateProduct(Integer id, String newDescription, String newCode, double newPrice, String newNote)
-    public boolean deleteProductType(Integer id)
-    public ProductType getProductTypeByBarCode(String barCode)
-
-    public void updateProductQuantity(Map<Integer, Integer>(productCode, quantity))
-    public void updateProductQuantity(Integer , Integer quantity)
-}
-
-class Loyalty_Card {
-    -card_ID
-    -points
-    -name
-    -surname
+    +List<ProductType> getAllProductTypes()
+    +List<ProductType> getProductTypesByDescription(String description)
+    +Integer createProductType(String description, String productCode, double pricePerUnit, String note)
+    +boolean updateProduct(Integer id, String newDescription, String newCode, double newPrice, String newNote)
+    +boolean deleteProductType(Integer id)
+    +ProductType getProductTypeByBarCode(String barCode)
+    +boolean updateQuantity(Integer productId, int toBeAdded)
+    +boolean updatePosition(Integer productId, String newPos)
     
+    +List<Order> getAllOrders()
+    +Integer issueReorder(String productCode, int quantity, double pricePerUnit)!
+    +Integer payOrderFor(String productCode, int quantity, double pricePerUnit)!
+    +boolean payOrder(Integer orderId)
+    +boolean recordOrderArrival(Integer orderId)
+
+    +List<Customer> getAllCustomers()
+    +Integer defineCustomer(String customerName)
+    +boolean modifyCustomer(Integer id, String newCustomerName, String newCustomerCard)
+    +boolean deleteCustomer(Integer id)
+    +Customer getCustomer(Integer id)
+    +String createCard();
+    +boolean attachCardToCustomer(String customerCard, Integer customerId)
+    +boolean modifyPointsOnCard(String customerCard, int pointsToBeAdded)
+
+    +Integer startSaleTransaction();
+    +boolean addProductToSale(Integer transactionId, String productCode, int amount)!
+    +boolean deleteProductFromSale(Integer transactionId, String productCode, int amount)!
+    +boolean applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate)!
+    +boolean applyDiscountRateToSale(Integer transactionId, double discountRate)
+    +int computePointsForSale(Integer transactionId)
+    +boolean closeSaleTransaction(Integer transactionId)
+    +boolean deleteSaleTicket(Integer ticketNumber)!
+    +Ticket getSaleTicket(Integer transactionId)!
+
+    +Integer startReturnTransaction(Integer ticketNumber)!
+    +boolean returnProduct(Integer returnId, String productCode, int amount)
+    +boolean endReturnTransaction(Integer returnId, boolean commit)
+    +boolean deleteReturnTransaction(Integer returnId)
+
+    +double receiveCashPayment(Integer ticketNumber, double cash)  
+    +boolean receiveCreditCardPayment(Integer ticketNumber, String creditCard)
+    +double returnCashPayment(Integer returnId)
+    +double returnCreditCardPayment(Integer returnId, String creditCard)
+
+    +List<BalanceOperation> getCreditsAndDebits(LocalDate from, LocalDate to)
+    +boolean recordBalanceUpdate(double toBeAdded)
+    +double computeBalance();
 }
 
-Sale_Transaction "1...*" -- "0..1" Loyalty_Card
+
+class User{
+    -role: String
+    -username: String
+    -password: String
+
+    +boolean compareUsers(User otherUser)
+}
+
+
+class ProductType{
+    -productId: Integer
+    -barCode: String
+    -description: String
+    -sellPrice: Double
+    -quantity: Integer
+    -productdiscountRate: Double
+    -notes: String
+    -AisleID: Integer
+    -RackID: String
+    -LevelID: Integer
+}
+
 
 class Order {
-    -order_Id
-    -supplier
-    -pricePerUnit
-    -quantity
-    -status
+    -orderId: Integer
+    -pricePerUnit: Double
+    -productCode: String
+    -quantity: Integer
+    -status: enum Status{PAYED, ISSUED, ORDERED, COMPLETED}
+
+    -product: ProductType
 }
 
-class Order_payment{
-    -__orderId
+
+class Customer{
+    -customerName: String
+    -customerId: Integer
+
+    -customerCard: LoyaltyCard
 }
 
-Order "*" - Product_Type
 
-Return_Transaction "0...*" - "1" Sale_Transaction
-Return_Transaction "0...*" - "1...*" Product_Type
+class SaleTransaction {
+    -transactionId: Integer
+    -state: enum State{FAILED, COMPLETED, DELETE}!
+    -paymentType: enum PaymentType{CARD, CASH}
+    -amount_tmp: Double!
+    -salediscountRate: Double
+
+    -ListOfProductsSale: Map<ProductType, Integer>()
+    -transactionCard: LoyaltyCard
+}
+
+
+class ReturnTransaction {
+    -amount_tmp: Double!
+    -returnId: Integer
+
+    -originalTransaction: SaleTransaction
+    -ListOfProductsReturn: Map<ProductType, Integer>()
+}
+
+
+class LoyaltyCard{
+    -cardId: String
+    -cardPoints: Integer
+}
+
+
+class BalanceOperation {
+    -balanceID: Integer
+    -description: enum Description{DEBIT, CREDIT}
+    -amount: Double
+    -date: LocalDate 
+}
+
+
+EZShop ->"*" Order
+EZShop ->"*" Customer
+EZShop ->"*" SaleTransaction
+EZShop ->"*" ReturnTransaction
+EZShop ->"*" ProductType
+EZShop ->"*" User
+
+
+Order "*"--> ProductType
+Customer -->"0..1" LoyaltyCard
+
+
+SaleTransaction "1...*" --> "0..1" LoyaltyCard
+SaleTransaction "*" --> "*" ProductType
+ReturnTransaction "0...*" --> "1" SaleTransaction
+ReturnTransaction "0...*" --> "1...*" ProductType
+
+
+SaleTransaction --> BalanceOperation
+ReturnTransaction --> BalanceOperation
+Order --> BalanceOperation
 
 
 ```
