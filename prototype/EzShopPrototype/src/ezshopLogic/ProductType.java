@@ -74,4 +74,8 @@ public class ProductType {
         this.notes = notes;
         return true;
     }
+
+	public Double getSellPrice() {
+		return sellPrice;
+	}
 }

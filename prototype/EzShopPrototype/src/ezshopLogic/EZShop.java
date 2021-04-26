@@ -2,8 +2,10 @@ package ezshopLogic;
 
 import javax.print.attribute.standard.JobKOctets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.lang.Exception;
 
 public class EZShop {
@@ -313,8 +315,8 @@ public class EZShop {
             return -1;
         }
         Double current_amount = 0.0;
-        Integer newTransactionId= salesList.stream().map(x::getId).collect(Collectors.toList()).max()+1;   // I think we could substitue lists with maps
-        sale= new SaleTrasaction(newtrasactionId, current_amount);
+        Integer newtransactionId= salesList.stream().map(e -> e.getTransactionId()).max(Integer::compare).get()+1;   // I think we could substitue lists with maps
+        SaleTransaction sale= new SaleTransaction(newtransactionId, current_amount);
         salesList.add(sale);
         return newtransactionId;
     }
@@ -347,13 +349,13 @@ public class EZShop {
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
-        listofproducts=sale.getListOfProductsSale();
+        HashMap<ProductType, Integer> listofproducts = sale.getListOfProductsSale();
         //MISSING handle invalid productCode
         //MISSING handle invalid amount
 
-        if(listofproducts.contains(productCode)){
+        if(listofproducts.containsKey(getProductTypeByBarCode(productCode))){
             listofproducts.put(getProductTypeByBarCode(productCode), listofproducts.get(getProductTypeByBarCode(productCode))+ amount);
-            sale.setCurrentAmount(getCurrentAmount()+amount*getProductTypeByBarCode(productCode).getSellPrice());
+            sale.setCurrentAmount(sale.getCurrentAmount()+amount*getProductTypeByBarCode(productCode).getSellPrice());
             return true;
         } else{
             listofproducts.put(getProductTypeByBarCode(productCode), amount);
@@ -390,20 +392,20 @@ public class EZShop {
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
-        listofproducts=sale.getListOfProductsSale();
+        HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
         //MISSING handle invalid productCode
 
-        if(listofproducts.contains(productCode)){
+        if(listofproducts.containsKey(getProductTypeByBarCode(productCode))){
             if(listofproducts.get(getProductTypeByBarCode(productCode))<amount){
                 listofproducts.put(getProductTypeByBarCode(productCode), listofproducts.get(getProductTypeByBarCode(productCode))- amount);
-                sale.setCurrentAmount(getCurrentAmount()-amount*getProductTypeByBarCode(productCode).getSellPrice());
+                sale.setCurrentAmount(sale.getCurrentAmount()-amount*getProductTypeByBarCode(productCode).getSellPrice());
                 return true;
             } else if(listofproducts.get(getProductTypeByBarCode(productCode))==amount) {
-                sale.setCurrentAmount(getCurrentAmount()-amount*getProductTypeByBarCode(productCode).getSellPrice());
+                sale.setCurrentAmount(sale.getCurrentAmount()-amount*getProductTypeByBarCode(productCode).getSellPrice());
                 listofproducts.remove(getProductTypeByBarCode(productCode));
                 return true;
             } else{
-                throw InvalidQuantityException;
+                //throw InvalidQuantityException;
                 return false;
             }
         }
@@ -439,12 +441,12 @@ public class EZShop {
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
-        listofproducts=sale.getListOfProductsSale();
+        HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
         //MISSING handle invalid productCode
         //MISSING handle invalid discountRate
 
-        if(listofproducts.contains(productCode)){
-            sale.setCurrentAmount(getCurrentAmount()-discountRate*listofproducts.get(getProductTypeByBarCode(productCode))*getProductTypeByBarCode(productCode).getSellPrice());
+        if(listofproducts.containsKey(getProductTypeByBarCode(productCode))){
+            sale.setCurrentAmount(sale.getCurrentAmount()-discountRate*listofproducts.get(getProductTypeByBarCode(productCode))*getProductTypeByBarCode(productCode).getSellPrice());
             return true;
         }
 
@@ -476,14 +478,14 @@ public class EZShop {
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
-        listofproducts=sale.getListOfProductsSale();
+        HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
         //MISSING handle invalid productCode
         //MISSING handle invalid discountRate
 
-        if(listofproducts.contains(productCode)){
-            sale.setCurrentAmount(getCurrentAmount()*(1-discountRate));
+ 
+            sale.setCurrentAmount(sale.getCurrentAmount()*(1-discountRate));
             return true;
-        }
+     
     }
 
 
@@ -506,7 +508,7 @@ public class EZShop {
         if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             //throw new UnauthorizedException();
-            return false;
+         
         }
 
         Integer points=-1;
@@ -514,7 +516,7 @@ public class EZShop {
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
 
-        points=(sale.getCurrentAmount()-5)/10;
+        points=(int) ((sale.getCurrentAmount()-5)/10);
 
     }
 
@@ -545,9 +547,9 @@ public class EZShop {
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
-        listofproducts=sale.getListOfProductsSale();
+        HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
 
-        listofproducts.entrySet().stream().forEach(e->updateQuantity(e.key().getProductId(),e.value()));
+        listofproducts.entrySet().stream().forEach(e->updateQuantity(e.getKey().getProductID(),e.getValue()));
         return true;
 
 
