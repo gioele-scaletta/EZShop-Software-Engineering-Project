@@ -569,7 +569,7 @@ public class EZShop {
      * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    //public boolean deleteSaleTicket(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
+    //!!!!!!public boolean deleteSaleTicket(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
 
     /**
      * This method returns the sale ticket related to a closed sale transaction.
@@ -582,7 +582,7 @@ public class EZShop {
      * @throws InvalidTransactionIdException if the transaction id less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    //public Ticket getSaleTicket(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
+    //!!!!!!public Ticket getSaleTicket(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
 
     /**
      * This method returns a sale ticket having given ticket number.
@@ -595,6 +595,99 @@ public class EZShop {
      * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    //public Ticket getTicketByNumber(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
+    //!!!!!!!public Ticket getTicketByNumber(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
+    
+
+    //LAST METHODS RELATED TO RETURN TRANSACTION MISSING!!
+
+    // -------------------- FR7 ------------------- //
+    // ------------------- ADMIN ------------------ //
+    // --------------- SHOP MANAGER --------------- //
+    // ------------------ CASHIER ----------------- //
+
+    /**
+     * This method record the payment of a ticket with cash and returns the change (if present).
+     * This method affects the balance of the system.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param ticketNumber the number of the ticket that the customer wants to pay
+     * @param cash the cash received by the cashier
+     *
+     * @return the change (cash - ticket price)
+     *         -1   if the ticket does not exists,
+     *              if the cash is not enough,
+     *              if there is some problemi with the db
+     *
+     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     * @throws InvalidPaymentException if the cash is less than or equal to 0
+     */
+    //!!!!!!public double receiveCashPayment(Integer ticketNumber, double cash) throws InvalidTicketNumberException, InvalidPaymentException, UnauthorizedException;
+
+    /**
+     * This method record the payment of a ticket with credit card. If the card has not enough money the payment should
+     * be refused.
+     * The credit card number validity should be checked. It should follow the luhn algorithm.
+     * The credit card should be registered in the system.
+     * This method affects the balance of the system.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param ticketNumber the number of the ticket that the customer wants to pay
+     * @param creditCard the credit card number of the customer
+     *
+     * @return  true if the operation is successful
+     *          false   if the ticket does not exists,
+     *                  if the card has not enough money,
+     *                  if the card is not registered,
+     *                  if there is some problem with the db connection
+     *
+     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
+     * @throws InvalidCreditCardException if the credit card number is empty, null or if luhn algorithm does not
+     *                                      validate the credit card
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
+    //!!!!public boolean receiveCreditCardPayment(Integer ticketNumber, String creditCard) throws InvalidTicketNumberException, InvalidCreditCardException, UnauthorizedException;
+
+    /**
+     * This method record the payment of a closed return transaction with given id. The return value of this method is the
+     * amount of money to be returned.
+     * This method affects the balance of the application.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param returnId the id of the return transaction
+     *
+     * @return  the money returned to the customer
+     *          -1  if the return transaction is not ended,
+     *              if it does not exist,
+     *              if there is a problem with the db
+     *
+     * @throws InvalidTransactionIdException if the return id is less than or equal to 0
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
+    //!!!!!public double returnCashPayment(Integer returnId) throws InvalidTransactionIdException, UnauthorizedException;
+
+    /**
+     * This method record the payment of a return transaction to a credit card.
+     * The credit card number validity should be checked. It should follow the luhn algorithm.
+     * The credit card should be registered and its balance will be affected.
+     * This method affects the balance of the system.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param returnId the id of the return transaction
+     * @param creditCard the credit card number of the customer
+     *
+     * @return  the money returned to the customer
+     *          -1  if the return transaction is not ended,
+     *              if it does not exist,
+     *              if the card is not registered,
+     *              if there is a problem with the db
+     *
+     * @throws InvalidTransactionIdException if the return id is less than or equal to 0
+     * @throws InvalidCreditCardException if the credit card number is empty, null or if luhn algorithm does not
+     *                                      validate the credit card
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
+    //!!!!!public double returnCreditCardPayment(Integer returnId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException;
+    
 
 }
