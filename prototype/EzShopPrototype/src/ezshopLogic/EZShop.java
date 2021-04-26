@@ -1,5 +1,6 @@
 package ezshopLogic;
 
+import javax.print.attribute.standard.JobKOctets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -13,9 +14,11 @@ public class EZShop {
     private List<ReturnTransaction> returnsList;
     private List<BalanceOperation> balanceOperationsList;
     private List<User> usersList;
+    private List<ProductType> productsList;
 
     private User loggedIn;
     private Integer latestUserID;
+    private Integer latestProductTypeID;
 
     public EZShop(){
         this.customers = new ArrayList<>();
@@ -24,25 +27,27 @@ public class EZShop {
         this.returnsList = new ArrayList<>();
         this.balanceOperationsList = new ArrayList<>();
         this.usersList = new ArrayList<>();
+        this.productsList = new ArrayList<>();
         this.loggedIn = null;
         this.latestUserID = 1;
+        this.latestProductTypeID = 1;
     }
 
 
     public Integer createUser(String username, String password, String role) throws Exception /*throws InvalidUsernameException, InvalidPasswordException, InvalidRoleException*/ {
         if(username.isBlank() || username == null) {
-            System.out.println("Username invalido");
+            System.out.println("Invalid username");
             //throw new InvalidUsernameException();
             return -1;
         }
         if(password.isBlank() || password == null) {
-            System.out.println("Password invalida");
+            System.out.println("Invalid password");
             //throw new InvalidPasswordException;
             return -1;
         }
         for (User u : usersList) {
             if (username.equals(u.getUsername())) {
-                System.out.println("Esiste già un utente con l'username " + username);
+                System.out.println("An user with username " + username + " does already exists");
                 return -1;
             }
         }
@@ -50,8 +55,7 @@ public class EZShop {
         return latestUserID++;
     }
 
-    public boolean deleteUser(Integer id) /*throws InvalidUserIdException, UnauthorizedException*/
-    {
+    public boolean deleteUser(Integer id) /*throws InvalidUserIdException, UnauthorizedException*/ {
         if(!loggedIn.canManageUsers()) {
             System.out.println("User " + loggedIn.getUsername() + " has no permission to delete users");
             //throw new UnauthorizedException();
@@ -102,6 +106,11 @@ public class EZShop {
     }
 
     public User login(String username, String password) /*throws InvalidUsernameException, InvalidPasswordException*/ {
+        if(loggedIn != null)
+        {
+            System.out.println("There's already a user logged in");
+            return null;
+        }
         for (User u : usersList) {
             if (u.getUsername().equals(username)) {
                 if (u.getPassword().equals(password)) {
@@ -128,7 +137,162 @@ public class EZShop {
         loggedIn = null;
         return true;
     }
-    
+
+    public Integer createProductType(String description, String productCode, double pricePerUnit, String note)
+        /*throws InvalidProductDescriptionException, InvalidProductCodeException, InvalidPricePerUnitException, UnauthorizedException*/ {
+        if(!loggedIn.canManageProductList()) {
+            System.out.println("User " + loggedIn.getUsername() + " has no permission to manage product list");
+            //throw new UnauthorizedException();
+            return -1;
+        }
+        if(description.isBlank() || description == null) {
+            System.out.println("Invalid product description");
+            //throw new InvalidProductDescriptionException();
+            return -1;
+        }
+        if(ProductType.isValidBarcode(productCode)) {
+            System.out.println("Invalid product barcode");
+            //throw new InvalidProductCodeException;
+            return -1;
+        }
+        if(pricePerUnit <= 0.0) {
+            System.out.println("Invalid price per unit");
+            //throw ner InvalidPricePerUnitException
+            return -1;
+        }
+        for (ProductType p : productsList) {
+            if (productCode.equals(p.getBarcode())){
+                System.out.println("There's already a product with barcode: " + productCode);
+                return -1;
+            }
+        }
+        productsList.add(new ProductType(latestProductTypeID, productCode, description, pricePerUnit, note));
+        return latestProductTypeID++;
+    }
+
+    public boolean updateProduct(Integer id, String newDescription, String newCode, double newPrice, String newNote)
+            /*throws InvalidProductIdException, InvalidProductDescriptionException, InvalidProductCodeException, InvalidPricePerUnitException, UnauthorizedException*/{
+        if(!loggedIn.canManageProductList()) {
+            System.out.println("User " + loggedIn.getUsername() + " has no permission to manage product list");
+            //throw new UnauthorizedException();
+            return false;
+        }
+        if(id<=0 || id == null) {
+            System.out.println("Invalid product ID");
+            //throw new InvalidProductIdException();
+            return false;
+        }
+        if(newDescription.isBlank() || newDescription == null) {
+            System.out.println("Invalid product description");
+            //throw new InvalidProductDescriptionException();
+            return false;
+        }
+        if(ProductType.isValidBarcode(newCode)) {
+            System.out.println("Invalid product barcode");
+            //throw new InvalidProductCodeException;
+            return false;
+        }
+        if(newPrice <= 0.0) {
+            System.out.println("Invalid price per unit");
+            //throw ner InvalidPricePerUnitException
+            return false;
+        }
+
+        for(ProductType p:productsList) {
+            if(p.getBarcode() == newCode) {
+                System.out.println("There's already a product with barcode " + newCode);
+                return false;
+            }
+        }
+
+        for (ProductType p : productsList) {
+            if(p.getProductID() == id) {
+                p.setBarcode(newCode);
+                p.setDescription(newDescription);
+                p.setSellPrice(newPrice);
+                p.setNotes(newNote);
+                return true;
+            }
+        }
+        System.out.println("No product with ID " + id + " has been found");
+        return false;
+    }
+
+    public boolean deleteProductType(Integer id) /*throws InvalidProductIdException, UnauthorizedException*/ {
+        if(!loggedIn.canManageProductList()) {
+            System.out.println("User " + loggedIn.getUsername() + " has no permission to delete products from the products list");
+            //throw new UnauthorizedException();
+            return false;
+        }
+        if(id<=0 || id == null) {
+            System.out.println("Invalid product ID");
+            //throw new InvalidProductIdException();
+            return false;
+        }
+
+        for (ProductType p : productsList) {
+            if(p.getProductID() == id) {
+                productsList.remove(p);
+                return true;
+            }
+        }
+        System.out.println("No product with ID " + id + " has been found");
+        return false;
+    }
+
+    public List<ProductType> getAllProductTypes() /*throws UnauthorizedException*/ {
+        if(!loggedIn.canListProducts()) {
+            System.out.println("User " + loggedIn.getUsername() + " has no permission to retrieve the products list");
+            //throw new UnauthorizedException();
+            return null;
+        }
+        return productsList;
+    }
+
+    public ProductType getProductTypeByBarCode(String barCode) /*throws InvalidProductCodeException, UnauthorizedException*/ {
+        if(!loggedIn.canManageProductList()) {
+            System.out.println("User " + loggedIn.getUsername() + " has no permission to retrieve the products list");
+            //throw new UnauthorizedException();
+            return null;
+        }
+        if(ProductType.isValidBarcode(barCode)) {
+            System.out.println("Invalid product barcode");
+            //throw new InvalidProductCodeException;
+            return null;
+        }
+        for (ProductType p : productsList) {
+            if (barCode.equals(p.getBarcode())){
+                return p;
+            }
+        }
+        System.out.println("There's no product with barcode " + barCode);
+        return null;
+    }
+
+    public List<ProductType> getProductTypesByDescription(String description) /*throws UnauthorizedException*/{
+        if(!loggedIn.canManageProductList()) {
+            System.out.println("User " + loggedIn.getUsername() + " has no permission to retrieve the products list");
+            //throw new UnauthorizedException();
+            return null;
+        }
+        String descriptionToSearch;
+        List<ProductType> matches = new ArrayList<>();
+
+        if(description==null)
+            descriptionToSearch = "";
+        else
+            descriptionToSearch = description;
+
+        for(ProductType p:productsList) {
+            if(p.getDescription().equals(descriptionToSearch))
+                matches.add(p);
+        }
+        if(matches.size() == 0) {
+            System.out.println("There's no product type that matches the description");
+            return null;
+        }
+        return matches;
+    }
 
     // -------------------- FR6 ------------------- //
     // ------------------- ADMIN ------------------ //
@@ -142,14 +306,14 @@ public class EZShop {
      *
      * @return the id of the transaction (greater than or equal to 0)
      */
-    public Integer startSaleTransaction() throws UnauthorizedException {
-        if(!loggedIn.canPerformSale()) {  //need to check SALE authorization part is just an idea
+    public Integer startSaleTransaction() /*throws UnauthorizedException*/ {
+        if(!loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             //throw new UnauthorizedException();
-            return false;
+            return -1;
         }
-        Double current_amount=0;
-        Integer newtransactionId= salesList.stream().map(x::getId).collect(Collectors.toList()).max()+1;   // I think we could substitue lists with maps
+        Double current_amount = 0.0;
+        Integer newTransactionId= salesList.stream().map(x::getId).collect(Collectors.toList()).max()+1;   // I think we could substitue lists with maps
         sale= new SaleTrasaction(newtrasactionId, current_amount);
         salesList.add(sale);
         return newtransactionId;
@@ -173,9 +337,9 @@ public class EZShop {
      * @throws InvalidQuantityException if the quantity is less than 0
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean addProductToSale(Integer transactionId, String productCode, int amount) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException{
-        
-        if(!loggedIn.canPerformSale()) {  //need to check SALE authorization part is just an idea
+    public boolean addProductToSale(Integer transactionId, String productCode, int amount) /*throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException*/{
+
+        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             //throw new UnauthorizedException();
             return false;
@@ -194,7 +358,7 @@ public class EZShop {
         } else{
             listofproducts.put(getProductTypeByBarCode(productCode), amount);
         }
-    
+
     }
 
     /**
@@ -216,9 +380,9 @@ public class EZShop {
      * @throws InvalidQuantityException if the quantity is less than 0
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean deleteProductFromSale(Integer transactionId, String productCode, int amount) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException{
-       
-        if(!loggedIn.canPerformSale()) {  //need to check SALE authorization part is just an idea
+    public boolean deleteProductFromSale(Integer transactionId, String productCode, int amount) /*throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException*/{
+
+        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             //throw new UnauthorizedException();
             return false;
@@ -265,9 +429,9 @@ public class EZShop {
      * @throws InvalidDiscountRateException if the discount rate is less than 0 or if it greater than or equal to 1.00
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidDiscountRateException, UnauthorizedException{
-       
-        if(!loggedIn.canPerformSale()) {  //need to check SALE authorization part is just an idea
+    public boolean applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate) /*throws InvalidTransactionIdException, InvalidProductCodeException, InvalidDiscountRateException, UnauthorizedException*/{
+
+        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             //throw new UnauthorizedException();
             return false;
@@ -302,9 +466,9 @@ public class EZShop {
      * @throws InvalidDiscountRateException if the discount rate is less than 0 or if it greater than or equal to 1.00
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean applyDiscountRateToSale(Integer transactionId, double discountRate) throws InvalidTransactionIdException, InvalidDiscountRateException, UnauthorizedException{
+    public boolean applyDiscountRateToSale(Integer transactionId, double discountRate) /*throws InvalidTransactionIdException, InvalidDiscountRateException, UnauthorizedException*/{
 
-        if(!loggedIn.canPerformSale()) {  //need to check SALE authorization part is just an idea
+        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             //throw new UnauthorizedException();
             return false;
@@ -320,7 +484,6 @@ public class EZShop {
             sale.setCurrentAmount(getCurrentAmount()*(1-discountRate));
             return true;
         }
-
     }
 
 
@@ -338,9 +501,9 @@ public class EZShop {
      * @throws InvalidTransactionIdException if the transaction id less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public int computePointsForSale(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException{
+    public int computePointsForSale(Integer transactionId) /*throws InvalidTransactionIdException, UnauthorizedException*/{
 
-        if(!loggedIn.canPerformSale()) {  //need to check SALE authorization part is just an idea
+        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             //throw new UnauthorizedException();
             return false;
@@ -371,10 +534,10 @@ public class EZShop {
      * @throws InvalidTransactionIdException if the transaction id less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean closeSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException{
+    public boolean closeSaleTransaction(Integer transactionId) /*throws InvalidTransactionIdException, UnauthorizedException*/{
         //MISSING Connection with balanceoperation and ticket since I havenm't understood how to handel ticket yet (also next three methods still todo)
-        
-        if(!loggedIn.canPerformSale()) {  //need to check SALE authorization part is just an idea
+
+        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             //throw new UnauthorizedException();
             return false;
@@ -383,7 +546,7 @@ public class EZShop {
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
         listofproducts=sale.getListOfProductsSale();
-        
+
         listofproducts.entrySet().stream().forEach(e->updateQuantity(e.key().getProductId(),e.value()));
         return true;
 
@@ -404,7 +567,7 @@ public class EZShop {
      * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean deleteSaleTicket(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
+    //public boolean deleteSaleTicket(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
 
     /**
      * This method returns the sale ticket related to a closed sale transaction.
@@ -417,7 +580,7 @@ public class EZShop {
      * @throws InvalidTransactionIdException if the transaction id less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public Ticket getSaleTicket(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
+    //public Ticket getSaleTicket(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
 
     /**
      * This method returns a sale ticket having given ticket number.
@@ -430,6 +593,6 @@ public class EZShop {
      * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public Ticket getTicketByNumber(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
+    //public Ticket getTicketByNumber(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
 
 }
