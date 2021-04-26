@@ -142,7 +142,7 @@ class ProductType{
     -RackID: String
     -LevelID: Integer
 
-    isValidBarcode: static boolean
+    isValidBarcode(String barcode): static boolean
     getProductID(): Integer
     getBarcode(): String
     getDescription(): String
