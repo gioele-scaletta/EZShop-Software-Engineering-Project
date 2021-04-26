@@ -245,9 +245,16 @@ Order --> BalanceOperation
 
 \<for each functional requirement from the requirement document, list which classes concur to implement it>
 
-
-
-
+|FR ID|EZShop|Customer|LoyaltyCard|SaleTransaction|BalanceOperation|Order|ProductType|User|ReturnTransaction|
+|-------------| :-------------: | :-------------: | :-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+|  FR1 |  | |   |   |   |  |   |   |    | 
+|  FR2 |  |   |   |   |   |  |   |   |    | 
+|  FR3 |  |   |   |   |   |  |   |   |    | 
+|  FR4 |  |   |   |   |   |  |   |   |    | 
+|  FR5 |  |   |   |   |   |  |   |   |    | 
+|  FR6 | X |   | X  | X  | X  |  | X  |   |    | 
+|  FR7 |  |   |   | X  | X  |  |   |   |    | 
+|  FR8 |  |   |   |   |   |  |   |   |    | 
 
 
 
@@ -258,3 +265,75 @@ Order --> BalanceOperation
 # Verification sequence diagrams 
 \<select key scenarios from the requirement document. For each of them define a sequence diagram showing that the scenario can be implemented by the classes and methods in the design>
 
+<Use Case 6>
+
+<Scenarios 6.1, 6.2, 6.3, 7.1: Sale with product and sale discounts>
+
+```plantuml
+participant EZShop as 1
+participant SaleTransaction as 2
+participant ProductType as 3
+participant SalePayment as 4
+participant BalanceOperation as 5
+
+
+1->2 : startSaleTransaction()
+2->3 : addProductToSale()
+3->3 : getProductTypeByBarCode()
+3->3 : updateQuantity()
+3-->2 : addProductToSale()
+2->2 : applyDiscountRateToProduct()
+2->2 : applyDiscountRateToSale()
+2->4 : closeSaleTransaction()
+4->4 : getSaleTicket()
+4->4 : receiveCreditCardPayment()
+4->5 : recordBalanceUpdate()
+5-->1 : recordBalanceUpdate()
+
+```
+
+<Scenarios 6.4, 6.6, 7.4: Sale with loyalty card and cash payment>
+
+```plantuml
+participant EZShop as 1
+participant SaleTransaction as 2
+participant ProductType as 3
+participant LoyaltyCard as 4
+participant SalePayment as 5
+participant BalanceOperation as 6
+
+1->2 : startSaleTransaction()
+2->3 : addProductToSale()
+3->3 : getProductTypeByBarCode()
+3->3 : updateQuantity()
+3-->2 : addProductToSale()
+2->2 : computePointsForSale()
+2->4 : modifyPointsOnCard()
+4-->2 : modifyPointsOnCard()
+2->5 : closeSaleTransaction()
+5->5 : getSaleTicket()
+5->5 : receiveCashPayment()
+5->6 : recordBalanceUpdate()
+6-->1 : recordBalanceUpdate()
+
+```
+
+
+<Scenarios 6.5, 7.2, 7.3:  Sale cancelled because of invalid credit card or not enough credit>
+
+```plantuml
+participant EZShop as 1
+participant SaleTransaction as 2
+participant ProductType as 3
+participant SalePayment as 5
+
+1->2 : startSaleTransaction()
+2->3 : addProductToSale()
+3->3 : getProductTypeByBarCode()
+3->3 : updateQuantity()
+3-->2 : addProductToSale()
+2->5 : closeSaleTransaction()
+5->5 : getSaleTicket()
+5->5 : receiveCreditCardPayment()
+5->1 : deleteSaleTicket()
+```
