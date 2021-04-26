@@ -49,6 +49,7 @@ class EZShop{
     -returnsList: List<ReturnTransaction>
     -productsList: List<ProductType>
     -balanceOperationsList: List<BalanceOperation>
+    -loggedIn: User
 
     +void reset();
 
