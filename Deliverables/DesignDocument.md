@@ -115,21 +115,41 @@ class User{
     -username: String
     -password: String
 
-    +boolean compareUsers(User otherUser)
+    +getUsername(): String
+    +getPassword(): String
+    +getRole(): String
+    +setRole(String role): boolean
+    +canManageUsers(): boolean
+    +canEditProducts(): boolean
+    +canListProducts(): boolean
+    +canManageInventory(): boolean
+    +canManageSaleTransactions(): boolean
+    +canManagePayments(): boolean
+    +canManageAccounting(): boolean
+
 }
 
 
 class ProductType{
     -productId: Integer
-    -barCode: String
+    -barcode: String
     -description: String
     -sellPrice: Double
     -quantity: Integer
-    -productdiscountRate: Double
+    -productDiscountRate: Double
     -notes: String
     -AisleID: Integer
     -RackID: String
     -LevelID: Integer
+
+    isValidBarcode: static boolean
+    getProductID(): Integer
+    getBarcode(): String
+    getDescription(): String
+    setBarcode(String barcode): boolean
+    setDescription(String description): boolean
+    setSellPrice(Double sellPrice): boolean
+    setNotes(String notes): boolean
 }
 
 
