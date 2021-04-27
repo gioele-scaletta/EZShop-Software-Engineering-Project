@@ -247,10 +247,9 @@ Order --> BalanceOperation
 
 |FR ID|EZShop|Customer|LoyaltyCard|SaleTransaction|BalanceOperation|Order|ProductType|User|ReturnTransaction|
 |-------------| :-------------: | :-------------: | :-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
-|  FR1 |  | |   |   |   |  |   |   |    | 
-|  FR2 |  |   |   |   |   |  |   |   |    | 
-|  FR3 |  |   |   |   |   |  |   |   |    | 
-|  FR4 |  |   |   |   |   |  |   |   |    | 
+|  FR1 |X  | |   |   |   |  |   | X  |    | 
+|  FR3 |X  |   |   |   |   |  |X  |   |    | 
+|  FR4 |X  |   |   |   |   |X  |X   |   |    | 
 |  FR5 |  |   |   |   |   |  |   |   |    | 
 |  FR6 | X |   | X  | X  | X  |  | X  |  X |    | 
 |  FR7 |  |   |   | X  | X  |  |   | X   |    | 
@@ -264,6 +263,102 @@ Order --> BalanceOperation
 
 # Verification sequence diagrams 
 \<select key scenarios from the requirement document. For each of them define a sequence diagram showing that the scenario can be implemented by the classes and methods in the design>
+
+<Use Case 1>
+
+<Scenario 1.1 - Create Product Type X>
+
+```plantuml
+participant GUI as 1
+participant EZShop as 2
+participant User as 3
+participant ProductType as 4
+
+1->2 : createProductType()
+2->3 : canEditProducts()
+2->4 : new ProdutctType()
+2->2 : addProductToInventory()
+```
+
+<Scenario 1.3 - Modify Product Type pricePerUnit>
+
+```plantuml
+participant GUI as 1
+participant EZShop as 2
+participant User as 3
+participant ProductType as 4
+
+1->2 : updateProduct()
+2->3 : canEditProducts()
+2->2 : getProductTypeByID()
+2->4 : setBarcode()
+2->4 : setDescription()
+2->4 : setSellPrice()
+2->4 : setNotes()
+```
+<Use Case 2>
+
+<Scenario 2.1 - Create user and define rights>
+
+```plantuml
+participant GUI as 1
+participant EZShop as 2
+participant User as 3
+
+1->2 : createUser()
+2->3 : new User()
+2->2 : addUserToUsersList()
+```
+
+<Scenario 2.3 - Create user and define rights>
+
+```plantuml
+participant GUI as 1
+participant EZShop as 2
+participant User as 3
+
+1->2 : updateUserRights()
+2->3 : canManageUsers()
+2->2 : getUser()
+2->3 : setRole()
+```
+
+<Use Case 3>
+
+<Scenario 3.1 - Order od Product Type Issued>
+
+```plantuml
+participant GUI as 1
+participant EZShop as 2
+participant User as 3
+participant Order as 4
+
+1->2 : issueReorder()
+2->3 : canManageInventory()
+2->2 : getProductTypeByBarCode
+2->4 : new Order()
+2->2 : addOrderToOrdersList()
+```
+
+<Scenario 3.3 - Record order of ProductType arrival>
+
+```plantuml
+participant GUI as 1
+participant EZShop as 2
+participant User as 3
+participant Order as 4
+participant ProductType as 5
+
+1->2 : recordOrderArrival()
+2->3 : canManageInventory()
+2->2 : getOrderByID()
+2->4 : setOrderState()
+2->2 : getProductTypeByID()
+2->5 : setBarcode()
+2->5 : setDescription()
+2->5 : setSellPrice()
+2->5 : setNotes()
+```
 
 <Use Case 6>
 
