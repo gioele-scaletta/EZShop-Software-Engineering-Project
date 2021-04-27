@@ -2,11 +2,13 @@ package ezshopLogic;
 
 import javax.print.attribute.standard.JobKOctets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.lang.Exception;
 
-public class EZShop {
+public class EZShop /*implements EZShopInterface*/{
 
     private List<Customer> customers;
     private List<Order> orders;
@@ -313,8 +315,8 @@ public class EZShop {
             return -1;
         }
         Double current_amount = 0.0;
-        Integer newTransactionId= salesList.stream().map(x::getId).collect(Collectors.toList()).max()+1;   // I think we could substitue lists with maps
-        sale= new SaleTrasaction(newtrasactionId, current_amount);
+        Integer newtransactionId= salesList.stream().map(e -> e.getTransactionId()).max(Integer::compare).get()+1;   // I think we could substitue lists with maps
+        SaleTransaction sale= new SaleTransaction(newtransactionId, current_amount);
         salesList.add(sale);
         return newtransactionId;
     }
@@ -347,13 +349,13 @@ public class EZShop {
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
-        listofproducts=sale.getListOfProductsSale();
+        HashMap<ProductType, Integer> listofproducts = sale.getListOfProductsSale();
         //MISSING handle invalid productCode
         //MISSING handle invalid amount
 
-        if(listofproducts.contains(productCode)){
+        if(listofproducts.containsKey(getProductTypeByBarCode(productCode))){
             listofproducts.put(getProductTypeByBarCode(productCode), listofproducts.get(getProductTypeByBarCode(productCode))+ amount);
-            sale.setCurrentAmount(getCurrentAmount()+amount*getProductTypeByBarCode(productCode).getSellPrice());
+            sale.setCurrentAmount(sale.getCurrentAmount()+amount*getProductTypeByBarCode(productCode).getSellPrice());
             return true;
         } else{
             listofproducts.put(getProductTypeByBarCode(productCode), amount);
@@ -390,20 +392,20 @@ public class EZShop {
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
-        listofproducts=sale.getListOfProductsSale();
+        HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
         //MISSING handle invalid productCode
 
-        if(listofproducts.contains(productCode)){
+        if(listofproducts.containsKey(getProductTypeByBarCode(productCode))){
             if(listofproducts.get(getProductTypeByBarCode(productCode))<amount){
                 listofproducts.put(getProductTypeByBarCode(productCode), listofproducts.get(getProductTypeByBarCode(productCode))- amount);
-                sale.setCurrentAmount(getCurrentAmount()-amount*getProductTypeByBarCode(productCode).getSellPrice());
+                sale.setCurrentAmount(sale.getCurrentAmount()-amount*getProductTypeByBarCode(productCode).getSellPrice());
                 return true;
             } else if(listofproducts.get(getProductTypeByBarCode(productCode))==amount) {
-                sale.setCurrentAmount(getCurrentAmount()-amount*getProductTypeByBarCode(productCode).getSellPrice());
+                sale.setCurrentAmount(sale.getCurrentAmount()-amount*getProductTypeByBarCode(productCode).getSellPrice());
                 listofproducts.remove(getProductTypeByBarCode(productCode));
                 return true;
             } else{
-                throw InvalidQuantityException;
+                //throw InvalidQuantityException;
                 return false;
             }
         }
@@ -439,12 +441,12 @@ public class EZShop {
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
-        listofproducts=sale.getListOfProductsSale();
+        HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
         //MISSING handle invalid productCode
         //MISSING handle invalid discountRate
 
-        if(listofproducts.contains(productCode)){
-            sale.setCurrentAmount(getCurrentAmount()-discountRate*listofproducts.get(getProductTypeByBarCode(productCode))*getProductTypeByBarCode(productCode).getSellPrice());
+        if(listofproducts.containsKey(getProductTypeByBarCode(productCode))){
+            sale.setCurrentAmount(sale.getCurrentAmount()-discountRate*listofproducts.get(getProductTypeByBarCode(productCode))*getProductTypeByBarCode(productCode).getSellPrice());
             return true;
         }
 
@@ -476,14 +478,14 @@ public class EZShop {
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
-        listofproducts=sale.getListOfProductsSale();
+        HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
         //MISSING handle invalid productCode
         //MISSING handle invalid discountRate
 
-        if(listofproducts.contains(productCode)){
-            sale.setCurrentAmount(getCurrentAmount()*(1-discountRate));
+ 
+            sale.setCurrentAmount(sale.getCurrentAmount()*(1-discountRate));
             return true;
-        }
+     
     }
 
 
@@ -506,7 +508,7 @@ public class EZShop {
         if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             //throw new UnauthorizedException();
-            return false;
+         
         }
 
         Integer points=-1;
@@ -514,7 +516,7 @@ public class EZShop {
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
 
-        points=(sale.getCurrentAmount()-5)/10;
+        points=(int) ((sale.getCurrentAmount()-5)/10);
 
     }
 
@@ -545,9 +547,9 @@ public class EZShop {
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
-        listofproducts=sale.getListOfProductsSale();
+        HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
 
-        listofproducts.entrySet().stream().forEach(e->updateQuantity(e.key().getProductId(),e.value()));
+        listofproducts.entrySet().stream().forEach(e->updateQuantity(e.getKey().getProductID(),e.getValue()));
         return true;
 
 
@@ -567,7 +569,7 @@ public class EZShop {
      * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    //public boolean deleteSaleTicket(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
+    //!!!!!!public boolean deleteSaleTicket(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
 
     /**
      * This method returns the sale ticket related to a closed sale transaction.
@@ -580,7 +582,7 @@ public class EZShop {
      * @throws InvalidTransactionIdException if the transaction id less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    //public Ticket getSaleTicket(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
+    //!!!!!!public Ticket getSaleTicket(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
 
     /**
      * This method returns a sale ticket having given ticket number.
@@ -593,6 +595,99 @@ public class EZShop {
      * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    //public Ticket getTicketByNumber(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
+    //!!!!!!!public Ticket getTicketByNumber(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
+    
+
+    //LAST METHODS RELATED TO RETURN TRANSACTION MISSING!!
+
+    // -------------------- FR7 ------------------- //
+    // ------------------- ADMIN ------------------ //
+    // --------------- SHOP MANAGER --------------- //
+    // ------------------ CASHIER ----------------- //
+
+    /**
+     * This method record the payment of a ticket with cash and returns the change (if present).
+     * This method affects the balance of the system.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param ticketNumber the number of the ticket that the customer wants to pay
+     * @param cash the cash received by the cashier
+     *
+     * @return the change (cash - ticket price)
+     *         -1   if the ticket does not exists,
+     *              if the cash is not enough,
+     *              if there is some problemi with the db
+     *
+     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     * @throws InvalidPaymentException if the cash is less than or equal to 0
+     */
+    //!!!!!!public double receiveCashPayment(Integer ticketNumber, double cash) throws InvalidTicketNumberException, InvalidPaymentException, UnauthorizedException;
+
+    /**
+     * This method record the payment of a ticket with credit card. If the card has not enough money the payment should
+     * be refused.
+     * The credit card number validity should be checked. It should follow the luhn algorithm.
+     * The credit card should be registered in the system.
+     * This method affects the balance of the system.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param ticketNumber the number of the ticket that the customer wants to pay
+     * @param creditCard the credit card number of the customer
+     *
+     * @return  true if the operation is successful
+     *          false   if the ticket does not exists,
+     *                  if the card has not enough money,
+     *                  if the card is not registered,
+     *                  if there is some problem with the db connection
+     *
+     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
+     * @throws InvalidCreditCardException if the credit card number is empty, null or if luhn algorithm does not
+     *                                      validate the credit card
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
+    //!!!!public boolean receiveCreditCardPayment(Integer ticketNumber, String creditCard) throws InvalidTicketNumberException, InvalidCreditCardException, UnauthorizedException;
+
+    /**
+     * This method record the payment of a closed return transaction with given id. The return value of this method is the
+     * amount of money to be returned.
+     * This method affects the balance of the application.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param returnId the id of the return transaction
+     *
+     * @return  the money returned to the customer
+     *          -1  if the return transaction is not ended,
+     *              if it does not exist,
+     *              if there is a problem with the db
+     *
+     * @throws InvalidTransactionIdException if the return id is less than or equal to 0
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
+    //!!!!!public double returnCashPayment(Integer returnId) throws InvalidTransactionIdException, UnauthorizedException;
+
+    /**
+     * This method record the payment of a return transaction to a credit card.
+     * The credit card number validity should be checked. It should follow the luhn algorithm.
+     * The credit card should be registered and its balance will be affected.
+     * This method affects the balance of the system.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param returnId the id of the return transaction
+     * @param creditCard the credit card number of the customer
+     *
+     * @return  the money returned to the customer
+     *          -1  if the return transaction is not ended,
+     *              if it does not exist,
+     *              if the card is not registered,
+     *              if there is a problem with the db
+     *
+     * @throws InvalidTransactionIdException if the return id is less than or equal to 0
+     * @throws InvalidCreditCardException if the credit card number is empty, null or if luhn algorithm does not
+     *                                      validate the credit card
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
+    //!!!!!public double returnCreditCardPayment(Integer returnId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException;
+    
 
 }

@@ -49,6 +49,7 @@ class EZShop{
     -returnsList: List<ReturnTransaction>
     -productsList: List<ProductType>
     -balanceOperationsList: List<BalanceOperation>
+    -usersList: List<User>
     -loggedIn: User
 
     +void reset();
@@ -257,9 +258,15 @@ Order --> BalanceOperation
 
 \<for each functional requirement from the requirement document, list which classes concur to implement it>
 
-
-
-
+|FR ID|EZShop|Customer|LoyaltyCard|SaleTransaction|BalanceOperation|Order|ProductType|User|ReturnTransaction|
+|-------------| :-------------: | :-------------: | :-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+|  FR1 |X  | |   |   |   |  |   | X  |    | 
+|  FR3 |X  |   |   |   |   |  |X  |   |    | 
+|  FR4 |X  |   |   |   |   |X  |X   |   |    | 
+|  FR5 |  |   |   |   |   |  |   |   |    | 
+|  FR6 | X |   | X  | X  | X  |  | X  |  X |    | 
+|  FR7 |  |   |   | X  | X  |  |   | X   |    | 
+|  FR8 |  |   |   |   |   |  |   |   |    | 
 
 
 
@@ -270,7 +277,176 @@ Order --> BalanceOperation
 # Verification sequence diagrams 
 \<select key scenarios from the requirement document. For each of them define a sequence diagram showing that the scenario can be implemented by the classes and methods in the design>
 
-## Scenario 8.1 & 10.1
+<Use Case 1>
+
+<Scenario 1.1 - Create Product Type X>
+
+```plantuml
+participant GUI as 1
+participant EZShop as 2
+participant User as 3
+participant ProductType as 4
+
+1->2 : createProductType()
+2->3 : canEditProducts()
+2->4 : new ProdutctType()
+2->2 : addProductToInventory()
+```
+
+<Scenario 1.3 - Modify Product Type pricePerUnit>
+
+```plantuml
+participant GUI as 1
+participant EZShop as 2
+participant User as 3
+participant ProductType as 4
+
+1->2 : updateProduct()
+2->3 : canEditProducts()
+2->2 : getProductTypeByID()
+2->4 : setBarcode()
+2->4 : setDescription()
+2->4 : setSellPrice()
+2->4 : setNotes()
+```
+<Use Case 2>
+
+<Scenario 2.1 - Create user and define rights>
+
+```plantuml
+participant GUI as 1
+participant EZShop as 2
+participant User as 3
+
+1->2 : createUser()
+2->3 : new User()
+2->2 : addUserToUsersList()
+```
+
+<Scenario 2.3 - Create user and define rights>
+
+```plantuml
+participant GUI as 1
+participant EZShop as 2
+participant User as 3
+
+1->2 : updateUserRights()
+2->3 : canManageUsers()
+2->2 : getUser()
+2->3 : setRole()
+```
+
+<Use Case 3>
+
+<Scenario 3.1 - Order od Product Type Issued>
+
+```plantuml
+participant GUI as 1
+participant EZShop as 2
+participant User as 3
+participant Order as 4
+
+1->2 : issueReorder()
+2->3 : canManageInventory()
+2->2 : getProductTypeByBarCode
+2->4 : new Order()
+2->2 : addOrderToOrdersList()
+```
+
+<Scenario 3.3 - Record order of ProductType arrival>
+
+```plantuml
+participant GUI as 1
+participant EZShop as 2
+participant User as 3
+participant Order as 4
+participant ProductType as 5
+
+1->2 : recordOrderArrival()
+2->3 : canManageInventory()
+2->2 : getOrderByID()
+2->4 : setOrderState()
+2->2 : getProductTypeByID()
+2->5 : setBarcode()
+2->5 : setDescription()
+2->5 : setSellPrice()
+2->5 : setNotes()
+```
+
+<Use Case 6>
+
+<Scenarios 6.1, 6.2, 6.3, 7.1: Sale with product and sale discounts>
+
+```plantuml
+participant EZShop as 1
+participant SaleTransaction as 2
+participant ProductType as 3
+''participant SalePayment as 4
+participant BalanceOperation as 5
+
+1->1 : canManageSaleTransactions()
+1->2 : startSaleTransaction()
+2->3 : addProductToSale()
+3->3 : getProductTypeByBarCode()
+3->3 : updateQuantity()
+3-->2 : addProductToSale()
+2->2 : applyDiscountRateToProduct()
+2->2 : applyDiscountRateToSale()
+2->2 : closeSaleTransaction()
+/'4->4 : getSaleTransaction()'/
+2->2 : receiveCreditCardPayment()
+2->5 : recordBalanceUpdate()
+5-->1 : recordBalanceUpdate()
+```
+
+<Scenarios 6.4, 6.6, 7.4: Sale with loyalty card and cash payment>
+
+```plantuml
+participant EZShop as 1
+participant SaleTransaction as 2
+participant ProductType as 3
+participant LoyaltyCard as 4
+''participant SalePayment as 5
+participant BalanceOperation as 6
+
+1->1 : canManageSaleTransactions()
+1->2 : startSaleTransaction()
+2->3 : addProductToSale()
+3->3 : getProductTypeByBarCode()
+3->3 : updateQuantity()
+3-->2 : addProductToSale()
+2->2 : computePointsForSale()
+2->4 : modifyPointsOnCard()
+4-->2 : modifyPointsOnCard()
+2->2 : closeSaleTransaction()
+''4->4 : getSaleTransaction()
+2->2 : receiveCashPayment()
+2->6 : recordBalanceUpdate()
+6-->1 : recordBalanceUpdate()
+```
+
+
+<Scenarios 6.5, 7.2, 7.3:  Sale cancelled because of invalid credit card or not enough credit>
+
+```plantuml
+participant EZShop as 1
+participant SaleTransaction as 2
+participant ProductType as 3
+''participant SalePayment as 5
+
+1->1 : canManageSaleTransactions()
+1->2 : startSaleTransaction()
+2->3 : addProductToSale()
+3->3 : getProductTypeByBarCode()
+3->3 : updateQuantity()
+3-->2 : addProductToSale()
+2->2 : closeSaleTransaction()
+''4->4 : getSaleTransaction()
+2->2 : receiveCreditCardPayment()
+2->1 : deleteSaleTransaction()*
+```
+
+<Scenarios 8.1 & 10.1>
 
 ```plantuml
 actor "Administrator\nShop Manager\nCashier" as user
@@ -318,7 +494,7 @@ user <-- EZShop
 deactivate EZShop
 ```
 
-## Scenario 8.2 & 10.2
+<Scenarios 8.2 & 10.2>
 
 ```plantuml
 actor "Administrator\nShop Manager\nCashier" as user
@@ -364,7 +540,7 @@ user <-- EZShop
 deactivate EZShop
 ```
 
-## Scenario 9.1
+<Scenario 9.1>
 
 ```plantuml
 actor "Administrator\nShop Manager" as user
