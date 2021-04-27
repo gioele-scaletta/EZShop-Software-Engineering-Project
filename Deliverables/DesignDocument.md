@@ -273,10 +273,10 @@ Order --> BalanceOperation
 participant EZShop as 1
 participant SaleTransaction as 2
 participant ProductType as 3
-participant SalePayment as 4
+''participant SalePayment as 4
 participant BalanceOperation as 5
 
-
+1->1 : canManageSaleTransactions()
 1->2 : startSaleTransaction()
 2->3 : addProductToSale()
 3->3 : getProductTypeByBarCode()
@@ -284,12 +284,11 @@ participant BalanceOperation as 5
 3-->2 : addProductToSale()
 2->2 : applyDiscountRateToProduct()
 2->2 : applyDiscountRateToSale()
-2->4 : closeSaleTransaction()
-4->4 : getSaleTicket()
-4->4 : receiveCreditCardPayment()
-4->5 : recordBalanceUpdate()
+2->2 : closeSaleTransaction()
+/'4->4 : getSaleTransaction()'/
+2->2 : receiveCreditCardPayment()
+2->5 : recordBalanceUpdate()
 5-->1 : recordBalanceUpdate()
-
 ```
 
 <Scenarios 6.4, 6.6, 7.4: Sale with loyalty card and cash payment>
@@ -299,9 +298,10 @@ participant EZShop as 1
 participant SaleTransaction as 2
 participant ProductType as 3
 participant LoyaltyCard as 4
-participant SalePayment as 5
+''participant SalePayment as 5
 participant BalanceOperation as 6
 
+1->1 : canManageSaleTransactions()
 1->2 : startSaleTransaction()
 2->3 : addProductToSale()
 3->3 : getProductTypeByBarCode()
@@ -310,12 +310,11 @@ participant BalanceOperation as 6
 2->2 : computePointsForSale()
 2->4 : modifyPointsOnCard()
 4-->2 : modifyPointsOnCard()
-2->5 : closeSaleTransaction()
-5->5 : getSaleTicket()
-5->5 : receiveCashPayment()
-5->6 : recordBalanceUpdate()
+2->2 : closeSaleTransaction()
+''4->4 : getSaleTransaction()
+2->2 : receiveCashPayment()
+2->6 : recordBalanceUpdate()
 6-->1 : recordBalanceUpdate()
-
 ```
 
 
@@ -325,15 +324,16 @@ participant BalanceOperation as 6
 participant EZShop as 1
 participant SaleTransaction as 2
 participant ProductType as 3
-participant SalePayment as 5
+''participant SalePayment as 5
 
+1->1 : canManageSaleTransactions()
 1->2 : startSaleTransaction()
 2->3 : addProductToSale()
 3->3 : getProductTypeByBarCode()
 3->3 : updateQuantity()
 3-->2 : addProductToSale()
-2->5 : closeSaleTransaction()
-5->5 : getSaleTicket()
-5->5 : receiveCreditCardPayment()
-5->1 : deleteSaleTicket()
+2->2 : closeSaleTransaction()
+''4->4 : getSaleTransaction()
+2->2 : receiveCreditCardPayment()
+2->1 : deleteSaleTransaction()*
 ```

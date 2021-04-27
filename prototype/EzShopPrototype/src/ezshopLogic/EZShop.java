@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.lang.Exception;
 
-public class EZShop {
+public class EZShop /*implements EZShopInterface*/{
 
     private List<Customer> customers;
     private List<Order> orders;
