@@ -445,6 +445,8 @@ participant ProductType as 3
 2->1 : deleteSaleTransaction()*
 ```
 
+<Use Case 8 & 10>
+
 <Scenarios 8.1 & 10.1>
 
 ```plantuml
@@ -453,14 +455,10 @@ actor "Administrator\nShop Manager\nCashier" as user
 autonumber
 user -> EZShop : startReturnTransaction()
 activate  EZShop
-EZShop -> EZShop : getLoggedIn()
-note right: Is it necessary?
 EZShop -> User : canManageSaleTransactions()
 EZShop <-- User : return canManageSaleTransactions()
 EZShop -> EZShop : searchTransactionById()
-note right: To check if the transaction exists
-EZShop -> ReturnTransaction : ReturnTransaction()
-note right: ReturnTransaction constructor
+EZShop -> ReturnTransaction : new ReturnTransaction()
 EZShop <-- ReturnTransaction : return ReturnTransaction()
 user <-- EZShop : return startReturnTransaction()
 deactivate EZShop
@@ -479,7 +477,7 @@ deactivate EZShop
 
 user -> EZShop : returnCreditCardPayment()
 activate EZShop
-EZShop -> EZShop : validateCreditCard()
+EZShop -> EZShop : isValidCreditCard()
 note right: Luhn algorithm
 EZShop -> ReturnTransaction : getAmount()
 EZShop <-- ReturnTransaction : return getAmount()
@@ -501,14 +499,10 @@ actor "Administrator\nShop Manager\nCashier" as user
 autonumber
 user -> EZShop : startReturnTransaction()
 activate  EZShop
-EZShop -> EZShop : getLoggedIn()
-note right: Is it necessary?
 EZShop -> User : canManageSaleTransactions()
 EZShop <-- User : return canManageSaleTransactions()
 EZShop -> EZShop : searchTransactionById()
-note right: To check if the transaction exists
-EZShop -> ReturnTransaction : ReturnTransaction()
-note right: ReturnTransaction constructor
+EZShop -> ReturnTransaction : new ReturnTransaction()
 EZShop <-- ReturnTransaction : return ReturnTransaction()
 user <-- EZShop : return startReturnTransaction()
 deactivate EZShop
@@ -539,6 +533,8 @@ user <-- EZShop
 deactivate EZShop
 ```
 
+<Use Case 9>
+
 <Scenario 9.1>
 
 ```plantuml
@@ -547,8 +543,6 @@ actor "Administrator\nShop Manager" as user
 autonumber
 user -> EZShop : getCreditsAndDebits()
 activate EZShop
-EZShop -> EZShop : getLoggedIn()
-note right: Is it necessary?
 EZShop -> User : canManageAccounting()
 EZShop <-- User : return canManageAccounting()
 EZShop -> EZShop : getBalanceOperationsList()
