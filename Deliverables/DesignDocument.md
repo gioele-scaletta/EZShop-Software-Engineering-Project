@@ -147,9 +147,11 @@ class ProductType{
     getProductID(): Integer
     getBarcode(): String
     getDescription(): String
+    getQuantity() : Integer
     setBarcode(String barcode): boolean
     setDescription(String description): boolean
     setSellPrice(Double sellPrice): boolean
+    setQuantity(Integer quantity) : boolean
     setNotes(String notes): boolean
 }
 
@@ -181,19 +183,25 @@ class SaleTransaction {
     -amount_tmp: Double!
     -salediscountRate: Double
 
-    -ListOfProductsSale: Map<ProductType, Integer>()
     -transactionCard: LoyaltyCard
     -saleOperationRecord: BalanceOperation
+    -ListOfProductsSale: Map<ProductType, Integer>()
+
+    +isProductInSale(String productCode): boolean
 }
 
 
 class ReturnTransaction {
-    -amount_tmp: Double!
     -returnId: Integer
+    -state: enum State{FAILED, COMPLETED, DELETE}!
+    -paymentType: enum PaymentType{CARD, CASH}
+    -amount_tmp: Double!
 
     -originalTransaction: SaleTransaction
     -retOperationRecord: BalanceOperation
     -ListOfProductsReturn: Map<ProductType, Integer>()
+
+    +addProduct(ProductType product, Integer quantity): boolean
 }
 
 
@@ -207,7 +215,12 @@ class BalanceOperation {
     -balanceID: Integer
     -description: enum Description{DEBIT, CREDIT}
     -amount: Double
-    -date: LocalDate 
+    -date: LocalDate
+
+    +getBalanceID(): Integer
+    +getDescription(): enum Description{DEBIT, CREDIT}
+    +getAmount(): Double
+    +getDate(): LocalDate
 }
 
 
@@ -257,3 +270,117 @@ Order --> BalanceOperation
 # Verification sequence diagrams 
 \<select key scenarios from the requirement document. For each of them define a sequence diagram showing that the scenario can be implemented by the classes and methods in the design>
 
+## Scenario 8.1 & 10.1
+
+```plantuml
+actor "Administrator\nShop Manager\nCashier" as user
+
+autonumber
+user -> EZShop : startReturnTransaction()
+activate  EZShop
+EZShop -> EZShop : getLoggedIn()
+note right: Is it necessary?
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : return canManageSaleTransactions()
+EZShop -> EZShop : searchTransactionById()
+note right: To check if the transaction exists
+EZShop -> ReturnTransaction : ReturnTransaction()
+note right: ReturnTransaction constructor
+EZShop <-- ReturnTransaction : return ReturnTransaction()
+user <-- EZShop : return startReturnTransaction()
+deactivate EZShop
+
+user -> EZShop : returnProduct()
+activate EZShop
+EZShop -> EZShop : searchProductByCode()
+EZShop -> TransactionSale : isProductInSale()
+EZShop <-- TransactionSale : return isProductInSale()
+EZShop -> ReturnTransaction : addProduct()
+EZShop <-- ReturnTransaction : return addProduct()
+EZShop -> ProductType : updateQuantity()
+EZShop <-- ProductType : return updateQuantity()
+user <-- EZShop : return returnProduct()
+deactivate EZShop
+
+user -> EZShop : returnCreditCardPayment()
+activate EZShop
+EZShop -> EZShop : validateCreditCard()
+note right: Luhn algorithm
+EZShop -> ReturnTransaction : getAmount()
+EZShop <-- ReturnTransaction : return getAmount()
+user <-- EZShop
+deactivate EZShop
+
+user -> EZShop : endReturnTransaction()
+activate EZShop
+EZShop -> EZShop : recordBalanceUpdate()
+user <-- EZShop
+deactivate EZShop
+```
+
+## Scenario 8.2 & 10.2
+
+```plantuml
+actor "Administrator\nShop Manager\nCashier" as user
+
+autonumber
+user -> EZShop : startReturnTransaction()
+activate  EZShop
+EZShop -> EZShop : getLoggedIn()
+note right: Is it necessary?
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : return canManageSaleTransactions()
+EZShop -> EZShop : searchTransactionById()
+note right: To check if the transaction exists
+EZShop -> ReturnTransaction : ReturnTransaction()
+note right: ReturnTransaction constructor
+EZShop <-- ReturnTransaction : return ReturnTransaction()
+user <-- EZShop : return startReturnTransaction()
+deactivate EZShop
+
+user -> EZShop : returnProduct()
+activate EZShop
+EZShop -> EZShop : searchProductByCode()
+EZShop -> TransactionSale : isProductInSale()
+EZShop <-- TransactionSale : return isProductInSale()
+EZShop -> ReturnTransaction : addProduct()
+EZShop <-- ReturnTransaction : return addProduct()
+EZShop -> ProductType : updateQuantity()
+EZShop <-- ProductType : return updateQuantity()
+user <-- EZShop : return returnProduct()
+deactivate EZShop
+
+user -> EZShop : returnCashPayment()
+activate EZShop
+EZShop -> ReturnTransaction : getAmount()
+EZShop <-- ReturnTransaction : return getAmount()
+user <-- EZShop
+deactivate EZShop
+
+user -> EZShop : endReturnTransaction()
+activate EZShop
+EZShop -> EZShop : recordBalanceUpdate()
+user <-- EZShop
+deactivate EZShop
+```
+
+## Scenario 9.1
+
+```plantuml
+actor "Administrator\nShop Manager" as user
+
+autonumber
+user -> EZShop : getCreditsAndDebits()
+activate EZShop
+EZShop -> EZShop : getLoggedIn()
+note right: Is it necessary?
+EZShop -> User : canManageAccounting()
+EZShop <-- User : return canManageAccounting()
+EZShop -> EZShop : getBalanceOperationsList()
+loop for-each BalanceOperation
+    EZShop -> BalanceOperation : getDate()
+    EZShop <-- BalanceOperation : return LocalDate
+end
+user <- EZShop : return getCreditsAndDebits()
+deactivate EZShop
+```
