@@ -373,6 +373,21 @@ participant ProductType as 5
 2->5 : setNotes()
 ```
 
+<Use Case 4>
+<Scenario 4.2: Attach card to customer record>
+```plantuml
+EZShop -> EZShop : createCard()
+EZShop ->Customer : getCustomer()
+Customer --> EZShop : customerId
+EZShop -> EZShop : attachCardToCustomer()
+```
+<Scenario 4.2: Detach card from customer record>
+```plantuml
+EZShop ->Customer : getCustomer()
+Customer --> EZShop : customerId
+EZShop -> EZShop : modifyCustomer()
+```
+
 <Use Case 6>
 
 <Scenarios 6.1, 6.2, 6.3, 7.1: Sale with product and sale discounts>
