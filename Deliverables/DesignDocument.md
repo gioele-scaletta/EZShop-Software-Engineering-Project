@@ -260,19 +260,13 @@ Order --> BalanceOperation
 
 |FR ID|EZShop|Customer|LoyaltyCard|SaleTransaction|BalanceOperation|Order|ProductType|User|ReturnTransaction|
 |-------------| :-------------: | :-------------: | :-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
-|  FR1 |X  | |   |   |   |  |   | X  |    | 
-|  FR3 |X  |   |   |   |   |  |X  |   |    | 
-|  FR4 |X  |   |   |   |   |X  |X   |   |    | 
-|  FR5 |  |   |   |   |   |  |   |   |    | 
-|  FR6 | X |   | X  | X  | X  |  | X  |  X |    | 
-|  FR7 |  |   |   | X  | X  |  |   | X   |    | 
-|  FR8 |  |   |   |   |   |  |   |   |    | 
-
-
-
-
-
-
+| FR1 | X |   |   |   |   |   |   | X |   |
+| FR3 | X |   |   |   |   |   | X |   |   |
+| FR4 | X |   |   |   |   | X | X |   |   |
+| FR5 |   |   |   |   |   |   |   |   |   |
+| FR6 | X |   | X | X | X |   | X | X | X |
+| FR7 | X |   |   | X | X |   |   | X | X |
+| FR8 | X |   |   |   | X |   |   | X |   |
 
 # Verification sequence diagrams 
 \<select key scenarios from the requirement document. For each of them define a sequence diagram showing that the scenario can be implemented by the classes and methods in the design>
