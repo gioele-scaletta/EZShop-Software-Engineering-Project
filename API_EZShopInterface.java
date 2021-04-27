@@ -2,7 +2,21 @@ package it.polito.ezshop.data;
 
 import it.polito.ezshop.exceptions.*;
 import it.polito.ezshop.model.*;
+/*  version 1.1 27 april 2021  
+changes: 
+issueReOrder() renamed in issueOrder()
 
+closeSaleTransaction() renamed in endSaleTransaction()
+
+canceled concept of ticket, and consequently:
+deleteSaleTicket(ticketNumber) renamed deleteSaleTransaction(transactionId)
+Ticket getSaleTicket() changed in   SaleTransaction getSaleTransaction(Integer transactionId)
+canceled getTicketByNumber() 
+startReturnTransaction   receives transactionID and not ticketNumber
+receiveCashPayment()    receives transactionID and not ticketNumber
+receiveCreditCardPayment()    receives transactionID and not ticketNumber
+
+*/ 
 import java.time.LocalDate;
 import java.util.List;
 
@@ -262,7 +276,7 @@ public interface EZShopInterface {
      * @throws InvalidPricePerUnitException if the price per unit of product is less than or equal to 0
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public Integer issueReorder(String productCode, int quantity, double pricePerUnit)
+    public Integer issueOrder(String productCode, int quantity, double pricePerUnit)
             throws InvalidProductCodeException, InvalidQuantityException, InvalidPricePerUnitException, UnauthorizedException;
 
     /**
@@ -567,7 +581,7 @@ public interface EZShopInterface {
 
 
     /**
-     * This method makes the transaction's ticket available by closing an opened transaction. After this operation the
+     * This method closes an opened transaction. After this operation the
      * transaction is persisted in the system's memory.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
@@ -581,65 +595,52 @@ public interface EZShopInterface {
      * @throws InvalidTransactionIdException if the transaction id less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean closeSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
+    public boolean endSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
 
     /**
-     * This method deletes a sale ticket with given unique identifier from the system's data store.
+     * This method deletes a sale transaction with given unique identifier from the system's data store.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
-     * @param ticketNumber the number of the ticket to be deleted
+     * @param transactionId the number of the transaction to be deleted
      *
-     * @return  true if the ticket has been successfully deleted,
-     *          false   if the ticket doesn't exist,
+     * @return  true if the transaction has been successfully deleted,
+     *          false   if the transaction doesn't exist,
      *                  if it has been payed,
      *                  if there are some problems with the db
      *
-     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
+     * @throws InvalidTransactionIdException if the transaction id number is less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean deleteSaleTicket(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
+    public boolean deleteSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
 
     /**
-     * This method returns the sale ticket related to a closed sale transaction.
+     * This method returns  a closed sale transaction.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
      * @param transactionId the id of the CLOSED Sale transaction
      *
-     * @return the ticket of the transaction if it is available (transaction closed), null otherwise
+     * @return the transaction if it is available (transaction closed), null otherwise
      *
      * @throws InvalidTransactionIdException if the transaction id less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public Ticket getSaleTicket(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
-
-    /**
-     * This method returns a sale ticket having given ticket number.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @param ticketNumber the ticket number
-     *
-     * @return the ticket it is available, null otherwise
-     *
-     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
-    public Ticket getTicketByNumber(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
+    public SaleTransaction getSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
 
     /**
      * This method starts a new return transaction for units of products that have already been sold and payed.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
-     * @param ticketNumber the number of the ticket
+     * @param transactionId the number of the transaction
      *
-     * @return the id of the returned transaction (>= 0), -1 if the ticket is not available.
+     * @return the id of the return transaction (>= 0), -1 if the transaction is not available.
      *
-     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
+     * @throws InvalidTransactionIdException if the transactionId  is less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public Integer startReturnTransaction(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
+    public Integer startReturnTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
 
     /**
-     * This method adds a product to the return transaction that must be listed in the related ticket.
+     * This method adds a product to the return transaction 
      * The amount of units of product to be returned should not exceed the amount originally sold.
      * This method DOES NOT update the product quantity
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
@@ -651,7 +652,7 @@ public interface EZShopInterface {
      * @return  true if the operation is successful
      *          false   if the the product to be returned does not exists,
      *                  if it was not in the transaction,
-     *                  if the amount is higher than the one in the ticket of the transaction,
+     *                  if the amount is higher than the one in the sale transaction,
      *                  if the transaction does not exist
      *
      * @throws InvalidTransactionIdException if the return id is less ther or equal to 0 or if it is null
@@ -665,7 +666,7 @@ public interface EZShopInterface {
      * This method closes a return transaction. A closed return transaction can be committed (i.e. <commit> = true) thus
      * it increases the product quantity available on the shelves or not (i.e. <commit> = false) thus the whole trasaction
      * is undone.
-     * This method updates the ticket status (decreasing the number of units sold by the number of returned one and
+     * This method updates the transaction status (decreasing the number of units sold by the number of returned one and
      * decreasing the final price).
      * If committed, the return transaction must be persisted in the system's memory.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
@@ -683,7 +684,7 @@ public interface EZShopInterface {
     public boolean endReturnTransaction(Integer returnId, boolean commit) throws InvalidTransactionIdException, UnauthorizedException;
 
     /**
-     * This method deletes a closed return transaction. It affects the quantity of product sold in the connected sale ticket
+     * This method deletes a closed return transaction. It affects the quantity of product sold in the connected sale transaction
      * (and consequently its price) and the quantity of product available on the shelves.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
@@ -705,47 +706,47 @@ public interface EZShopInterface {
     // ------------------ CASHIER ----------------- //
 
     /**
-     * This method record the payment of a ticket with cash and returns the change (if present).
+     * This method record the payment of a sale transaction with cash and returns the change (if present).
      * This method affects the balance of the system.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
-     * @param ticketNumber the number of the ticket that the customer wants to pay
+     * @param transactionId the number of the transaction that the customer wants to pay
      * @param cash the cash received by the cashier
      *
-     * @return the change (cash - ticket price)
-     *         -1   if the ticket does not exists,
+     * @return the change (cash - sale price)
+     *         -1   if the sale does not exists,
      *              if the cash is not enough,
      *              if there is some problemi with the db
      *
-     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
+     * @throws InvalidTransactionIdException if the  number is less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      * @throws InvalidPaymentException if the cash is less than or equal to 0
      */
-    public double receiveCashPayment(Integer ticketNumber, double cash) throws InvalidTicketNumberException, InvalidPaymentException, UnauthorizedException;
+    public double receiveCashPayment(Integer transactionId, double cash) throws InvalidTransactionIdException, InvalidPaymentException, UnauthorizedException;
 
     /**
-     * This method record the payment of a ticket with credit card. If the card has not enough money the payment should
+     * This method record the payment of a sale with credit card. If the card has not enough money the payment should
      * be refused.
      * The credit card number validity should be checked. It should follow the luhn algorithm.
      * The credit card should be registered in the system.
      * This method affects the balance of the system.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
-     * @param ticketNumber the number of the ticket that the customer wants to pay
+     * @param transactionId the number of the sale that the customer wants to pay
      * @param creditCard the credit card number of the customer
      *
      * @return  true if the operation is successful
-     *          false   if the ticket does not exists,
+     *          false   if the sale does not exists,
      *                  if the card has not enough money,
      *                  if the card is not registered,
      *                  if there is some problem with the db connection
      *
-     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
+     * @throws InvalidTransactionIdException if the sale number is less than or equal to 0 or if it is null
      * @throws InvalidCreditCardException if the credit card number is empty, null or if luhn algorithm does not
      *                                      validate the credit card
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean receiveCreditCardPayment(Integer ticketNumber, String creditCard) throws InvalidTicketNumberException, InvalidCreditCardException, UnauthorizedException;
+    public boolean receiveCreditCardPayment(Integer transactionId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException;
 
     /**
      * This method record the payment of a closed return transaction with given id. The return value of this method is the

@@ -315,11 +315,19 @@ public class EZShop /*implements EZShopInterface*/{
             return -1;
         }
         Double current_amount = 0.0;
-        Integer newtransactionId= salesList.stream().map(e -> e.getTransactionId()).max(Integer::compare).get()+1;   // I think we could substitue lists with maps
+        Integer newtransactionId=getNewSaleTransactionId();
         SaleTransaction sale= new SaleTransaction(newtransactionId, current_amount);
-        salesList.add(sale);
+        addSaleTransactionToSaleTransactionsList(sale);
         return newtransactionId;
     }
+
+    public Integer getNewSaleTransactionId(){
+        return salesList.stream().map(e -> e.getTransactionId()).max(Integer::compare).get()+1;
+    }
+    public void addSaleTransactionToSaleTransactionsList(SaleTransaction sale){
+        salesList.add(sale);
+    }
+   
 
     /**
      * This method adds a product to a sale transaction decreasing the temporary amount of product available on the
@@ -353,14 +361,31 @@ public class EZShop /*implements EZShopInterface*/{
         //MISSING handle invalid productCode
         //MISSING handle invalid amount
 
-        if(listofproducts.containsKey(getProductTypeByBarCode(productCode))){
-            listofproducts.put(getProductTypeByBarCode(productCode), listofproducts.get(getProductTypeByBarCode(productCode))+ amount);
-            sale.setCurrentAmount(sale.getCurrentAmount()+amount*getProductTypeByBarCode(productCode).getSellPrice());
+        if(listofproducts.containsKey(getProductTypeByCode(productCode))){
+            listofproducts.put(getProductTypeByCode(productCode), listofproducts.get(getProductTypeByCode(productCode))+ amount);
+            sale.setCurrentAmount(sale.getCurrentAmount()+amount*getProductTypeByCode(productCode).getSellPrice());
             return true;
         } else{
-            listofproducts.put(getProductTypeByBarCode(productCode), amount);
+            listofproducts.put(getProductTypeByCode(productCode), amount);
         }
 
+    }
+
+    SaleTransaction getSaleTransactionById(Integer transactionId){
+
+        for (SaleTransaction e : salesList ){
+            if(e.getTransactionId()==transactionId){
+                return e;
+            }
+        }      
+    }
+
+    ProductType getProductTypeByCode(String productCode){
+        for (ProductType p : productsList) {
+            if (productCode.equals(p.getBarcode())){
+                return p;
+            }
+        }
     }
 
     /**
@@ -395,14 +420,14 @@ public class EZShop /*implements EZShopInterface*/{
         HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
         //MISSING handle invalid productCode
 
-        if(listofproducts.containsKey(getProductTypeByBarCode(productCode))){
-            if(listofproducts.get(getProductTypeByBarCode(productCode))<amount){
-                listofproducts.put(getProductTypeByBarCode(productCode), listofproducts.get(getProductTypeByBarCode(productCode))- amount);
-                sale.setCurrentAmount(sale.getCurrentAmount()-amount*getProductTypeByBarCode(productCode).getSellPrice());
+        if(listofproducts.containsKey(getProductTypeByCode(productCode))){
+            if(listofproducts.get(getProductTypeByCode(productCode))<amount){
+                listofproducts.put(getProductTypeByCode(productCode), listofproducts.get(getProductTypeByCode(productCode))- amount);
+                sale.setCurrentAmount(sale.getCurrentAmount()-amount*getProductTypeByCode(productCode).getSellPrice());
                 return true;
-            } else if(listofproducts.get(getProductTypeByBarCode(productCode))==amount) {
-                sale.setCurrentAmount(sale.getCurrentAmount()-amount*getProductTypeByBarCode(productCode).getSellPrice());
-                listofproducts.remove(getProductTypeByBarCode(productCode));
+            } else if(listofproducts.get(getProductTypeByCode(productCode))==amount) {
+                sale.setCurrentAmount(sale.getCurrentAmount()-amount*getProductTypeByCode(productCode).getSellPrice());
+                listofproducts.remove(getProductTypeByCode(productCode));
                 return true;
             } else{
                 //throw InvalidQuantityException;
@@ -439,7 +464,7 @@ public class EZShop /*implements EZShopInterface*/{
             return false;
         }
 
-        SaleTransaction sale = getSaleTransactionById(transactionId);
+        SaleTransaction sale = getSaleTransaction(transactionId);
         //MISSING handle invalid transactionId
         HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
         //MISSING handle invalid productCode
@@ -521,8 +546,8 @@ public class EZShop /*implements EZShopInterface*/{
     }
 
 
-    /**
-     * This method makes the transaction's ticket available by closing an opened transaction. After this operation the
+ /**
+     * This method closes an opened transaction. After this operation the
      * transaction is persisted in the system's memory.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
@@ -536,7 +561,7 @@ public class EZShop /*implements EZShopInterface*/{
      * @throws InvalidTransactionIdException if the transaction id less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean closeSaleTransaction(Integer transactionId) /*throws InvalidTransactionIdException, UnauthorizedException*/{
+    public boolean endSaleTransaction(Integer transactionId) /*throws InvalidTransactionIdException, UnauthorizedException*/{
         //MISSING Connection with balanceoperation and ticket since I havenm't understood how to handel ticket yet (also next three methods still todo)
 
         if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
@@ -556,97 +581,84 @@ public class EZShop /*implements EZShopInterface*/{
     }
 
     /**
-     * This method deletes a sale ticket with given unique identifier from the system's data store.
+     * This method deletes a sale transaction with given unique identifier from the system's data store.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
-     * @param ticketNumber the number of the ticket to be deleted
+     * @param transactionId the number of the transaction to be deleted
      *
-     * @return  true if the ticket has been successfully deleted,
-     *          false   if the ticket doesn't exist,
+     * @return  true if the transaction has been successfully deleted,
+     *          false   if the transaction doesn't exist,
      *                  if it has been payed,
      *                  if there are some problems with the db
      *
-     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
+     * @throws InvalidTransactionIdException if the transaction id number is less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    //!!!!!!public boolean deleteSaleTicket(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
+    public boolean deleteSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
 
     /**
-     * This method returns the sale ticket related to a closed sale transaction.
+     * This method returns  a closed sale transaction.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
      * @param transactionId the id of the CLOSED Sale transaction
      *
-     * @return the ticket of the transaction if it is available (transaction closed), null otherwise
+     * @return the transaction if it is available (transaction closed), null otherwise
      *
      * @throws InvalidTransactionIdException if the transaction id less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    //!!!!!!public Ticket getSaleTicket(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
+    public SaleTransaction getSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
 
-    /**
-     * This method returns a sale ticket having given ticket number.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @param ticketNumber the ticket number
-     *
-     * @return the ticket it is available, null otherwise
-     *
-     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
-    //!!!!!!!public Ticket getTicketByNumber(Integer ticketNumber) throws InvalidTicketNumberException, UnauthorizedException;
     
 
     //LAST METHODS RELATED TO RETURN TRANSACTION MISSING!!
-
-    // -------------------- FR7 ------------------- //
+ // -------------------- FR7 ------------------- //
     // ------------------- ADMIN ------------------ //
     // --------------- SHOP MANAGER --------------- //
     // ------------------ CASHIER ----------------- //
 
     /**
-     * This method record the payment of a ticket with cash and returns the change (if present).
+     * This method record the payment of a sale transaction with cash and returns the change (if present).
      * This method affects the balance of the system.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
-     * @param ticketNumber the number of the ticket that the customer wants to pay
+     * @param transactionId the number of the transaction that the customer wants to pay
      * @param cash the cash received by the cashier
      *
-     * @return the change (cash - ticket price)
-     *         -1   if the ticket does not exists,
+     * @return the change (cash - sale price)
+     *         -1   if the sale does not exists,
      *              if the cash is not enough,
      *              if there is some problemi with the db
      *
-     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
+     * @throws InvalidTransactionIdException if the  number is less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      * @throws InvalidPaymentException if the cash is less than or equal to 0
      */
-    //!!!!!!public double receiveCashPayment(Integer ticketNumber, double cash) throws InvalidTicketNumberException, InvalidPaymentException, UnauthorizedException;
+    public double receiveCashPayment(Integer transactionId, double cash) throws InvalidTransactionIdException, InvalidPaymentException, UnauthorizedException;
 
     /**
-     * This method record the payment of a ticket with credit card. If the card has not enough money the payment should
+     * This method record the payment of a sale with credit card. If the card has not enough money the payment should
      * be refused.
      * The credit card number validity should be checked. It should follow the luhn algorithm.
      * The credit card should be registered in the system.
      * This method affects the balance of the system.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
-     * @param ticketNumber the number of the ticket that the customer wants to pay
+     * @param transactionId the number of the sale that the customer wants to pay
      * @param creditCard the credit card number of the customer
      *
      * @return  true if the operation is successful
-     *          false   if the ticket does not exists,
+     *          false   if the sale does not exists,
      *                  if the card has not enough money,
      *                  if the card is not registered,
      *                  if there is some problem with the db connection
      *
-     * @throws InvalidTicketNumberException if the ticket number is less than or equal to 0 or if it is null
+     * @throws InvalidTransactionIdException if the sale number is less than or equal to 0 or if it is null
      * @throws InvalidCreditCardException if the credit card number is empty, null or if luhn algorithm does not
      *                                      validate the credit card
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    //!!!!public boolean receiveCreditCardPayment(Integer ticketNumber, String creditCard) throws InvalidTicketNumberException, InvalidCreditCardException, UnauthorizedException;
+    public boolean receiveCreditCardPayment(Integer transactionId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException;
 
     /**
      * This method record the payment of a closed return transaction with given id. The return value of this method is the
@@ -664,7 +676,7 @@ public class EZShop /*implements EZShopInterface*/{
      * @throws InvalidTransactionIdException if the return id is less than or equal to 0
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    //!!!!!public double returnCashPayment(Integer returnId) throws InvalidTransactionIdException, UnauthorizedException;
+    public double returnCashPayment(Integer returnId) throws InvalidTransactionIdException, UnauthorizedException;
 
     /**
      * This method record the payment of a return transaction to a credit card.
@@ -687,7 +699,6 @@ public class EZShop /*implements EZShopInterface*/{
      *                                      validate the credit card
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    //!!!!!public double returnCreditCardPayment(Integer returnId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException;
-    
+    public double returnCreditCardPayment(Integer returnId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException;
 
 }
