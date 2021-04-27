@@ -2,9 +2,16 @@
 
 Authors: Vittorio Di Leo, Maurizio Morisio 
 
-Date: 21 April 2021
+Date: 27 April 2021
 
-Version: 1.0
+Version: 1.1
+
+ 
+| Version number | Change |
+| ----------------- |:-----------|
+| 1.1 | Modified glossary, Sale is now SaleTransaction|
+| 1.1 | Modified glossary, Return is now ReturnTransaction|
+
 
 # Contents
 
@@ -55,7 +62,6 @@ EZShop is a software application to
 ## Context Diagram
 
 ```plantuml
-
 top to bottom direction
 actor Administrator as a
 actor Cashier as ch
@@ -67,7 +73,6 @@ mngr -up-|> ch
 ch -> (EZShop)
  (EZShop) --> cc
  (EZShop) --> sp
-
 ```
 
 ## Interfaces
@@ -810,8 +815,8 @@ class Sale
 class Return
 
 Order --|> Debit
-Sale --|> Credit
-Return --|> Debit
+SaleTransaction --|> Credit
+ReturnTransaction --|> Debit
 
 
 class ProductType{
