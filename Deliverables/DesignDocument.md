@@ -186,7 +186,7 @@ class SaleTransaction {
 
     -transactionCard: LoyaltyCard
     -saleOperationRecord: BalanceOperation
-    -ListOfProductsSale: Map<ProductType, Integer>()
+    -listOfProductsSale: Map<ProductType, Integer>
 
     +isProductInSale(String productCode): boolean
 }
@@ -200,7 +200,7 @@ class ReturnTransaction {
 
     -originalTransaction: SaleTransaction
     -retOperationRecord: BalanceOperation
-    -ListOfProductsReturn: Map<ProductType, Integer>()
+    -listOfProductsReturn: Map<ProductType, Integer>
 
     +addProduct(ProductType product, Integer quantity): boolean
 }
@@ -217,11 +217,6 @@ class BalanceOperation {
     -description: enum Description{DEBIT, CREDIT}
     -amount: Double
     -date: LocalDate
-
-    +getBalanceID(): Integer
-    +getDescription(): enum Description{DEBIT, CREDIT}
-    +getAmount(): Double
-    +getDate(): LocalDate
 }
 
 
@@ -247,12 +242,7 @@ ReturnTransaction "0...*" --> "1...*" ProductType
 SaleTransaction --> BalanceOperation
 ReturnTransaction --> BalanceOperation
 Order --> BalanceOperation
-
-
 ```
-
-
-
 
 # Verification traceability matrix
 
