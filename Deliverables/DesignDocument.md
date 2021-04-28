@@ -430,7 +430,7 @@ EZShop <-- SaleTransaction : Boolean
 user <-- EZShop : Boolean
 deactivate EZShop
 
-user -> EZShop : applyDiscountRateToProduct()
+user -> EZShop : applyDiscountRateToSale()
 activate  EZShop
 EZShop -> User : canManageSaleTransactions()
 EZShop <-- User : Boolean
