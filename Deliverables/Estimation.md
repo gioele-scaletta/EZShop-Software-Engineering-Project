@@ -43,7 +43,7 @@ Version:
 
 ```plantuml
 ganttscale daily
-scale 1.5
+scale 2
 
 saturday are closed
 sunday are closed
