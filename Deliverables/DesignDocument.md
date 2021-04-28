@@ -19,8 +19,9 @@ Version:
 
 The design must satisfy the Official Requirements document, notably functional and non functional requirements
 
-# High level design
+# High level design 
 
+<
 The application implements a 3-tiers architecture, where the data layes, the logic layer and the presentation layer are in different packages. The GUI interacts with the EZShop logic layer via the Façade class "EZShop".
 
 ```plantuml
@@ -34,10 +35,18 @@ EZShopException --> EZShopLogic
 Data <-> EZShopLogic
 
 ```
+
 # Low level design
+
+<for each package, report class diagram>
+
+<"!" used to signal inconsistency in function parameter>
+
+<"In each class, methods or connections attributes have been separated with a space">
 
 ```plantuml
 left to right direction
+
 
 class EZShop{
 
@@ -263,7 +272,11 @@ Here we decided to model explicitely the relationships with lists and maps.\n
 end note
 ```
 
+
+
 # Verification traceability matrix
+
+
 
 |FR ID|EZShop|Customer|LoyaltyCard|SaleTransaction|BalanceOperation|Order|ProductType|User|ReturnTransaction|
 |-------------| :-------------: | :-------------: | :-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
@@ -276,6 +289,7 @@ end note
 | FR8 | X |   |   |   | X |   |   | X |   |
 
 # Verification sequence diagrams 
+\<select key scenarios from the requirement document. For each of them define a sequence diagram showing that the scenario can be implemented by the classes and methods in the design>
 
 ### Use Case 1
 
@@ -573,6 +587,7 @@ deactivate EZShop
 ```
 
 <Scenario 7.3 API????????>
+
 
 
 <Use Case 8 & 10>
