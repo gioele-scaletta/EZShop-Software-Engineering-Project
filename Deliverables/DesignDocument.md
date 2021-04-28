@@ -269,7 +269,7 @@ Order --> BalanceOperation
 | FR1 | X |   |   |   |   |   |   | X |   |
 | FR3 | X |   |   |   |   |   | X |   |   |
 | FR4 | X |   |   |   |   | X | X |   |   |
-| FR5 |   |   |   |   |   |   |   |   |   |
+| FR5 | X | X | X |   |   |   |   |   |   |
 | FR6 | X |   | X | X | X |   | X | X | X |
 | FR7 | X |   |   | X | X |   |   | X | X |
 | FR8 | X |   |   |   | X |   |   | X |   |
@@ -374,17 +374,25 @@ participant ProductType as 5
 ```
 
 <Use Case 4>
+
 <Scenario 4.2: Attach card to customer record>
+
 ```plantuml
 EZShop -> EZShop : createCard()
 EZShop ->Customer : getCustomer()
+Customer -> Customer : getCustomerId()
 Customer --> EZShop : customerId
 EZShop -> EZShop : attachCardToCustomer()
 ```
+
 <Scenario 4.2: Detach card from customer record>
+
 ```plantuml
 EZShop ->Customer : getCustomer()
+Customer -> Customer : getCustomerId()
 Customer --> EZShop : customerId
+Customer -> Customer : getCustomerName()
+Customer --> EZShop : customerName
 EZShop -> EZShop : modifyCustomer()
 ```
 
