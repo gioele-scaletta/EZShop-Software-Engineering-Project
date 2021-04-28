@@ -8,6 +8,7 @@ Version:
 - [Estimate by activity decomposition ]
 # Estimation approach
 <Consider the EZGas  project as described in YOUR requirement document, assume that you are going to develop the project INDEPENDENT of the deadlines of the course>
+
 # Estimate by product decomposition
 ### 
 |             | Estimate                        |             
@@ -17,31 +18,37 @@ Version:
 | S = Estimated size of project, in LOC (= NC * A) | 3000 |
 | E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)  |             300 ph  |   
 | C = Estimated cost, in euro (here use 1 person hour cost = 30 euro) | 9000 | 
-| Estimated calendar time, in calendar weeks (Assume team of 4 people, 8 hours per day, 5 days per week ) |           1,875 weeks         |               
+| Estimated calendar time, in calendar weeks (Assume team of 4 people, 8 hours per day, 5 days per week ) |           1,875 weeks         |      
+
 # Estimate by activity decomposition
 ### 
 |         Activity name    | Estimated effort (person hours)   |             
 | ----------- | ------------------------------- | 
 |  | |
 | Requirement Document | 55 |
-| &ensp;&ensp;  Concept development ||
-| &ensp;&ensp;  Document drafting ||
-| &ensp;&ensp;  Document V&V ||
+| &ensp; &ensp;  Concept development |30|
+| &ensp; &ensp;  Document drafting |15|
+| &ensp; &ensp;  Document V&V |10|
 | GUI | 65 |
-| &ensp; &ensp;  Usability study||
-| &ensp; &ensp;  Development ||
-| &ensp;&ensp;  GUI V&V ||
+| &ensp; &ensp;  Usability study|20|
+| &ensp; &ensp;  Development |35|
+| &ensp; &ensp;   GUI V&V |10|
 |Design document| 50 |
-| &ensp; &ensp;  High level||
-| &ensp; &ensp; Low level||
-| &ensp; &ensp;  Design V&V ||
+| &ensp; &ensp;  High level|10|
+| &ensp; &ensp; Low level|30|
+| &ensp; &ensp;  Design V&V |10|
 |Coding| 85 |
-|&ensp;&ensp;Java Classes||
-|&ensp;&ensp;DB layer||
+|&ensp; &ensp;Java Classes|70|
+|&ensp; &ensp;DB layer|15|
 |Testing| 30 |
 |Integration|  15 |
 
+<br>
+<br>
+
 ```plantuml
+
+
 ganttscale daily
 scale 2
 
