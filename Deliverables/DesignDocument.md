@@ -19,27 +19,25 @@ Version:
 
 The design must satisfy the Official Requirements document, notably functional and non functional requirements
 
-# High level design 
+# High level design
 
-<discuss architectural styles used, if any>
-<report package diagram>
+The application implements a 3-tiers architecture, where the data layes, the logic layer and the presentation layer are in different packages. The GUI interacts with the EZShop logic layer via the Façade class "EZShop".
 
+```plantuml
+package "GUI"
+package "EZShopLogic"
+package "Data"
+package "EZShopException"
 
+EZShopLogic <-> GUI
+EZShopException --> EZShopLogic
+Data <-> EZShopLogic
 
-
-
-
+```
 # Low level design
-
-<for each package, report class diagram>
-
-<"!" used to signal inconsistency in function parameter>
-
-<"In each class, methods or connections attributes have been separated with a space">
 
 ```plantuml
 left to right direction
-
 
 class EZShop{
 
@@ -258,11 +256,14 @@ ReturnTransaction "0...*" --> "1...*" ProductType
 SaleTransaction --> BalanceOperation
 ReturnTransaction --> BalanceOperation
 Order --> BalanceOperation
+
+note as N
+The classes is stored persistently in the data layer.\n
+Here we decided to model explicitely the relationships with lists and maps.\n
+end note
 ```
 
 # Verification traceability matrix
-
-\<for each functional requirement from the requirement document, list which classes concur to implement it>
 
 |FR ID|EZShop|Customer|LoyaltyCard|SaleTransaction|BalanceOperation|Order|ProductType|User|ReturnTransaction|
 |-------------| :-------------: | :-------------: | :-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
@@ -275,11 +276,10 @@ Order --> BalanceOperation
 | FR8 | X |   |   |   | X |   |   | X |   |
 
 # Verification sequence diagrams 
-\<select key scenarios from the requirement document. For each of them define a sequence diagram showing that the scenario can be implemented by the classes and methods in the design>
 
-<Use Case 1>
+### Use Case 1
 
-<Scenario 1.1 - Create Product Type X>
+##### Scenario 1.1 - Create Product Type X
 
 ```plantuml
 participant GUI as 1
@@ -293,7 +293,7 @@ participant ProductType as 4
 2->2 : addProductToInventory()
 ```
 
-<Scenario 1.3 - Modify Product Type pricePerUnit>
+##### Scenario 1.3 - Modify Product Type pricePerUnit
 
 ```plantuml
 participant GUI as 1
@@ -309,7 +309,7 @@ participant ProductType as 4
 2->4 : setSellPrice()
 2->4 : setNotes()
 ```
-<Use Case 2>
+Use Case 2>
 
 <Scenario 2.1 - Create user and define rights>
 
