@@ -60,6 +60,8 @@ class EZShop{
     +ProductType getProductTypeByCode(String productCode)
     +boolean isValidCreditCard(String cardNumber)
     +int sumDigits(int[] arr)
+    +void addBalanceToBalancesList()
+    +newBalanceUpdate(Double amount)
 
 
     +void reset();
@@ -448,7 +450,7 @@ SaleTransaction -> ProductType : updateProductQuantity()
 SaleTransaction <-- ProductType : void
 EZShop <-- SaleTransaction : Boolean
 user <-- EZShop : Boolean
-deactuvate
+deactivate EZShop
 
 user -> EZShop : receiveCashPayment()
 activate  EZShop
@@ -461,7 +463,7 @@ EZShop -> EZShop : BalanceUpdate()
 EZShop -> BalanceOperation : new BalanceOperation()
 EZShop <-- BalanceOperation : BalanceOperation
 EZShop -> EZShop : addBalanceToBalancesList()
-user <-- EZShop : Double()
+user <-- EZShop : Double
 deactivate EZShop
 
 ```
