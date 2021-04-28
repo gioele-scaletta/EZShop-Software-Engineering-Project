@@ -462,7 +462,7 @@ EZShop -> BalanceOperation : new BalanceOperation()
 EZShop <-- BalanceOperation : BalanceOperation
 EZShop -> EZShop : addBalanceToBalancesList()
 user <-- EZShop : Double()
-
+deactivate EZShop
 
 ```
 
