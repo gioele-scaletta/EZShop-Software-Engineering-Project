@@ -2,6 +2,7 @@ package ezshopLogic;
 
 import javax.print.attribute.standard.JobKOctets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -295,13 +296,90 @@ public class EZShop /*implements EZShopInterface*/{
         }
         return matches;
     }
+    
 
     // -------------------- FR6 ------------------- //
     // ------------------- ADMIN ------------------ //
     // --------------- SHOP MANAGER --------------- //
     // ------------------ CASHIER ----------------- //
+    
+    
+    
+    //ADDED METHODS
+    public Integer getNewSaleTransactionId(){
+        return salesList.stream().map(e -> e.getTransactionId()).max(Integer::compare).get()+1;
+    }
+    
+    public void addSaleToSalesList(SaleTransaction sale){
+        salesList.add(sale);
+    }
+    
+    public void RemoveSaleFromSalesList(SaleTransaction sale) {
+   	 salesList.remove(sale);
+   	}
+    
+    SaleTransaction getSaleTransactionById(Integer transactionId) /*throw*/{
 
+        for (SaleTransaction e : salesList ){
+            if(e.getTransactionId()==transactionId){
+                return e;
+            }
+        }
+        return null;
+       // throw ...
+    }
 
+    ProductType getProductTypeByCode(String productCode){
+        for (ProductType p : productsList) {
+            if (productCode.equals(p.getBarcode())){
+                return p;
+            }
+        }
+        return null;
+       // throw ...
+    }
+    
+    public static boolean isValidCreditCard(String cardNumber)
+    {
+        // int array for processing the cardNumber
+        int[] cardIntArray=new int[cardNumber.length()];
+ 
+        for(int i=0;i<cardNumber.length();i++)
+        {
+            char c= cardNumber.charAt(i);
+            cardIntArray[i]=  Integer.parseInt(""+c);
+        }
+ 
+        for(int i=cardIntArray.length-2;i>=0;i=i-2)
+        {
+            int num = cardIntArray[i];
+            num = num * 2;  // step 1
+            if(num>9)
+            {
+                num = num%10 + num/10;  // step 2
+            }
+            cardIntArray[i]=num;
+        }
+ 
+        int sum = sumDigits(cardIntArray);  // step 3
+ 
+        System.out.println(sum);
+ 
+        if(sum%10==0)  // step 4
+        {
+            return true;
+        }
+ 
+        return false;
+ 
+    }
+ 
+    public static int sumDigits(int[] arr)
+    {
+        return Arrays.stream(arr).sum();
+    }
+
+    //INTERFACE METHODS
     /**
      * This method starts a new sale transaction and returns its unique identifier.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
@@ -314,21 +392,16 @@ public class EZShop /*implements EZShopInterface*/{
             //throw new UnauthorizedException();
             return -1;
         }
-        Double current_amount = 0.0;
+
         Integer newtransactionId=getNewSaleTransactionId();
-        SaleTransaction sale= new SaleTransaction(newtransactionId, current_amount);
-        addSaleTransactionToSaleTransactionsList(sale);
+        SaleTransaction sale= new SaleTransaction(newtransactionId);
+        addSaleToSalesList(sale);
         return newtransactionId;
     }
 
-    public Integer getNewSaleTransactionId(){
-        return salesList.stream().map(e -> e.getTransactionId()).max(Integer::compare).get()+1;
-    }
-    public void addSaleTransactionToSaleTransactionsList(SaleTransaction sale){
-        salesList.add(sale);
-    }
-   
 
+    
+  
     /**
      * This method adds a product to a sale transaction decreasing the temporary amount of product available on the
      * shelves for other customers.
@@ -357,36 +430,12 @@ public class EZShop /*implements EZShopInterface*/{
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
-        HashMap<ProductType, Integer> listofproducts = sale.getListOfProductsSale();
-        //MISSING handle invalid productCode
-        //MISSING handle invalid amount
-
-        if(listofproducts.containsKey(getProductTypeByCode(productCode))){
-            listofproducts.put(getProductTypeByCode(productCode), listofproducts.get(getProductTypeByCode(productCode))+ amount);
-            sale.setCurrentAmount(sale.getCurrentAmount()+amount*getProductTypeByCode(productCode).getSellPrice());
-            return true;
-        } else{
-            listofproducts.put(getProductTypeByCode(productCode), amount);
-        }
-
+        
+        return sale.AddUpdateDeleteProductInSale(getProductTypeByCode(productCode), amount);
+        
     }
 
-    SaleTransaction getSaleTransactionById(Integer transactionId){
 
-        for (SaleTransaction e : salesList ){
-            if(e.getTransactionId()==transactionId){
-                return e;
-            }
-        }      
-    }
-
-    ProductType getProductTypeByCode(String productCode){
-        for (ProductType p : productsList) {
-            if (productCode.equals(p.getBarcode())){
-                return p;
-            }
-        }
-    }
 
     /**
      * This method deletes a product from a sale transaction increasing the temporary amount of product available on the
@@ -415,25 +464,13 @@ public class EZShop /*implements EZShopInterface*/{
             return false;
         }
 
-        SaleTransaction sale = getSaleTransactionById(transactionId);
-        //MISSING handle invalid transactionId
-        HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
-        //MISSING handle invalid productCode
 
-        if(listofproducts.containsKey(getProductTypeByCode(productCode))){
-            if(listofproducts.get(getProductTypeByCode(productCode))<amount){
-                listofproducts.put(getProductTypeByCode(productCode), listofproducts.get(getProductTypeByCode(productCode))- amount);
-                sale.setCurrentAmount(sale.getCurrentAmount()-amount*getProductTypeByCode(productCode).getSellPrice());
-                return true;
-            } else if(listofproducts.get(getProductTypeByCode(productCode))==amount) {
-                sale.setCurrentAmount(sale.getCurrentAmount()-amount*getProductTypeByCode(productCode).getSellPrice());
-                listofproducts.remove(getProductTypeByCode(productCode));
-                return true;
-            } else{
-                //throw InvalidQuantityException;
-                return false;
-            }
-        }
+        //MISSING handling exceptions
+        
+        SaleTransaction sale = getSaleTransactionById(transactionId);
+        
+        return sale.AddUpdateDeleteProductInSale(getProductTypeByCode(productCode), -amount);
+        
 
     }
 
@@ -464,16 +501,15 @@ public class EZShop /*implements EZShopInterface*/{
             return false;
         }
 
-        SaleTransaction sale = getSaleTransaction(transactionId);
+        SaleTransaction sale = getSaleTransactionById(transactionId);
+        
         //MISSING handle invalid transactionId
-        HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
         //MISSING handle invalid productCode
         //MISSING handle invalid discountRate
+        
+        return sale.ApplyDiscountToSaleProduct(discountRate, getProductTypeByCode(productCode));
 
-        if(listofproducts.containsKey(getProductTypeByBarCode(productCode))){
-            sale.setCurrentAmount(sale.getCurrentAmount()-discountRate*listofproducts.get(getProductTypeByBarCode(productCode))*getProductTypeByBarCode(productCode).getSellPrice());
-            return true;
-        }
+       
 
     }
 
@@ -502,14 +538,12 @@ public class EZShop /*implements EZShopInterface*/{
         }
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
+        
         //MISSING handle invalid transactionId
-        HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
         //MISSING handle invalid productCode
         //MISSING handle invalid discountRate
 
- 
-            sale.setCurrentAmount(sale.getCurrentAmount()*(1-discountRate));
-            return true;
+        return sale.ApplyDiscountToSaleAll(discountRate);//if discount rate out of bound returns false
      
     }
 
@@ -536,13 +570,10 @@ public class EZShop /*implements EZShopInterface*/{
          
         }
 
-        Integer points=-1;
-
         SaleTransaction sale = getSaleTransactionById(transactionId);
-        //MISSING handle invalid transactionId
+        //MISSING handle invalid transactionId (ret -1)
 
-        points=(int) ((sale.getCurrentAmount()-5)/10);
-
+       return sale.PointsForSale(); 
     }
 
 
@@ -572,10 +603,10 @@ public class EZShop /*implements EZShopInterface*/{
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
         //MISSING handle invalid transactionId
-        HashMap<ProductType, Integer> listofproducts=sale.getListOfProductsSale();
+       
+        return sale.EndSaleUpdateProductQuantity();
 
-        listofproducts.entrySet().stream().forEach(e->updateQuantity(e.getKey().getProductID(),e.getValue()));
-        return true;
+
 
 
     }
@@ -594,9 +625,25 @@ public class EZShop /*implements EZShopInterface*/{
      * @throws InvalidTransactionIdException if the transaction id number is less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean deleteSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
+    public boolean deleteSaleTransaction(Integer transactionId) /*throws InvalidTransactionIdException, UnauthorizedException*/{
+    	if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
+            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
+            //throw new UnauthorizedException();
+            return false;
+        }
+    	
 
-    /**
+        SaleTransaction sale = getSaleTransactionById(transactionId);
+    	
+    	 RemoveSaleFromSalesList(sale);
+    	 return true; //exceptions manca
+   
+    }
+
+  
+
+
+	/**
      * This method returns  a closed sale transaction.
      * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
      *
@@ -607,11 +654,21 @@ public class EZShop /*implements EZShopInterface*/{
      * @throws InvalidTransactionIdException if the transaction id less than or equal to 0 or if it is null
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public SaleTransaction getSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException;
-
+    public SaleTransaction getSaleTransaction(Integer transactionId) /*throws InvalidTransactionIdException, UnauthorizedException*/{
     
+    	if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
+            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
+            //throw new UnauthorizedException();
+            return null;
+        }
+    	
+    	return getSaleTransactionById(transactionId);
+    	//exceptions manca
+    }
 
     //LAST METHODS RELATED TO RETURN TRANSACTION MISSING!!
+    
+    
  // -------------------- FR7 ------------------- //
     // ------------------- ADMIN ------------------ //
     // --------------- SHOP MANAGER --------------- //
@@ -634,7 +691,12 @@ public class EZShop /*implements EZShopInterface*/{
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      * @throws InvalidPaymentException if the cash is less than or equal to 0
      */
-    public double receiveCashPayment(Integer transactionId, double cash) throws InvalidTransactionIdException, InvalidPaymentException, UnauthorizedException;
+    public double receiveCashPayment(Integer transactionId, double cash) /*throws InvalidTransactionIdException, InvalidPaymentException, UnauthorizedException;*/{
+    	
+    	SaleTransaction sale=getSaleTransactionById(transactionId);
+    	return sale.PaySaleAndReturnChange(cash, true);
+    	
+    }
 
     /**
      * This method record the payment of a sale with credit card. If the card has not enough money the payment should
@@ -658,47 +720,19 @@ public class EZShop /*implements EZShopInterface*/{
      *                                      validate the credit card
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean receiveCreditCardPayment(Integer transactionId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException;
+    public boolean receiveCreditCardPayment(Integer transactionId, String creditCard) /* throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException;*/{
+    	if(isValidCreditCard(creditCard)) {
+    		
+    		//Check enogh money on card
+    		//store card
+    	SaleTransaction sale=getSaleTransactionById(transactionId);
+    
+    	sale.PaySaleAndReturnChange(sale.getCurrentAmount(), false);
+    	return true;
+    
+    	}
+    	return false;
+    }
 
-    /**
-     * This method record the payment of a closed return transaction with given id. The return value of this method is the
-     * amount of money to be returned.
-     * This method affects the balance of the application.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @param returnId the id of the return transaction
-     *
-     * @return  the money returned to the customer
-     *          -1  if the return transaction is not ended,
-     *              if it does not exist,
-     *              if there is a problem with the db
-     *
-     * @throws InvalidTransactionIdException if the return id is less than or equal to 0
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
-    public double returnCashPayment(Integer returnId) throws InvalidTransactionIdException, UnauthorizedException;
-
-    /**
-     * This method record the payment of a return transaction to a credit card.
-     * The credit card number validity should be checked. It should follow the luhn algorithm.
-     * The credit card should be registered and its balance will be affected.
-     * This method affects the balance of the system.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @param returnId the id of the return transaction
-     * @param creditCard the credit card number of the customer
-     *
-     * @return  the money returned to the customer
-     *          -1  if the return transaction is not ended,
-     *              if it does not exist,
-     *              if the card is not registered,
-     *              if there is a problem with the db
-     *
-     * @throws InvalidTransactionIdException if the return id is less than or equal to 0
-     * @throws InvalidCreditCardException if the credit card number is empty, null or if luhn algorithm does not
-     *                                      validate the credit card
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
-    public double returnCreditCardPayment(Integer returnId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException;
-
+  //METHODS FOR RETURN PAYMENT MISSING
 }

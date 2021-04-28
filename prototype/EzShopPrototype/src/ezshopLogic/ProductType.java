@@ -18,7 +18,7 @@ public class ProductType {
         this.barcode = barcode;
         this.description = description;
         this.sellPrice = sellPrice;
-        this.quantity = 0;
+        this.setQuantity(0);
         this.notes = notes;
         this.productDiscountRate = 0.0;
         this.aisleID = 0;
@@ -37,6 +37,13 @@ public class ProductType {
         }
         return true;
     }
+    
+    //metodo aggiunto da Gioele per cambiare quantità di un prodotto in inventory serve per le sales
+    
+    public void updateProductQuantity(Integer quantitytorem) {
+    	this.quantity=this.quantity-quantitytorem;
+    }
+    
 
     public Integer getProductID() {
         return this.productID;
@@ -77,5 +84,13 @@ public class ProductType {
 
 	public Double getSellPrice() {
 		return sellPrice;
+	}
+
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
 	}
 }
