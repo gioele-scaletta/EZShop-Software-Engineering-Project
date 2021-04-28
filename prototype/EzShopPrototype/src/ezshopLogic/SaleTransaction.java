@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class SaleTransaction {  
     Integer transactionId;
-    enum State{FAILED, COMPLETED, INPROGRESS};
+    enum State{PAYED, CLOSED, INPROGRESS};
     State state;
     enum PaymentType{CARD, CASH};
     PaymentType pay;
@@ -67,6 +67,10 @@ public class SaleTransaction {
 
     }
 	
+	public void AbortSaleUpdateProductQuantity() {
+		this.listOfProductsSale.entrySet().stream().forEach(e->e.getKey().updateProductQuantity(-e.getValue()));
+
+	}
 
 	public boolean isProductInSale(ProductType product){
 		return this.listOfProductsSale.containsKey(product);
@@ -98,10 +102,13 @@ public class SaleTransaction {
 	 
 
 	public int PointsForSale() {
-			return (int) ((this.currentamount-5)/10);
+		Integer tmp=(int) ((this.currentamount-5)/10);
+			this.transactionCard.updatePoints(tmp);
+			return tmp;
 		}
 
 	public boolean EndSaleUpdateProductQuantity() {
+		this.state=State.CLOSED;
 		this.listOfProductsSale.entrySet().stream().forEach(e->e.getKey().updateProductQuantity(e.getValue()));
 		return false;
 		
@@ -110,7 +117,7 @@ public class SaleTransaction {
 	
 	public double PaySaleAndReturnChange(Double amount, Boolean method) {
 		if(this.currentamount<=amount) {
-    		this.state=State.COMPLETED;
+    		this.state=State.PAYED;
     		if(method) {
     			this.pay=PaymentType.CASH;
     		}else {
@@ -159,6 +166,8 @@ public class SaleTransaction {
 	public void setSaleOperationRecord(BalanceOperation saleOperationRecord) {
 		this.saleOperationRecord = saleOperationRecord;
 	}
+
+	
 
 
 }

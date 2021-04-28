@@ -19,6 +19,8 @@ public class EZShop /*implements EZShopInterface*/{
     private List<User> usersList;
     private List<ProductType> productsList;
 
+    private List<LoyaltyCard> cardsList;
+
     private User loggedIn;
     private Integer latestUserID;
     private Integer latestProductTypeID;
@@ -363,7 +365,7 @@ public class EZShop /*implements EZShopInterface*/{
  
         int sum = sumDigits(cardIntArray);  // step 3
  
-        System.out.println(sum);
+     
  
         if(sum%10==0)  // step 4
         {
@@ -378,6 +380,32 @@ public class EZShop /*implements EZShopInterface*/{
     {
         return Arrays.stream(arr).sum();
     }
+
+    public void newBalanceUpdate(Double amount){
+        //tobeimplemented
+    	
+    }
+
+    public void addBalanceToBalancesList(){
+        //tobimplemented
+    }
+
+    public boolean attachCardToSale(LoyaltyCard customerCard){	
+    	return true;
+    }
+
+    LoyaltyCard getCardById(String customerCard) /*throw*/{
+
+        for (LoyaltyCard e : cardsList ){
+            if(e.getCardId()==customerCard){
+                return e;
+            }
+        }
+        return null;
+       // throw ...
+    }
+
+
 
     //INTERFACE METHODS
     /**
@@ -634,8 +662,8 @@ public class EZShop /*implements EZShopInterface*/{
     	
 
         SaleTransaction sale = getSaleTransactionById(transactionId);
-    	
-    	 RemoveSaleFromSalesList(sale);
+    	sale.AbortSaleUpdateProductQuantity();
+    	RemoveSaleFromSalesList(sale);
     	 return true; //exceptions manca
    
     }
@@ -667,8 +695,8 @@ public class EZShop /*implements EZShopInterface*/{
     }
 
     //LAST METHODS RELATED TO RETURN TRANSACTION MISSING!!
-    
-    
+
+
  // -------------------- FR7 ------------------- //
     // ------------------- ADMIN ------------------ //
     // --------------- SHOP MANAGER --------------- //
@@ -694,9 +722,13 @@ public class EZShop /*implements EZShopInterface*/{
     public double receiveCashPayment(Integer transactionId, double cash) /*throws InvalidTransactionIdException, InvalidPaymentException, UnauthorizedException;*/{
     	
     	SaleTransaction sale=getSaleTransactionById(transactionId);
-    	return sale.PaySaleAndReturnChange(cash, true);
+
+    	Double change=sale.PaySaleAndReturnChange(cash, true);
+            newBalanceUpdate(cash);
+            return change;
+        }
     	
-    }
+    
 
     /**
      * This method record the payment of a sale with credit card. If the card has not enough money the payment should
@@ -721,18 +753,22 @@ public class EZShop /*implements EZShopInterface*/{
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
     public boolean receiveCreditCardPayment(Integer transactionId, String creditCard) /* throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException;*/{
-    	if(isValidCreditCard(creditCard)) {
+    	
     		
     		//Check enogh money on card
     		//store card
     	SaleTransaction sale=getSaleTransactionById(transactionId);
     
+    	if(isValidCreditCard(creditCard)) {
     	sale.PaySaleAndReturnChange(sale.getCurrentAmount(), false);
+        newBalanceUpdate(sale.getCurrentAmount());
     	return true;
     
     	}
+        sale.AbortSaleUpdateProductQuantity();
+    	RemoveSaleFromSalesList(sale);
     	return false;
     }
 
   //METHODS FOR RETURN PAYMENT MISSING
-}
+    }

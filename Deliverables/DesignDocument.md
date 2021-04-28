@@ -60,6 +60,7 @@ class EZShop{
     +ProductType getProductTypeByCode(String productCode)
     +boolean isValidCreditCard(String cardNumber)
     +int sumDigits(int[] arr)
+    +getCardById()
     +void addBalanceToBalancesList()
     +newBalanceUpdate(Double amount)
 
@@ -200,6 +201,8 @@ class SaleTransaction {
     +EndSaleUpdateProductQuantity(): boolean
     +AbortSaleUpdateProductQuantity(): void
     +PaySaleAndReturnChange(Double amount, Boolean method): Double
+    +attachCardToSale(String customerCard)
+
 }
 
 
@@ -220,6 +223,8 @@ class ReturnTransaction {
 class LoyaltyCard{
     -cardId: String
     -cardPoints: Integer
+
+    +updatePoints(Integer points)
 }
 
 
@@ -383,9 +388,9 @@ Customer --> EZShop : customerId
 EZShop -> EZShop : modifyCustomer()
 ```
 
-<Use Case 6>
+<Use Case 6 & 7>
 
-<Scenarios 6.1, 6.2, 6.3, 6.6: Sale with product and sale discounts (for payment part see)>
+<Scenarios 6.1, 6.2, 6.3, 6.4, 6.6, 7.1, (7.4): Full Sale with product discount, sale discounts and loyalty card update>
 
 ```plantuml
 actor "Administrator\nShop Manager\nCashier" as user
@@ -452,12 +457,26 @@ EZShop <-- SaleTransaction : Boolean
 user <-- EZShop : Boolean
 deactivate EZShop
 
+user -> EZShop : computePointsForSale?API?
+activate  EZShop
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : Boolean
+EZShop -> EZShop : getSaleTransactionById()
+EZShop -> SaleTransaction : attachCardToSale()
+EZShop <-- SaleTransaction : Boolean
+user <-- EZShop : Boolean
+deactivate EZShop
+
+
 user -> EZShop : receiveCashPayment()
 activate  EZShop
 EZShop -> User : canManageSaleTransactions()
 EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : PaySaleAndReturnChange()
+SaleTransaction -> LoyaltyCard : PointsForSale()
+LoyaltyCard-> LoyaltyCard : updatePoints()
+SaleTransaction <-- LoyaltyCard : Integer?API?
 EZShop <-- SaleTransaction : Double
 EZShop -> EZShop : BalanceUpdate()
 EZShop -> BalanceOperation : new BalanceOperation()
@@ -468,52 +487,85 @@ deactivate EZShop
 
 ```
 
-<Scenarios 6.4, 6.5, 6.6: Sale with loyalty card and cash payment>
+<Scenarios 6.5: Sale cancelled>
 
 ```plantuml
-participant EZShop as 1
-participant SaleTransaction as 2
-participant ProductType as 3
-participant LoyaltyCard as 4
-''participant SalePayment as 5
-participant BalanceOperation as 6
+actor "Administrator\nShop Manager\nCashier" as user
 
-1->1 : canManageSaleTransactions()
-1->2 : startSaleTransaction()
-2->3 : addProductToSale()
-3->3 : getProductTypeByBarCode()
-3->3 : updateQuantity()
-3-->2 : addProductToSale()
-2->2 : computePointsForSale()
-2->4 : modifyPointsOnCard()
-4-->2 : modifyPointsOnCard()
-2->2 : closeSaleTransaction()
-''4->4 : getSaleTransaction()
-2->2 : receiveCashPayment()
-2->6 : recordBalanceUpdate()
-6-->1 : recordBalanceUpdate()
+autonumber
+
+user -> EZShop : startReturnTransaction()
+activate  EZShop
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : Boolean
+EZShop -> EZShop : getNewSaleTransactionId()
+EZShop -> SaleTransaction : new SaleTransaction()
+EZShop <-- SaleTransaction : SaleTransaction
+EZShop -> EZShop : addSaleToSalesList()
+user <-- EZShop : Integer
+deactivate EZShop
+
+user -> EZShop : addProductToSale()
+activate  EZShop
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : Boolean
+EZShop -> EZShop : getSaleTransactionById()
+EZShop-> EZShop : getProductTypeByCode()
+EZShop -> SaleTransaction : AddUpdateDeleteProductInSale()
+SaleTransaction -> SaleTransaction : isProductInSale()
+SaleTransaction -> ProductType : getSellPrice()
+SaleTransaction <-- ProductType : Double
+EZShop <-- SaleTransaction : Boolean
+user <-- EZShop : Boolean
+deactivate EZShop
+
+user -> EZShop : endSaleTransaction()
+activate  EZShop
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : Boolean
+EZShop -> EZShop : getSaleTransactionById()
+EZShop -> SaleTransaction : EndSaleUpdateProductQuantity()
+SaleTransaction -> ProductType : updateProductQuantity()
+SaleTransaction <-- ProductType : void
+EZShop <-- SaleTransaction : Boolean
+user <-- EZShop : Boolean
+deactivate EZShop
+
+user -> EZShop : deleteSaleTransaction()
+activate  EZShop
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : Boolean
+EZShop -> EZShop : getSaleTransactionById()
+EZShop -> SaleTransaction : AbortSaleUpdateProductQuantity()
+SaleTransaction -> ProductType : updateProductQuantity()
+SaleTransaction <-- ProductType : void
+EZShop <-- SaleTransaction : void
+EZShop->EZShop : RemoveSaleFromSalesList()
+user <-- EZShop : Double
+deactivate EZShop
+
 ```
 
+<Scenarios 7.2:  Invalid credit card number>
 
-<Scenarios 6.5, 7.2, 7.3:  Sale cancelled because of invalid credit card or not enough credit>
 
 ```plantuml
-participant EZShop as 1
-participant SaleTransaction as 2
-participant ProductType as 3
-''participant SalePayment as 5
-
-1->1 : canManageSaleTransactions()
-1->2 : startSaleTransaction()
-2->3 : addProductToSale()
-3->3 : getProductTypeByBarCode()
-3->3 : updateQuantity()
-3-->2 : addProductToSale()
-2->2 : closeSaleTransaction()
-''4->4 : getSaleTransaction()
-2->2 : receiveCreditCardPayment()
-2->1 : deleteSaleTransaction()*
+user -> EZShop : receiveCreditCardPayment()
+activate  EZShop
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : Boolean
+EZShop -> EZShop : isValidCreditCard()
+EZShop -> SaleTransaction : AbortSaleUpdateProductQuantity()
+SaleTransaction -> ProductType : updateProductQuantity()
+SaleTransaction <-- ProductType : void
+EZShop <-- SaleTransaction : void
+EZShop->EZShop : RemoveSaleFromSalesList()
+user <-- EZShop : Boolean
+deactivate EZShop
 ```
+
+<Scenario 7.3 API????????>
+
 
 <Use Case 8 & 10>
 
