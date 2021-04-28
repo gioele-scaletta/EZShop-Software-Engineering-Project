@@ -1,17 +1,15 @@
-# Design Document 
+# Design Document
 
-
-Authors: 
+Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scaletta
 
 Date:
 
 Version:
 
-
 # Contents
 
-- [High level design](#package-diagram)
-- [Low level design](#class-diagram)
+- [High level design](#high-level-design)
+- [Low level design](#low-level-design)
 - [Verification traceability matrix](#verification-traceability-matrix)
 - [Verification sequence diagrams](#verification-sequence-diagrams)
 
@@ -19,9 +17,8 @@ Version:
 
 The design must satisfy the Official Requirements document, notably functional and non functional requirements
 
-# High level design 
+# High level design
 
-<
 The application implements a 3-tiers architecture, where the data layes, the logic layer and the presentation layer are in different packages. The GUI interacts with the EZShop logic layer via the Façade class "EZShop".
 
 ```plantuml
@@ -38,18 +35,15 @@ Data <-> EZShopLogic
 
 # Low level design
 
-<for each package, report class diagram>
-
-<"!" used to signal inconsistency in function parameter>
-
-<"In each class, methods or connections attributes have been separated with a space">
-
 ```plantuml
-left to right direction
-
+note as N
+    The classes is stored persistently
+    in the data layer.
+    Here we decided to model explicitely
+    the relationships with lists and maps.
+end note
 
 class EZShop{
-
     -customersList: List<Customer>
     -ordersList: List<Order>
     -salesList: List<SaleTransaction>
@@ -58,7 +52,6 @@ class EZShop{
     -balanceOperationsList: List<BalanceOperation>
     -usersList: List<User>
     -loggedIn: User
-
 
     +Integer getNewSaleTransactionId();
     +void addSaleToSalesList(SaleTransaction sale)
@@ -70,7 +63,6 @@ class EZShop{
     +getCardById()
     +void addBalanceToBalancesList()
     +newBalanceUpdate(Double amount)
-
 
     +void reset();
 
@@ -90,7 +82,7 @@ class EZShop{
     +ProductType getProductTypeByBarCode(String barCode)
     +boolean updateQuantity(Integer productId, int toBeAdded)
     +boolean updatePosition(Integer productId, String newPos)
-    
+
     +List<Order> getAllOrders()
     +Integer issueReorder(String productCode, int quantity, double pricePerUnit)!
     +Integer payOrderFor(String productCode, int quantity, double pricePerUnit)!
@@ -131,7 +123,6 @@ class EZShop{
     +double computeBalance();
 }
 
-
 class User{
     -role: String
     -username: String
@@ -148,38 +139,7 @@ class User{
     +canManageSaleTransactions(): boolean
     +canManagePayments(): boolean
     +canManageAccounting(): boolean
-
 }
-
-
-class ProductType{
-    -productId: Integer
-    -barcode: String
-    -description: String
-    -sellPrice: Double
-    -quantity: Integer
-    -productDiscountRate: Double
-    -notes: String
-    -AisleID: Integer
-    -RackID: String
-    -LevelID: Integer
-
-    isValidBarcode(String barcode): static boolean
-    updateProductQuantity(Integer quantitytorem): void
-}
-
-
-class Order {
-    -orderId: Integer
-    -pricePerUnit: Double
-    -productCode: String
-    -quantity: Integer
-    -status: enum Status{PAYED, ISSUED, ORDERED, COMPLETED}
-
-    -orderOperationRecord: BalanceOperation
-    -product: ProductType
-}
-
 
 class Customer{
     -customerName: String
@@ -188,6 +148,12 @@ class Customer{
     -customerCard: LoyaltyCard
 }
 
+class LoyaltyCard{
+    -cardId: String
+    -cardPoints: Integer
+
+    +updatePoints(Integer points)
+}
 
 class SaleTransaction {
     -transactionId: Integer
@@ -209,9 +175,7 @@ class SaleTransaction {
     +AbortSaleUpdateProductQuantity(): void
     +PaySaleAndReturnChange(Double amount, Boolean method): Double
     +attachCardToSale(String customerCard)
-
 }
-
 
 class ReturnTransaction {
     -returnId: Integer
@@ -226,14 +190,16 @@ class ReturnTransaction {
     +addProductToReturn(ProductType product, Integer quantity): boolean
 }
 
+class Order {
+    -orderId: Integer
+    -pricePerUnit: Double
+    -productCode: String
+    -quantity: Integer
+    -status: enum Status{PAYED, ISSUED, ORDERED, COMPLETED}
 
-class LoyaltyCard{
-    -cardId: String
-    -cardPoints: Integer
-
-    +updatePoints(Integer points)
+    -orderOperationRecord: BalanceOperation
+    -product: ProductType
 }
-
 
 class BalanceOperation {
     -balanceID: Integer
@@ -242,41 +208,45 @@ class BalanceOperation {
     -date: LocalDate
 }
 
+class ProductType{
+    -productId: Integer
+    -barcode: String
+    -description: String
+    -sellPrice: Double
+    -quantity: Integer
+    -productDiscountRate: Double
+    -notes: String
+    -AisleID: Integer
+    -RackID: String
+    -LevelID: Integer
 
-EZShop ->"*" Order
-EZShop ->"*" Customer
-EZShop ->"*" SaleTransaction
-EZShop ->"*" ReturnTransaction
-EZShop ->"*" ProductType
-EZShop ->"*" User
-EZShop ->"*" BalanceOperation
+    isValidBarcode(String barcode): static boolean
+    updateProductQuantity(Integer quantitytorem): void
+}
 
+User "*" <- EZShop
+Customer "*" <- EZShop
+EZShop --> "*" SaleTransaction
+EZShop --> "*" ReturnTransaction
+EZShop --> "*" Order
+EZShop --> "*" ProductType
+EZShop --> "*" BalanceOperation
 
-Order "*"--> ProductType
-Customer -->"0..1" LoyaltyCard
+Customer --> "0..1" LoyaltyCard
+SaleTransaction "1..*" --> "0..1" LoyaltyCard
 
+SaleTransaction "1" <- "0..*" ReturnTransaction
 
-SaleTransaction "1...*" --> "0..1" LoyaltyCard
 SaleTransaction "*" --> "*" ProductType
-ReturnTransaction "0...*" --> "1" SaleTransaction
-ReturnTransaction "0...*" --> "1...*" ProductType
+ReturnTransaction "0..*" --> "1..*" ProductType
+Order "*" --> ProductType
 
-
-SaleTransaction --> BalanceOperation
-ReturnTransaction --> BalanceOperation
-Order --> BalanceOperation
-
-note as N
-The classes is stored persistently in the data layer.\n
-Here we decided to model explicitely the relationships with lists and maps.\n
-end note
+SaleTransaction ---> BalanceOperation
+ReturnTransaction ---> BalanceOperation
+Order ---> BalanceOperation
 ```
 
-
-
 # Verification traceability matrix
-
-
 
 |FR ID|EZShop|Customer|LoyaltyCard|SaleTransaction|BalanceOperation|Order|ProductType|User|ReturnTransaction|
 |-------------| :-------------: | :-------------: | :-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
@@ -288,12 +258,11 @@ end note
 | FR7 | X |   |   | X | X |   |   | X | X |
 | FR8 | X |   |   |   | X |   |   | X |   |
 
-# Verification sequence diagrams 
-\<select key scenarios from the requirement document. For each of them define a sequence diagram showing that the scenario can be implemented by the classes and methods in the design>
+# Verification sequence diagrams
 
-### Use Case 1
+## Use Case 1
 
-##### Scenario 1.1 - Create Product Type X
+### Scenario 1.1 - Create Product Type X
 
 ```plantuml
 participant GUI as 1
@@ -307,7 +276,7 @@ participant ProductType as 4
 2->2 : addProductToInventory()
 ```
 
-##### Scenario 1.3 - Modify Product Type pricePerUnit
+### Scenario 1.3 - Modify Product Type pricePerUnit
 
 ```plantuml
 participant GUI as 1
@@ -323,9 +292,10 @@ participant ProductType as 4
 2->4 : setSellPrice()
 2->4 : setNotes()
 ```
-Use Case 2>
 
-<Scenario 2.1 - Create user and define rights>
+## Use Case 2
+
+### Scenario 2.1 - Create user and define rights
 
 ```plantuml
 participant GUI as 1
@@ -337,7 +307,7 @@ participant User as 3
 2->2 : addUserToUsersList()
 ```
 
-<Scenario 2.3 - Create user and define rights>
+### Scenario 2.3 - Create user and define rights
 
 ```plantuml
 participant GUI as 1
@@ -350,9 +320,9 @@ participant User as 3
 2->3 : setRole()
 ```
 
-<Use Case 3>
+## Use Case 3
 
-<Scenario 3.1 - Order od Product Type Issued>
+### Scenario 3.1 - Order od Product Type Issued
 
 ```plantuml
 participant GUI as 1
@@ -367,7 +337,7 @@ participant Order as 4
 2->2 : addOrderToOrdersList()
 ```
 
-<Scenario 3.3 - Record order of ProductType arrival>
+### Scenario 3.3 - Record order of ProductType arrival
 
 ```plantuml
 participant GUI as 1
@@ -387,9 +357,9 @@ participant ProductType as 5
 2->5 : setNotes()
 ```
 
-<Use Case 4>
+## Use Case 4
 
-<Scenario 4.2: Attach card to customer record>
+### Scenario 4.2: Attach card to customer record
 
 ```plantuml
 EZShop -> EZShop : createCard()
@@ -399,7 +369,7 @@ Customer --> EZShop : customerId
 EZShop -> EZShop : attachCardToCustomer()
 ```
 
-<Scenario 4.2: Detach card from customer record>
+### Scenario 4.2: Detach card from customer record
 
 ```plantuml
 EZShop ->Customer : getCustomer()
@@ -410,9 +380,9 @@ Customer --> EZShop : customerName
 EZShop -> EZShop : modifyCustomer()
 ```
 
-<Use Case 6 & 7>
+## Use Case 6 & 7
 
-<Scenarios 6.1, 6.2, 6.3, 6.4, 6.6, 7.1, (7.4): Full Sale with product discount, sale discounts and loyalty card update>
+### Scenarios 6.1, 6.2, 6.3, 6.4, 6.6, 7.1, (7.4): Full Sale with product discount, sale discounts and loyalty card update
 
 ```plantuml
 actor "Administrator\nShop Manager\nCashier" as user
@@ -509,7 +479,7 @@ deactivate EZShop
 
 ```
 
-<Scenarios 6.5: Sale cancelled>
+### Scenarios 6.5: Sale cancelled
 
 ```plantuml
 actor "Administrator\nShop Manager\nCashier" as user
@@ -568,8 +538,7 @@ deactivate EZShop
 
 ```
 
-<Scenarios 7.2:  Invalid credit card number>
-
+### Scenarios 7.2:  Invalid credit card number
 
 ```plantuml
 user -> EZShop : receiveCreditCardPayment()
@@ -586,13 +555,11 @@ user <-- EZShop : Boolean
 deactivate EZShop
 ```
 
-<Scenario 7.3 API????????>
+### Scenario 7.3 API????????
 
+## Use Case 8 & 10
 
-
-<Use Case 8 & 10>
-
-<Scenarios 8.1 & 10.1: Return transaction of product type X completed, credit card>
+### Scenarios 8.1 & 10.1: Return transaction of product type X completed, credit card
 
 ```plantuml
 actor "Administrator\nShop Manager\nCashier" as user
@@ -640,7 +607,7 @@ user <-- EZShop : return boolean
 deactivate EZShop
 ```
 
-<Scenarios 8.2 & 10.2: Return transaction of product type X completed, cash>
+### Scenarios 8.2 & 10.2: Return transaction of product type X completed, cash
 
 ```plantuml
 actor "Administrator\nShop Manager\nCashier" as user
@@ -687,9 +654,9 @@ user <-- EZShop: return boolean
 deactivate EZShop
 ```
 
-<Use Case 9>
+## Use Case 9
 
-<Scenario 9.1: List credits and debits>
+### Scenario 9.1: List credits and debits
 
 ```plantuml
 actor "Administrator\nShop Manager" as user
