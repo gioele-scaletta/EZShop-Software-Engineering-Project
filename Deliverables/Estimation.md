@@ -42,7 +42,11 @@ Version:
 |Integration|  15 |
 
 ```plantuml
-printscale daily
+ganttscale daily
+scale 1.5
+
+saturday are closed
+sunday are closed
 Project starts the 5th of april 2021
 [Requirement Document] as [TASK1] lasts 2 days
 [TASK1] is colored in Red
@@ -59,24 +63,31 @@ Project starts the 5th of april 2021
 [GUI]  starts the 6th of april 2021 and lasts 3 days and is colored in Red
 
 [Usability study] lasts 1 day and starts the 6th of april 2021
-[Development] lasts 2 day
-[GUI V&V] lasts 1 day and starts the 7th of april 2021
-
-[Usability study]->[Development] 
-[Usability study]->[GUI V&V] 
-
-
-[Design document]  starts the 6th of april 2021 and lasts 2 days and is colored in Red
-
-[Usability study] lasts 1 day and starts the 6th of april 2021
-[Development] lasts 1 day
-[GUI V&V] lasts 1 day
+[Development] lasts 2 days and starts the 7th of april 2021
+[GUI V&V] lasts 1 day and starts the 8th of april 2021
 
 [Usability study]->[Development] 
 [Usability study]->[GUI V&V] 
 
 
 
+[Design document]  starts the 8th of april 2021 and lasts 2 days and is colored in Red
+
+[High level] lasts 1 day and starts the 8th of april 2021
+[Low level] lasts 2 days and starts the 8th of april 2021
+[Design V&V] lasts 1 day and starts the 9th of april 2021
+
+[High level]->[Design V&V]
+
+
+[Coding]  starts the 12th of april 2021 and lasts 3 days and is colored in Red
+
+[Java Classes] lasts 3 day and starts the 12th of april 2021
+[DB layer] lasts 2 days and starts the 13th of april 2021
+
+[Testing]  starts the 15th of april 2021 and lasts 2 days and is colored in Red
+
+[Integration] starts the 16th of april 2021 and lasts 1 day and is colored in Red 
 
 
 
