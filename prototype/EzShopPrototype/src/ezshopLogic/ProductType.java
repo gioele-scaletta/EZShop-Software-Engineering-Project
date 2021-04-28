@@ -38,8 +38,7 @@ public class ProductType {
         return true;
     }
     
-    //metodo aggiunto da Gioele per cambiare quantità di un prodotto in inventory serve per le sales
-    
+    //metodo aggiunto da Gioele per cambiare quantitï¿½ di un prodotto in inventory serve per le sales
     public void updateProductQuantity(Integer quantitytorem) {
     	this.quantity=this.quantity-quantitytorem;
     }

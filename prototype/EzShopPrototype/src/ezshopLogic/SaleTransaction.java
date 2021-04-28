@@ -40,7 +40,7 @@ public class SaleTransaction {
 			}
 		 }
     	
-    	 if(this.listOfProductsSale.containsKey(product)){
+    	 if(isProductInSale(product)){
     		 this.listOfProductsSale.put(product, this.listOfProductsSale.get(product) + amount);
              this.currentamount=this.currentamount+amount*product.getSellPrice();
              if(this.currentamount==0) {
@@ -67,6 +67,11 @@ public class SaleTransaction {
 
     }
 	
+
+	public boolean isProductInSale(ProductType product){
+		return this.listOfProductsSale.containsKey(product);
+	}
+
 	 public boolean ApplyDiscountToSaleProduct(Double disc, ProductType product) {
 		 if (disc <0 || disc >1) {
 			 return false;
@@ -103,6 +108,20 @@ public class SaleTransaction {
 		//exceptions amnca come al solito
 	}
 	
+	public double PaySaleAndReturnChange(Double amount, Boolean method) {
+		if(this.currentamount<=amount) {
+    		this.state=State.COMPLETED;
+    		if(method) {
+    			this.pay=PaymentType.CASH;
+    		}else {
+    			this.pay=PaymentType.CARD;
+    		}
+    		return amount-this.currentamount;
+    	}
+	
+		return -1;
+	
+	}
 	
 	public Integer getTransactionId() {
 		return transactionId;
@@ -141,21 +160,5 @@ public class SaleTransaction {
 		this.saleOperationRecord = saleOperationRecord;
 	}
 
-	public double PaySaleAndReturnChange(Double cash, Boolean method) {
-		if(this.currentamount<=cash) {
-    		this.state=State.COMPLETED;
-    		if(method) {
-    			this.pay=PaymentType.CASH;
-    		}else {
-    			this.pay=PaymentType.CARD;
-    		}
-    		return cash-this.currentamount;
-    	}
-	
-		return -1;
-	
-	}
-
-	
 
 }

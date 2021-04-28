@@ -339,7 +339,7 @@ public class EZShop /*implements EZShopInterface*/{
        // throw ...
     }
     
-    public static boolean isValidCreditCard(String cardNumber)
+    public boolean isValidCreditCard(String cardNumber)
     {
         // int array for processing the cardNumber
         int[] cardIntArray=new int[cardNumber.length()];
