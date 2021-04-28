@@ -1,54 +1,4 @@
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
+
 # Project Estimation  
 Authors:
 Date:
@@ -62,16 +12,72 @@ Version:
 ### 
 |             | Estimate                        |             
 | ----------- | ------------------------------- |  
-| NC =  Estimated number of classes to be developed   |                             |             
-|  A = Estimated average size per class, in LOC       |                            | 
-| S = Estimated size of project, in LOC (= NC * A) | |
-| E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)  |                                      |   
-| C = Estimated cost, in euro (here use 1 person hour cost = 30 euro) | | 
-| Estimated calendar time, in calendar weeks (Assume team of 4 people, 8 hours per day, 5 days per week ) |                    |               
+| NC =  Estimated number of classes to be developed   |            20                |             
+|  A = Estimated average size per class, in LOC       |           150                 | 
+| S = Estimated size of project, in LOC (= NC * A) | 3000 |
+| E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)  |             300 ph  |   
+| C = Estimated cost, in euro (here use 1 person hour cost = 30 euro) | 9000 | 
+| Estimated calendar time, in calendar weeks (Assume team of 4 people, 8 hours per day, 5 days per week ) |           1,875 weeks         |               
 # Estimate by activity decomposition
 ### 
 |         Activity name    | Estimated effort (person hours)   |             
 | ----------- | ------------------------------- | 
-| | |
-###
-Insert here Gantt chart with above activities
+|  | |
+| Requirement Document | 55 |
+| &ensp;&ensp;  Concept development ||
+| &ensp;&ensp;  Document drafting ||
+| &ensp;&ensp;  Document V&V ||
+| GUI | 65 |
+| &ensp; &ensp;  Usability study||
+| &ensp; &ensp;  Development ||
+| &ensp;&ensp;  GUI V&V ||
+|Design document| 50 |
+| &ensp; &ensp;  High level||
+| &ensp; &ensp; Low level||
+| &ensp; &ensp;  Design V&V ||
+|Coding| 85 |
+|&ensp;&ensp;Java Classes||
+|&ensp;&ensp;DB layer||
+|Testing| 30 |
+|Integration|  15 |
+
+```plantuml
+printscale daily
+Project starts the 5th of april 2021
+[Requirement Document] as [TASK1] lasts 2 days
+[TASK1] is colored in Red
+
+[Concept development] lasts 1 day
+[Document drafting] lasts 1 day
+[Document V&V] lasts 1 day
+
+[Concept development]->[Document drafting] 
+[Concept development]->[Document V&V] 
+
+
+
+[GUI]  starts the 6th of april 2021 and lasts 3 days and is colored in Red
+
+[Usability study] lasts 1 day and starts the 6th of april 2021
+[Development] lasts 2 day
+[GUI V&V] lasts 1 day and starts the 7th of april 2021
+
+[Usability study]->[Development] 
+[Usability study]->[GUI V&V] 
+
+
+[Design document]  starts the 6th of april 2021 and lasts 2 days and is colored in Red
+
+[Usability study] lasts 1 day and starts the 6th of april 2021
+[Development] lasts 1 day
+[GUI V&V] lasts 1 day
+
+[Usability study]->[Development] 
+[Usability study]->[GUI V&V] 
+
+
+
+
+
+
+```
