@@ -212,11 +212,11 @@ class ReturnTransaction {
     -paymentType: enum PaymentType{CARD, CASH}
     -currentamount: Double
 
-    -originalTransaction: SaleTransaction
-    -retOperationRecord: BalanceOperation
+    -saleTransaction: SaleTransaction
+    -returnOperationRecord: BalanceOperation
     -listOfProductsReturn: Map<ProductType, Integer>
 
-    +addProduct(ProductType product, Integer quantity): boolean
+    +addProductToReturn(ProductType product, Integer quantity): boolean
 }
 
 
@@ -577,7 +577,7 @@ deactivate EZShop
 
 <Use Case 8 & 10>
 
-<Scenarios 8.1 & 10.1>
+<Scenarios 8.1 & 10.1: Return transaction of product type X completed, credit card>
 
 ```plantuml
 actor "Administrator\nShop Manager\nCashier" as user
@@ -586,42 +586,46 @@ autonumber
 user -> EZShop : startReturnTransaction()
 activate  EZShop
 EZShop -> User : canManageSaleTransactions()
-EZShop <-- User : return canManageSaleTransactions()
-EZShop -> EZShop : searchTransactionById()
+EZShop <-- User : return boolean
+EZShop -> EZShop : getSaleTransactionById()
 EZShop -> ReturnTransaction : new ReturnTransaction()
-EZShop <-- ReturnTransaction : return ReturnTransaction()
-user <-- EZShop : return startReturnTransaction()
+EZShop <-- ReturnTransaction : return ReturnTransaction
+user <-- EZShop : return returnTransactionId
 deactivate EZShop
 
 user -> EZShop : returnProduct()
 activate EZShop
-EZShop -> EZShop : searchProductByCode()
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : return boolean
+EZShop -> EZShop : getSaleTransactionById()
+EZShop -> EZShop : getProductTypeByCode()
 EZShop -> TransactionSale : isProductInSale()
-EZShop <-- TransactionSale : return isProductInSale()
-EZShop -> ReturnTransaction : addProduct()
-EZShop <-- ReturnTransaction : return addProduct()
-EZShop -> ProductType : updateQuantity()
-EZShop <-- ProductType : return updateQuantity()
-user <-- EZShop : return returnProduct()
+EZShop <-- TransactionSale : return boolean
+EZShop -> ReturnTransaction : addProductToReturn()
+EZShop <-- ReturnTransaction : return boolean
+user <-- EZShop : return boolean
 deactivate EZShop
 
 user -> EZShop : returnCreditCardPayment()
 activate EZShop
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : return boolean
 EZShop -> EZShop : isValidCreditCard()
-note right: Luhn algorithm
 EZShop -> ReturnTransaction : getAmount()
-EZShop <-- ReturnTransaction : return getAmount()
-user <-- EZShop
+EZShop <-- ReturnTransaction : return amount
+user <-- EZShop : return amount
 deactivate EZShop
 
 user -> EZShop : endReturnTransaction()
 activate EZShop
-EZShop -> EZShop : recordBalanceUpdate()
-user <-- EZShop
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : return boolean
+EZShop -> EZShop
+user <-- EZShop : return boolean
 deactivate EZShop
 ```
 
-<Scenarios 8.2 & 10.2>
+<Scenarios 8.2 & 10.2: Return transaction of product type X completed, cash>
 
 ```plantuml
 actor "Administrator\nShop Manager\nCashier" as user
@@ -630,42 +634,47 @@ autonumber
 user -> EZShop : startReturnTransaction()
 activate  EZShop
 EZShop -> User : canManageSaleTransactions()
-EZShop <-- User : return canManageSaleTransactions()
-EZShop -> EZShop : searchTransactionById()
+EZShop <-- User : return boolean
+EZShop -> EZShop : getSaleTransactionById()
 EZShop -> ReturnTransaction : new ReturnTransaction()
-EZShop <-- ReturnTransaction : return ReturnTransaction()
-user <-- EZShop : return startReturnTransaction()
+EZShop <-- ReturnTransaction : return ReturnTransaction
+user <-- EZShop : return returnTransactionId
 deactivate EZShop
 
 user -> EZShop : returnProduct()
 activate EZShop
-EZShop -> EZShop : searchProductByCode()
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : return boolean
+EZShop -> EZShop : getSaleTransactionById()
+EZShop -> EZShop : getProductTypeByCode()
 EZShop -> TransactionSale : isProductInSale()
-EZShop <-- TransactionSale : return isProductInSale()
-EZShop -> ReturnTransaction : addProduct()
-EZShop <-- ReturnTransaction : return addProduct()
-EZShop -> ProductType : updateQuantity()
-EZShop <-- ProductType : return updateQuantity()
-user <-- EZShop : return returnProduct()
+EZShop <-- TransactionSale : return boolean
+EZShop -> ReturnTransaction : addProductToReturn()
+EZShop <-- ReturnTransaction : return boolean
+user <-- EZShop : return boolean
 deactivate EZShop
 
 user -> EZShop : returnCashPayment()
 activate EZShop
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : return boolean
 EZShop -> ReturnTransaction : getAmount()
-EZShop <-- ReturnTransaction : return getAmount()
-user <-- EZShop
+EZShop <-- ReturnTransaction : return amount
+user <-- EZShop : return amount
 deactivate EZShop
 
 user -> EZShop : endReturnTransaction()
 activate EZShop
-EZShop -> EZShop : recordBalanceUpdate()
-user <-- EZShop
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : return boolean
+EZShop -> EZShop
+user <-- EZShop: return boolean
 deactivate EZShop
 ```
 
 <Use Case 9>
 
-<Scenario 9.1>
+<Scenario 9.1: List credits and debits>
 
 ```plantuml
 actor "Administrator\nShop Manager" as user
@@ -674,12 +683,11 @@ autonumber
 user -> EZShop : getCreditsAndDebits()
 activate EZShop
 EZShop -> User : canManageAccounting()
-EZShop <-- User : return canManageAccounting()
-EZShop -> EZShop : getBalanceOperationsList()
-loop for-each BalanceOperation
+EZShop <-- User : return boolean
+loop forEach BalanceOperation in balanceOperationsList
     EZShop -> BalanceOperation : getDate()
     EZShop <-- BalanceOperation : return LocalDate
 end
-user <- EZShop : return getCreditsAndDebits()
+user <- EZShop : return List<BalanceOperation>
 deactivate EZShop
 ```
