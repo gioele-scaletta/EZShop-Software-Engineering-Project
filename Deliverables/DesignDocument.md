@@ -264,7 +264,7 @@ Order --> BalanceOperation
 | FR1 | X |   |   |   |   |   |   | X |   |
 | FR3 | X |   |   |   |   |   | X |   |   |
 | FR4 | X |   |   |   |   | X | X |   |   |
-| FR5 |   |   |   |   |   |   |   |   |   |
+| FR5 | X | X | X |   |   |   |   |   |   |
 | FR6 | X |   | X | X | X |   | X | X | X |
 | FR7 | X |   |   | X | X |   |   | X | X |
 | FR8 | X |   |   |   | X |   |   | X |   |
