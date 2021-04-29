@@ -408,7 +408,7 @@ EZShop -> EZShop : modifyCustomer()
 ### Scenarios 6.1, 6.2, 6.3, 6.4, 6.6, 7.1, (7.4): Full Sale with product discount, sale discounts and loyalty card update
 
 ```plantuml
-scale 0.98
+scale 0.92
 
 actor "Administrator\nShop Manager\nCashier" as user
 
