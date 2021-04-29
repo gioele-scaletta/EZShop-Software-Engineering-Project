@@ -37,7 +37,7 @@ Data <-> EZShopLogic
 
 ```plantuml
 note as N
-    The classes is stored persistently
+    The classes are stored persistently
     in the data layer.
     Here we decided to model explicitely
     the relationships with lists and maps.
@@ -387,6 +387,7 @@ EZShop -> EZShop : modifyCustomer()
 ### Scenarios 6.1, 6.2, 6.3, 6.4, 6.6, 7.1, (7.4): Full Sale with product discount, sale discounts and loyalty card update
 
 ```plantuml
+''scale 0.8
 actor "Administrator\nShop Manager\nCashier" as user
 
 autonumber
@@ -404,8 +405,8 @@ deactivate EZShop
 
 user -> EZShop : addProductToSale()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
-EZShop <-- User : Boolean
+'EZShop -> User : canManageSaleTransactions()
+'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop-> EZShop : getProductTypeByCode()
 EZShop -> SaleTransaction : AddUpdateDeleteProductInSale()
@@ -418,8 +419,8 @@ deactivate EZShop
 
 user -> EZShop : applyDiscountRateToProduct()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
-EZShop <-- User : Boolean
+'EZShop -> User : canManageSaleTransactions()
+'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop-> EZShop : getProductTypeByCode()
 EZShop -> SaleTransaction : ApplyDiscountToSaleProduct()
@@ -431,8 +432,8 @@ deactivate EZShop
 
 user -> EZShop : applyDiscountRateToSale()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
-EZShop <-- User : Boolean
+'EZShop -> User : canManageSaleTransactions()
+'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : ApplyDiscountToSaleAll()
 EZShop <-- SaleTransaction : Boolean
@@ -441,20 +442,20 @@ deactivate EZShop
 
 user -> EZShop : endSaleTransaction()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
-EZShop <-- User : Boolean
+'EZShop -> User : canManageSaleTransactions()
+'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : EndSaleUpdateProductQuantity()
 SaleTransaction -> ProductType : updateProductQuantity()
-SaleTransaction <-- ProductType : void
+SaleTransaction <-- ProductType 
 EZShop <-- SaleTransaction : Boolean
 user <-- EZShop : Boolean
 deactivate EZShop
 
 user -> EZShop : computePointsForSale?API?
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
-EZShop <-- User : Boolean
+'EZShop -> User : canManageSaleTransactions()
+'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : attachCardToSale()
 EZShop <-- SaleTransaction : Boolean
@@ -464,13 +465,13 @@ deactivate EZShop
 
 user -> EZShop : receiveCashPayment()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
-EZShop <-- User : Boolean
+'EZShop -> User : canManageSaleTransactions()
+'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : PaySaleAndReturnChange()
 SaleTransaction -> LoyaltyCard : PointsForSale()
 LoyaltyCard-> LoyaltyCard : updatePoints()
-SaleTransaction <-- LoyaltyCard : Integer?API?
+SaleTransaction <-- LoyaltyCard : Integer
 EZShop <-- SaleTransaction : Double
 EZShop -> EZShop : BalanceUpdate()
 EZShop -> BalanceOperation : new BalanceOperation()
@@ -480,6 +481,14 @@ user <-- EZShop : Double
 deactivate EZShop
 
 ```
+
+```plantuml
+note as N
+    In this sequence diagram and in the next one, the method canManageSaleTransactions() has been represented only in the first API function call for the sake of readability.
+end note
+
+```
+
 
 ### Scenarios 6.5: Sale cancelled
 
@@ -501,8 +510,8 @@ deactivate EZShop
 
 user -> EZShop : addProductToSale()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
-EZShop <-- User : Boolean
+'EZShop -> User : canManageSaleTransactions()
+'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop-> EZShop : getProductTypeByCode()
 EZShop -> SaleTransaction : AddUpdateDeleteProductInSale()
@@ -515,25 +524,25 @@ deactivate EZShop
 
 user -> EZShop : endSaleTransaction()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
-EZShop <-- User : Boolean
+'EZShop -> User : canManageSaleTransactions()
+'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : EndSaleUpdateProductQuantity()
 SaleTransaction -> ProductType : updateProductQuantity()
-SaleTransaction <-- ProductType : void
+SaleTransaction <-- ProductType 
 EZShop <-- SaleTransaction : Boolean
 user <-- EZShop : Boolean
 deactivate EZShop
 
 user -> EZShop : deleteSaleTransaction()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
-EZShop <-- User : Boolean
+'EZShop -> User : canManageSaleTransactions()
+'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : AbortSaleUpdateProductQuantity()
 SaleTransaction -> ProductType : updateProductQuantity()
-SaleTransaction <-- ProductType : void
-EZShop <-- SaleTransaction : void
+SaleTransaction <-- ProductType 
+EZShop <-- SaleTransaction 
 EZShop->EZShop : RemoveSaleFromSalesList()
 user <-- EZShop : Double
 deactivate EZShop
@@ -550,8 +559,8 @@ EZShop <-- User : Boolean
 EZShop -> EZShop : isValidCreditCard()
 EZShop -> SaleTransaction : AbortSaleUpdateProductQuantity()
 SaleTransaction -> ProductType : updateProductQuantity()
-SaleTransaction <-- ProductType : void
-EZShop <-- SaleTransaction : void
+SaleTransaction <-- ProductType
+EZShop <-- SaleTransaction 
 EZShop->EZShop : RemoveSaleFromSalesList()
 user <-- EZShop : Boolean
 deactivate EZShop
