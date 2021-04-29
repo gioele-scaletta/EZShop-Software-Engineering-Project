@@ -42,11 +42,7 @@ it.polito.ezshop.exceptions <-- it.polito.ezshop.model
 
 ```plantuml
 
-note left of it.polito.ezshop.data 
-    All classes in MODEL and DATA are stored persistently.
-    Here we decided to model explicitely
-    the relationships with lists and maps.
-end note
+
 
 package it.polito.ezshop.data{
 
