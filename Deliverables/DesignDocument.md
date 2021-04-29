@@ -43,186 +43,188 @@ note as N
     the relationships with lists and maps.
 end note
 
-class EZShop{
-    -customersList: List<Customer>
-    -ordersList: List<Order>
-    -salesList: List<SaleTransaction>
-    -returnsList: List<ReturnTransaction>
-    -productsList: List<ProductType>
-    -balanceOperationsList: List<BalanceOperation>
-    -usersList: List<User>
-    -loggedIn: User
-
-    +Integer getNewSaleTransactionId();
-    +void addSaleToSalesList(SaleTransaction sale)
-    +void RemoveSaleFromSalesList(SaleTransaction sale)
-    +SaleTransaction getSaleTransactionById(Integer transactionId)
-    +ProductType getProductTypeByCode(String productCode)
-    +boolean isValidCreditCard(String cardNumber)
-    +int sumDigits(int[] arr)
-    +getCardById()
-    +void addBalanceToBalancesList()
-    +newBalanceUpdate(Double amount)
-
-    +void reset();
-
-    +List<User> getAllUsers()
-    +User login(String username, String password)
-    +boolean logout();
-    +Integer createUser(String username, String password, String role)
-    +boolean deleteUser(Integer id)
-    +User getUser(Integer id)
-    +boolean updateUserRights(Integer id, String role)
-
-    +List<ProductType> getAllProductTypes()
-    +List<ProductType> getProductTypesByDescription(String description)
-    +Integer createProductType(String description, String productCode, double pricePerUnit, String note)
-    +boolean updateProduct(Integer id, String newDescription, String newCode, double newPrice, String newNote)
-    +boolean deleteProductType(Integer id)
-    +ProductType getProductTypeByBarCode(String barCode)
-    +boolean updateQuantity(Integer productId, int toBeAdded)
-    +boolean updatePosition(Integer productId, String newPos)
-
-    +List<Order> getAllOrders()
-    +Integer issueReorder(String productCode, int quantity, double pricePerUnit)!
-    +Integer payOrderFor(String productCode, int quantity, double pricePerUnit)!
-    +boolean payOrder(Integer orderId)
-    +boolean recordOrderArrival(Integer orderId)
-
-    +List<Customer> getAllCustomers()
-    +Integer defineCustomer(String customerName)
-    +boolean modifyCustomer(Integer id, String newCustomerName, String newCustomerCard)
-    +boolean deleteCustomer(Integer id)
-    +Customer getCustomer(Integer id)
-    +String createCard();
-    +boolean attachCardToCustomer(String customerCard, Integer customerId)
-    +boolean modifyPointsOnCard(String customerCard, int pointsToBeAdded)
-
-    +Integer startSaleTransaction();
-    +boolean addProductToSale(Integer transactionId, String productCode, int amount)!
-    +boolean deleteProductFromSale(Integer transactionId, String productCode, int amount)!
-    +boolean applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate)!
-    +boolean applyDiscountRateToSale(Integer transactionId, double discountRate)
-    +int computePointsForSale(Integer transactionId)
-    +boolean closeSaleTransaction(Integer transactionId)
-    +boolean deleteSaleTicket(Integer ticketNumber)!
-    +Ticket getSaleTicket(Integer transactionId)!
-
-    +Integer startReturnTransaction(Integer ticketNumber)!
-    +boolean returnProduct(Integer returnId, String productCode, int amount)
-    +boolean endReturnTransaction(Integer returnId, boolean commit)
-    +boolean deleteReturnTransaction(Integer returnId)
-
-    +double receiveCashPayment(Integer ticketNumber, double cash)  
-    +boolean receiveCreditCardPayment(Integer ticketNumber, String creditCard)
-    +double returnCashPayment(Integer returnId)
-    +double returnCreditCardPayment(Integer returnId, String creditCard)
-
-    +List<BalanceOperation> getCreditsAndDebits(LocalDate from, LocalDate to)
-    +boolean recordBalanceUpdate(double toBeAdded)
-    +double computeBalance();
+interface EZShopInterface {
+    .. Reset ..
+    + reset(): void
+    .. FR1 ..
+    + createUser(String username, String password, String role): Integer
+    + deleteUser(Integer id): boolean
+    + getAllUsers(): List<User>
+    + getUser(Integer id): User
+    + updateUserRights(Integer id, String role): boolean
+    + login(String username, String password): User
+    + logout(): boolean
+    .. FR3 ..
+    + createProductType(String description, String productCode, double pricePerUnit, String note): Integer
+    + updateProduct(Integer id, String newDescription, String newCode, double newPrice, String newNote): boolean
+    + deleteProductType(Integer id): boolean
+    + getAllProductTypes(): List<ProductType>
+    + getProductTypeByBarCode(String barCode): ProductType
+    + getProductTypesByDescription(String description): List<ProductType>
+    .. FR4 ..
+    + updateQuantity(Integer productId, int toBeAdded): boolean
+    + updatePosition(Integer productId, String newPos): boolean
+    + issueOrder(String productCode, int quantity, double pricePerUnit): Integer
+    + payOrderFor(String productCode, int quantity, double pricePerUnit): Integer
+    + payOrder(Integer orderId): boolean
+    + recordOrderArrival(Integer orderId): boolean
+    + getAllOrders(): List<Order>
+    .. FR5 ..
+    + defineCustomer(String customerName): Integer
+    + modifyCustomer(Integer id, String newCustomerName, String newCustomerCard): boolean
+    + deleteCustomer(Integer id): boolean
+    + getCustomer(Integer id): Customer
+    + getAllCustomers(): List<Customer>
+    + createCard(): String
+    + attachCardToCustomer(String customerCard, Integer customerId): boolean
+    + modifyPointsOnCard(String customerCard, int pointsToBeAdded): boolean
+    .. FR6 ..
+    + startSaleTransaction(): Integer
+    + addProductToSale(Integer transactionId, String productCode, int amount): boolean
+    + deleteProductFromSale(Integer transactionId, String productCode, int amount): boolean
+    + applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate): boolean
+    + applyDiscountRateToSale(Integer transactionId, double discountRate): boolean
+    + computePointsForSale(Integer transactionId): Integer
+    + endSaleTransaction(Integer transactionId): boolean
+    + deleteSaleTransaction(Integer transactionId): boolean
+    + getSaleTransaction(Integer transactionId): SaleTransaction
+    + startReturnTransaction(Integer transactionId): Integer
+    + returnProduct(Integer returnId, String productCode, int amount): boolean
+    + endReturnTransaction(Integer returnId, boolean commit): boolean
+    + deleteReturnTransaction(Integer returnId): boolean
+    .. FR7 ..
+    + receiveCashPayment(Integer transactionId, double cash): double
+    + receiveCreditCardPayment(Integer transactionId, String creditCard): boolean
+    + returnCashPayment(Integer returnId): double
+    + returnCreditCardPayment(Integer returnId, String creditCard): double
+    .. FR8 ..
+    + recordBalanceUpdate(double toBeAdded): boolean
+    + getCreditsAndDebits(LocalDate from, LocalDate to): List<BalanceOperation>
+    + computeBalance(): double
 }
 
-class User{
-    -role: String
-    -username: String
-    -password: String
+class EZShop{
+    - customersList: List<Customer>
+    - ordersList: List<Order>
+    - salesList: List<SaleTransaction>
+    - returnsList: List<ReturnTransaction>
+    - productsList: List<ProductType>
+    - balanceOperationsList: List<BalanceOperation>
+    - usersList: List<User>
+    - loggedIn: User
 
-    +getUsername(): String
-    +getPassword(): String
-    +getRole(): String
-    +setRole(String role): boolean
-    +canManageUsers(): boolean
-    +canEditProducts(): boolean
-    +canListProducts(): boolean
-    +canManageInventory(): boolean
-    +canManageSaleTransactions(): boolean
-    +canManagePayments(): boolean
-    +canManageAccounting(): boolean
+    + getNewSaleTransactionId(): Integer
+    + addSaleToSalesList(SaleTransaction sale): void
+    + removeSaleFromSalesList(SaleTransaction sale): void
+    + getSaleTransactionById(Integer transactionId): SaleTransaction
+    + getProductTypeByCode(String productCode): ProductType
+    + isValidCreditCard(String cardNumber): boolean
+    + sumDigits(int[] arr): Integer
+    + getCardById(): LoyaltyCard
+    + addBalanceToBalancesList(): void
+    + newBalanceUpdate(Double amount): void
+}
+
+note top: All methods in EZShopInterface are implemented here
+
+class User{
+    - role: String
+    - username: String
+    - password: String
+
+    + canManageUsers(): boolean
+    + canEditProducts(): boolean
+    + canListProducts(): boolean
+    + canManageInventory(): boolean
+    + canManageSaleTransactions(): boolean
+    + canManagePayments(): boolean
+    + canManageAccounting(): boolean
 }
 
 class Customer{
-    -customerName: String
-    -customerId: Integer
+    - customerName: String
+    - customerId: Integer
 
-    -customerCard: LoyaltyCard
+    - customerCard: LoyaltyCard
 }
 
 class LoyaltyCard{
-    -cardId: String
-    -cardPoints: Integer
+    - cardId: String
+    - cardPoints: Integer
 
-    +updatePoints(Integer points)
+    + updatePoints(Integer points)
 }
 
 class SaleTransaction {
-    -transactionId: Integer
-    -state: enum State{PAYED, CLOSED, INPROGRESS}
-    -pay: enum PaymentType{CARD, CASH}
-    -currentamount: Double
-    -salediscountRate: Double
+    - transactionId: Integer
+    - state: enum State{PAYED, CLOSED, INPROGRESS}
+    - pay: enum PaymentType{CARD, CASH}
+    - currentamount: Double
+    - salediscountRate: Double
 
-    -transactionCard: LoyaltyCard
-    -saleOperationRecord: BalanceOperation
-    -listOfProductsSale: Map<ProductType, Integer>
+    - transactionCard: LoyaltyCard
+    - saleOperationRecord: BalanceOperation
+    - listOfProductsSale: Map<ProductType, Integer>
 
-    +AddUpdateDeleteProductInSale(ProductType product, Integer amount): boolean
-    +isProductInSale(ProductType product): boolean
-    +ApplyDiscountToSaleProduct(Double disc, ProductType product): boolean
-    +ApplyDiscountToSaleAll(Double disc): boolean
-    +PointsForSale(): Integer
-    +EndSaleUpdateProductQuantity(): boolean
-    +AbortSaleUpdateProductQuantity(): void
-    +PaySaleAndReturnChange(Double amount, Boolean method): Double
-    +attachCardToSale(String customerCard)
+    + AddUpdateDeleteProductInSale(ProductType product, Integer amount): boolean
+    + isProductInSale(ProductType product): boolean
+    + ApplyDiscountToSaleProduct(Double disc, ProductType product): boolean
+    + ApplyDiscountToSaleAll(Double disc): boolean
+    + PointsForSale(): Integer
+    + EndSaleUpdateProductQuantity(): boolean
+    + AbortSaleUpdateProductQuantity(): void
+    + PaySaleAndReturnChange(Double amount, Boolean method): Double
+    + attachCardToSale(String customerCard)
 }
 
 class ReturnTransaction {
-    -returnId: Integer
-    -state: enum State{FAILED, COMPLETED, DELETE}!
-    -paymentType: enum PaymentType{CARD, CASH}
-    -currentamount: Double
+    - returnId: Integer
+    - state: enum State{FAILED, COMPLETED, DELETE}!
+    - paymentType: enum PaymentType{CARD, CASH}
+    - currentamount: Double
 
-    -saleTransaction: SaleTransaction
-    -returnOperationRecord: BalanceOperation
-    -listOfProductsReturn: Map<ProductType, Integer>
+    - saleTransaction: SaleTransaction
+    - returnOperationRecord: BalanceOperation
+    - listOfProductsReturn: Map<ProductType, Integer>
 
-    +addProductToReturn(ProductType product, Integer quantity): boolean
+    + addProductToReturn(ProductType product, Integer quantity): boolean
 }
 
 class Order {
-    -orderId: Integer
-    -pricePerUnit: Double
-    -productCode: String
-    -quantity: Integer
-    -status: enum Status{PAYED, ISSUED, ORDERED, COMPLETED}
+    - orderId: Integer
+    - pricePerUnit: Double
+    - productCode: String
+    - quantity: Integer
+    - status: enum Status{PAYED, ISSUED, ORDERED, COMPLETED}
 
-    -orderOperationRecord: BalanceOperation
-    -product: ProductType
+    - orderOperationRecord: BalanceOperation
+    - product: ProductType
 }
 
 class BalanceOperation {
-    -balanceID: Integer
-    -description: enum Description{DEBIT, CREDIT}
-    -amount: Double
-    -date: LocalDate
+    - balanceID: Integer
+    - description: enum Description{DEBIT, CREDIT}
+    - amount: Double
+    - date: LocalDate
 }
 
 class ProductType{
-    -productId: Integer
-    -barcode: String
-    -description: String
-    -sellPrice: Double
-    -quantity: Integer
-    -productDiscountRate: Double
-    -notes: String
-    -AisleID: Integer
-    -RackID: String
-    -LevelID: Integer
+    - productId: Integer
+    - barcode: String
+    - description: String
+    - sellPrice: Double
+    - quantity: Integer
+    - productDiscountRate: Double
+    - notes: String
+    - AisleID: Integer
+    - RackID: String
+    - LevelID: Integer
 
-    isValidBarcode(String barcode): static boolean
-    updateProductQuantity(Integer quantitytorem): void
+    + isValidBarcode(String barcode): static boolean
+    + updateProductQuantity(Integer quantitytorem): void
 }
+
+EZShop -|> EZShopInterface : <<implements>>
 
 User "*" <- EZShop
 Customer "*" <- EZShop
