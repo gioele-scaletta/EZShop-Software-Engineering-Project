@@ -408,6 +408,7 @@ EZShop -> EZShop : modifyCustomer()
 ### Scenarios 6.1, 6.2, 6.3, 6.4, 6.6, 7.1, (7.4): Full Sale with product discount, sale discounts and loyalty card update
 
 ```plantuml
+scale 0.98
 
 actor "Administrator\nShop Manager\nCashier" as user
 
@@ -473,7 +474,7 @@ EZShop <-- SaleTransaction : Boolean
 user <-- EZShop : Boolean
 deactivate EZShop
 
-user -> EZShop : computePointsForSale()
+user -> EZShop : computePointsForSale() 
 user -> EZShop : getCustomer()
 activate  EZShop
 'EZShop -> User : canManageSalesAndCustomers()
@@ -493,9 +494,9 @@ activate  EZShop
 'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : PaySaleAndReturnChange()
-SaleTransaction -> LoyaltyCard : PointsForSale()
-LoyaltyCard-> LoyaltyCard : updatePoints()
-SaleTransaction <-- LoyaltyCard : Integer
+SaleTransaction -> SaleTransaction : PointsForSale()
+SaleTransaction -> LoyaltyCard : updatePoints()
+SaleTransaction <-- LoyaltyCard
 EZShop <-- SaleTransaction : Double
 EZShop -> EZShop : BalanceUpdate()
 EZShop -> BalanceOperation : new BalanceOperation()
@@ -504,6 +505,15 @@ EZShop -> EZShop : addBalanceToBalancesList()
 user <-- EZShop : Double
 deactivate EZShop
 
+```
+
+
+```plantuml
+note as N
+    We couldn't find an API function to read the Loyalty card serial number so we assumed the cashier asks the customer for his id. 
+    It is not clear to us how the function computePointsForSale() should be called by the GUI.
+    We updated the loyalty card points after the payment as described in Scenario 6-4
+end note
 ```
 
 ```plantuml
