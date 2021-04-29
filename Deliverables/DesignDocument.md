@@ -111,6 +111,7 @@ class EZShop{
     - productsList: List<ProductType>
     - balanceOperationsList: List<BalanceOperation>
     - usersList: List<User>
+    - cardsList: List<LoyaltyCard>
     - loggedIn: User
 
     + getNewSaleTransactionId(): Integer
@@ -123,9 +124,11 @@ class EZShop{
     + getCardById(): LoyaltyCard
     + addBalanceToBalancesList(): void
     + newBalanceUpdate(Double amount): void
+    + checkEnoughBalanceOnCardAndPay(String creditCard, Double amount): Boolean
+    + updateCreditCardBalance(String creditCard, Double amount): Boolean
 }
 
-note top: All methods in EZShopInterface are implemented here
+note top: All methods in EZShopInterface are implemented in EZShop
 
 class User{
     - role: String
@@ -233,6 +236,7 @@ EZShop --> "*" ReturnTransaction
 EZShop --> "*" Order
 EZShop --> "*" ProductType
 EZShop --> "*" BalanceOperation
+EZShop --> "*" LoyaltyCard
 
 Customer --> "0..1" LoyaltyCard
 SaleTransaction "1..*" --> "0..1" LoyaltyCard
@@ -246,6 +250,14 @@ Order "*" --> ProductType
 SaleTransaction ---> BalanceOperation
 ReturnTransaction ---> BalanceOperation
 Order ---> BalanceOperation
+```
+
+```plantuml
+
+note as F
+    We decided not to add credit card attributes since shops don't usually store credit card data. The two methods that will check and modify the credit card balance should act through the credit card API.
+end note
+
 ```
 
 # Verification traceability matrix
@@ -387,7 +399,7 @@ EZShop -> EZShop : modifyCustomer()
 ### Scenarios 6.1, 6.2, 6.3, 6.4, 6.6, 7.1, (7.4): Full Sale with product discount, sale discounts and loyalty card update
 
 ```plantuml
-''scale 0.8
+
 actor "Administrator\nShop Manager\nCashier" as user
 
 autonumber
@@ -481,10 +493,17 @@ user <-- EZShop : Double
 deactivate EZShop
 
 ```
+```plantuml
+note as S
+   We couldn't find and API method through wich the cashier can read the loyalty card number while performing the sale.
+end note
+
+```
 
 ```plantuml
 note as N
     In this sequence diagram and in the next one, the method canManageSaleTransactions() has been represented only in the first API function call for the sake of readability.
+
 end note
 
 ```
@@ -566,7 +585,25 @@ user <-- EZShop : Boolean
 deactivate EZShop
 ```
 
-### Scenario 7.3 API????????
+### Scenario 7.3: Not enough balance on credit card
+
+
+```plantuml
+user -> EZShop : receiveCreditCardPayment()
+activate  EZShop
+EZShop -> User : canManageSaleTransactions()
+EZShop <-- User : Boolean
+EZShop -> EZShop : isValidCreditCard()
+EZShop -> EZShop : checkEnoughBalanceOnCardAndPay()
+EZShop -> SaleTransaction : AbortSaleUpdateProductQuantity()
+SaleTransaction -> ProductType : updateProductQuantity()
+SaleTransaction <-- ProductType
+EZShop <-- SaleTransaction 
+EZShop->EZShop : RemoveSaleFromSalesList()
+user <-- EZShop : Boolean
+deactivate EZShop
+```
+
 
 ## Use Case 8 & 10
 
@@ -607,6 +644,7 @@ alt Manage credit card return
     EZShop -> EZShop : isValidCreditCard()
     EZShop -> ReturnTransaction : getAmount()
     EZShop <-- ReturnTransaction : return amount
+    EZShop -> EZShop : updateCreditCardBalance()
     user <-- EZShop : return amount
     deactivate EZShop
 else Manage cash return
