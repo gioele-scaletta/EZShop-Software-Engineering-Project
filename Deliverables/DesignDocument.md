@@ -41,7 +41,7 @@ it.polito.ezshop.exceptions <-- it.polito.ezshop.model
 
 
 ```plantuml
-scale 0.9
+scale 0.8
 note left of it.polito.ezshop.data 
     All classes in MODEL and DATA are stored persistently.
     Here we decided to model explicitely
