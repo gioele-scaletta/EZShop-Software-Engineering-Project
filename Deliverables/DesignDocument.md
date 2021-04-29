@@ -22,26 +22,34 @@ The design must satisfy the Official Requirements document, notably functional a
 The application implements a 3-tiers architecture, where the data layes, the logic layer and the presentation layer are in different packages. The GUI interacts with the EZShop logic layer via the Façade class "EZShop".
 
 ```plantuml
-package "GUI"
-package "EZShopLogic"
-package "Data"
-package "EZShopException"
 
-EZShopLogic <-> GUI
-EZShopException --> EZShopLogic
-Data <-> EZShopLogic
+
+package it.polito.ezshop {
+package "it.polito.ezshop.GUI"
+package "it.polito.ezshop.data"
+package "it.polito.ezshop.model"
+package "it.polito.ezshop.exceptions"
+it.polito.ezshop.data <- it.polito.ezshop.GUI
+it.polito.ezshop.exceptions <-- it.polito.ezshop.data
+it.polito.ezshop.model <- it.polito.ezshop.data
+it.polito.ezshop.exceptions <-- it.polito.ezshop.model
+}
 
 ```
 
 # Low level design
 
+
 ```plantuml
-note as N
-    The classes are stored persistently
-    in the data layer.
+
+note left of it.polito.ezshop.data 
+    All classes in MODEL and DATA are stored persistently.
     Here we decided to model explicitely
     the relationships with lists and maps.
 end note
+
+package it.polito.ezshop.data{
+
 
 interface EZShopInterface {
     .. Reset ..
@@ -111,7 +119,6 @@ class EZShop{
     - productsList: List<ProductType>
     - balanceOperationsList: List<BalanceOperation>
     - usersList: List<User>
-    - cardsList: List<LoyaltyCard>
     - loggedIn: User
 
     + getNewSaleTransactionId(): Integer
@@ -121,7 +128,6 @@ class EZShop{
     + getProductTypeByCode(String productCode): ProductType
     + isValidCreditCard(String cardNumber): boolean
     + sumDigits(int[] arr): Integer
-    + getCardById(): LoyaltyCard
     + addBalanceToBalancesList(): void
     + newBalanceUpdate(Double amount): void
     + checkEnoughBalanceOnCardAndPay(String creditCard, Double amount): Boolean
@@ -129,7 +135,9 @@ class EZShop{
 }
 
 note top: All methods in EZShopInterface are implemented in EZShop
+}
 
+package it.polito.ezshop.model{
 class User{
     - role: String
     - username: String
@@ -139,7 +147,7 @@ class User{
     + canEditProducts(): boolean
     + canListProducts(): boolean
     + canManageInventory(): boolean
-    + canManageSaleTransactions(): boolean
+    + canManageSalesAndCustomers(): boolean
     + canManagePayments(): boolean
     + canManageAccounting(): boolean
 }
@@ -236,7 +244,6 @@ EZShop --> "*" ReturnTransaction
 EZShop --> "*" Order
 EZShop --> "*" ProductType
 EZShop --> "*" BalanceOperation
-EZShop --> "*" LoyaltyCard
 
 Customer --> "0..1" LoyaltyCard
 SaleTransaction "1..*" --> "0..1" LoyaltyCard
@@ -250,6 +257,7 @@ Order "*" --> ProductType
 SaleTransaction ---> BalanceOperation
 ReturnTransaction ---> BalanceOperation
 Order ---> BalanceOperation
+}
 ```
 
 ```plantuml
@@ -399,14 +407,14 @@ EZShop -> EZShop : modifyCustomer()
 ### Scenarios 6.1, 6.2, 6.3, 6.4, 6.6, 7.1, (7.4): Full Sale with product discount, sale discounts and loyalty card update
 
 ```plantuml
-
+scale 1.5
 actor "Administrator\nShop Manager\nCashier" as user
 
 autonumber
 
 user -> EZShop : startReturnTransaction()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
+EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : Boolean
 EZShop -> EZShop : getNewSaleTransactionId()
 EZShop -> SaleTransaction : new SaleTransaction()
@@ -417,7 +425,7 @@ deactivate EZShop
 
 user -> EZShop : addProductToSale()
 activate  EZShop
-'EZShop -> User : canManageSaleTransactions()
+'EZShop -> User : canManageSalesAndCustomers()
 'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop-> EZShop : getProductTypeByCode()
@@ -431,7 +439,7 @@ deactivate EZShop
 
 user -> EZShop : applyDiscountRateToProduct()
 activate  EZShop
-'EZShop -> User : canManageSaleTransactions()
+'EZShop -> User : canManageSalesAndCustomers()
 'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop-> EZShop : getProductTypeByCode()
@@ -444,7 +452,7 @@ deactivate EZShop
 
 user -> EZShop : applyDiscountRateToSale()
 activate  EZShop
-'EZShop -> User : canManageSaleTransactions()
+'EZShop -> User : canManageSalesAndCustomers()
 'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : ApplyDiscountToSaleAll()
@@ -454,7 +462,7 @@ deactivate EZShop
 
 user -> EZShop : endSaleTransaction()
 activate  EZShop
-'EZShop -> User : canManageSaleTransactions()
+'EZShop -> User : canManageSalesAndCustomers()
 'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : EndSaleUpdateProductQuantity()
@@ -464,20 +472,23 @@ EZShop <-- SaleTransaction : Boolean
 user <-- EZShop : Boolean
 deactivate EZShop
 
-user -> EZShop : computePointsForSale?API?
+user -> EZShop : computePointsForSale()
+user -> EZShop : getCustomer()
 activate  EZShop
-'EZShop -> User : canManageSaleTransactions()
+'EZShop -> User : canManageSalesAndCustomers()
 'EZShop <-- User : Boolean
+EZShop -> Customer: getCustomerCard()
+EZShop <-- Customer: LoyaltyCard
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : attachCardToSale()
 EZShop <-- SaleTransaction : Boolean
-user <-- EZShop : Boolean
+user <-- EZShop : Integer
 deactivate EZShop
 
 
 user -> EZShop : receiveCashPayment()
 activate  EZShop
-'EZShop -> User : canManageSaleTransactions()
+'EZShop -> User : canManageSalesAndCustomers()
 'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : PaySaleAndReturnChange()
@@ -493,17 +504,10 @@ user <-- EZShop : Double
 deactivate EZShop
 
 ```
-```plantuml
-note as S
-   We couldn't find and API method through wich the cashier can read the loyalty card number while performing the sale.
-end note
-
-```
 
 ```plantuml
 note as N
-    In this sequence diagram and in the next one, the method canManageSaleTransactions() has been represented only in the first API function call for the sake of readability.
-
+    In this and the next sequence diagram the method canManageSalesAndCustomers() has been represented only in the first API function call for the sake of readability.
 end note
 
 ```
@@ -518,7 +522,7 @@ autonumber
 
 user -> EZShop : startReturnTransaction()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
+EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : Boolean
 EZShop -> EZShop : getNewSaleTransactionId()
 EZShop -> SaleTransaction : new SaleTransaction()
@@ -529,7 +533,7 @@ deactivate EZShop
 
 user -> EZShop : addProductToSale()
 activate  EZShop
-'EZShop -> User : canManageSaleTransactions()
+'EZShop -> User : canManageSalesAndCustomers()
 'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop-> EZShop : getProductTypeByCode()
@@ -543,7 +547,7 @@ deactivate EZShop
 
 user -> EZShop : endSaleTransaction()
 activate  EZShop
-'EZShop -> User : canManageSaleTransactions()
+'EZShop -> User : canManageSalesAndCustomers()
 'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : EndSaleUpdateProductQuantity()
@@ -555,7 +559,7 @@ deactivate EZShop
 
 user -> EZShop : deleteSaleTransaction()
 activate  EZShop
-'EZShop -> User : canManageSaleTransactions()
+'EZShop -> User : canManageSalesAndCustomers()
 'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : AbortSaleUpdateProductQuantity()
@@ -573,7 +577,7 @@ deactivate EZShop
 ```plantuml
 user -> EZShop : receiveCreditCardPayment()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
+EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : Boolean
 EZShop -> EZShop : isValidCreditCard()
 EZShop -> SaleTransaction : AbortSaleUpdateProductQuantity()
@@ -591,7 +595,7 @@ deactivate EZShop
 ```plantuml
 user -> EZShop : receiveCreditCardPayment()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
+EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : Boolean
 EZShop -> EZShop : isValidCreditCard()
 EZShop -> EZShop : checkEnoughBalanceOnCardAndPay()
@@ -615,7 +619,7 @@ actor "Administrator\nShop Manager\nCashier" as user
 autonumber
 user -> EZShop : startReturnTransaction()
 activate  EZShop
-EZShop -> User : canManageSaleTransactions()
+EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> ReturnTransaction : new ReturnTransaction()
@@ -625,7 +629,7 @@ deactivate EZShop
 
 user -> EZShop : returnProduct()
 activate EZShop
-EZShop -> User : canManageSaleTransactions()
+EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> EZShop : getProductTypeByCode()
@@ -639,7 +643,7 @@ deactivate EZShop
 alt Manage credit card return
     user -> EZShop : returnCreditCardPayment()
     activate EZShop
-    EZShop -> User : canManageSaleTransactions()
+    EZShop -> User : canManageSalesAndCustomers()
     EZShop <-- User : boolean
     EZShop -> EZShop : isValidCreditCard()
     EZShop -> ReturnTransaction : getAmount()
@@ -650,7 +654,7 @@ alt Manage credit card return
 else Manage cash return
     user -> EZShop : returnCashPayment()
     activate EZShop
-    EZShop -> User : canManageSaleTransactions()
+    EZShop -> User : canManageSalesAndCustomers()
     EZShop <-- User : return boolean
     EZShop -> ReturnTransaction : getAmount()
     EZShop <-- ReturnTransaction : Double
@@ -660,7 +664,7 @@ end
 
 user -> EZShop : endReturnTransaction()
 activate EZShop
-EZShop -> User : canManageSaleTransactions()
+EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : boolean
 EZShop -> ReturnTransaction : getSaleTransaction()
 EZShop <-- ReturnTransaction : SaleTransaction

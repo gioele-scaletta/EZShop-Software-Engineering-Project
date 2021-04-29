@@ -31,23 +31,23 @@ Consider the EZShop project as described in YOUR requirement document, assume th
 
 |         Activity name    | Estimated effort (person hours)   |
 | ----------- | ------------------------------- |
-| Requirement Document | 55 |
-| &ensp; &ensp; Concept development | 30 |
-| &ensp; &ensp; Document drafting | 15 |
-| &ensp; &ensp; Document V&V | 10 |
-| GUI | 65 |
-| &ensp; &ensp; Usability study | 20 |
-| &ensp; &ensp; Development | 35 |
-| &ensp; &ensp; GUI V&V | 10 |
-| Design document | 50 |
-| &ensp; &ensp; High level | 10 |
-| &ensp; &ensp; Low level | 30 |
-| &ensp; &ensp; Design V&V | 10 |
-| Coding | 85 |
-| &ensp; &ensp; Java Classes | 70 |
-| &ensp; &ensp; DB layer | 15 |
-| Testing | 30 |
-| Integration | 15 |
+| Requirement Document | **55** |
+| &ensp; &ensp; Concept development | *30* |
+| &ensp; &ensp; Document drafting | *15* |
+| &ensp; &ensp; Document V&V | *10* |
+| GUI | **65** |
+| &ensp; &ensp; Usability study | *20* |
+| &ensp; &ensp; Development | *35* |
+| &ensp; &ensp; GUI V&V | *10* |
+| Design document | **50** |
+| &ensp; &ensp; High level | *10* |
+| &ensp; &ensp; Low level | *30* |
+| &ensp; &ensp; Design V&V | *10* |
+| Coding | **85** |
+| &ensp; &ensp; Java Classes | *70* |
+| &ensp; &ensp; DB layer | *15* |
+| Testing | **30** |
+| Integration | **15** |
 
 <br>
 <br>
