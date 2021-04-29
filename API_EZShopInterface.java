@@ -2,6 +2,11 @@ package it.polito.ezshop.data;
 
 import it.polito.ezshop.exceptions.*;
 import it.polito.ezshop.model.*;
+/*  version 1.2 29 april 2021  
+changes:
+improved description of reset() function
+*/
+
 /*  version 1.1 27 april 2021  
 changes: 
 issueReOrder() renamed in issueOrder()
@@ -22,7 +27,7 @@ import java.util.List;
 
 public interface EZShopInterface {
     /**
-     * This method should reset the application to its base state.
+     * This method should reset the application to its base state: balance zero, no transacations, no products
      */
     public void reset();
 
