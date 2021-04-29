@@ -47,7 +47,7 @@ end note
 
 ```
 ```plantuml
-scale 0.88
+scale 0.9
 
 package it.polito.ezshop.data{
 
