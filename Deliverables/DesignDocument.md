@@ -4,7 +4,7 @@ Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scale
 
 Date: 30/04/2021
 
-Version: 1.0
+Version: 1.1
 
 # Contents
 
@@ -140,7 +140,6 @@ class EZShop{
     - isValidCreditCard(String cardNumber): Boolean
     - sumDigits(int[] arr): Integer
     - addBalanceToBalancesList(): Boolean
-    - newBalanceUpdate(Double amount): Boolean
     - checkEnoughBalanceOnCardAndPay(String creditCard, Double amount): Boolean
     - updateCreditCardBalance(String creditCard, Double amount): Boolean
 }
@@ -176,21 +175,21 @@ class LoyaltyCard{
     - cardPoints: Integer
     - isAttached: boolean
 
-    + updatePoints(Integer points)
+    + updatePoints(Integer points) : boolean
 }
 
 class SaleTransaction {
     - transactionId: Integer
     - state: enum State{PAYED, CLOSED, INPROGRESS}
     - pay: enum PaymentType{CARD, CASH}
-    - currentamount: Double
+    - amount: Double
     - salediscountRate: Double
 
     - transactionCard: LoyaltyCard
     - saleOperationRecord: BalanceOperation
     - listOfProductsSale: Map<ProductType, Integer>
 
-    + AddUpdateDeleteProductInSale(ProductType product, Integer amount): boolean
+    + EditProductInSale(ProductType product, Integer amount): boolean
     + isProductInSale(ProductType product): boolean
     + ApplyDiscountToSaleProduct(Double disc, ProductType product): boolean
     + ApplyDiscountToSaleAll(Double disc): boolean
@@ -198,14 +197,14 @@ class SaleTransaction {
     + EndSaleUpdateProductQuantity(): boolean
     + AbortSaleUpdateProductQuantity(): void
     + PaySaleAndReturnChange(Double amount, Boolean method): Double
-    + attachCardToSale(String customerCard)
+    + updateCardSale(String customerCard) : boolean
 }
 
 class ReturnTransaction {
     - returnId: Integer
     - state: enum State{FAILED, COMPLETED, DELETE}!
     - paymentType: enum PaymentType{CARD, CASH}
-    - currentamount: Double
+    - amount: Double
 
     - saleTransaction: SaleTransaction
     - returnOperationRecord: BalanceOperation
@@ -277,7 +276,7 @@ Order ---> BalanceOperation
 ```plantuml
 
 note as F
-    We decided not to add credit card attributes since shops don't usually store credit card data. The two methods that will check and modify the credit card balance should act through the credit card API.
+   We decided not to add credit card attributes since a real software wouldn’t store credit card data. The two methods that check and modify the credit card balance should act through the credit card API in a real scenario. 
 end note
 
 ```
@@ -488,13 +487,13 @@ deactivate EZShop
 ### Scenarios 6.1, 6.2, 6.3, 6.4, 6.6, 7.1, (7.4): Full Sale with product discount, sale discounts and loyalty card update
 
 ```plantuml
-scale 0.92
+scale 0.9
 
 actor "Administrator\nShop Manager\nCashier" as user
 
 autonumber
 
-user -> EZShop : startTransaction()
+user -> EZShop : startSaleTransaction()()
 activate  EZShop
 EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : Boolean
@@ -511,7 +510,7 @@ loop forEach product
     'EZShop <-- User : Boolean
     EZShop -> EZShop : getSaleTransactionById()
     EZShop-> EZShop : getProductTypeByCode()
-    EZShop -> SaleTransaction : AddUpdateDeleteProductInSale()
+    EZShop -> SaleTransaction : EditProductInSale()
     SaleTransaction -> SaleTransaction : isProductInSale()
     SaleTransaction -> ProductType : getSellPrice()
     SaleTransaction <-- ProductType : Double
@@ -557,46 +556,40 @@ user <-- EZShop : Boolean
 deactivate EZShop
 
 user -> EZShop : computePointsForSale() 
-user -> EZShop : getCustomer()
 activate  EZShop
-'EZShop -> User : canManageSalesAndCustomers()
-'EZShop <-- User : Boolean
-EZShop -> Customer: getCustomerCard()
-EZShop <-- Customer: LoyaltyCard
 EZShop -> EZShop : getSaleTransactionById()
-EZShop -> SaleTransaction : attachCardToSale()
-EZShop <-- SaleTransaction : Boolean
+EZShop -> SaleTransaction : PointsForSale()
+EZShop <-- SaleTransaction : Integer
 user <-- EZShop : Integer
 deactivate EZShop
 
-
 user -> EZShop : receiveCashPayment()
 activate  EZShop
-'EZShop -> User : canManageSalesAndCustomers()
-'EZShop <-- User : Boolean
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : PaySaleAndReturnChange()
-SaleTransaction -> SaleTransaction : PointsForSale()
-SaleTransaction -> LoyaltyCard : updatePoints()
-SaleTransaction <-- LoyaltyCard
 EZShop <-- SaleTransaction : Double
-EZShop -> EZShop : BalanceUpdate()
+deactivate EZShop
+
+user -> EZShop : modifyPointsOnCard()
+activate EZShop
+EZShop -> EZShop : getLoyaltyCard()
+EZShop -> SaleTransaction : updateCardSale()
+SaleTransaction -> LoyaltyCard : updatePoints()
+SaleTransaction <-- LoyaltyCard : Boolean
+EZShop <-- SaleTransaction : Boolean
+user <-- EZShop :Boolean
+deactivate EZShop
+
+user -> EZShop : recordBalanceUpdate()
+activate EZShop
 EZShop -> BalanceOperation : new BalanceOperation()
 EZShop <-- BalanceOperation : BalanceOperation
 EZShop -> EZShop : addBalanceToBalancesList()
-user <-- EZShop : Double
+user <-- EZShop : boolean
 deactivate EZShop
 
 ```
 
-
-```plantuml
-note as N
-    We couldn't find an API function to read the Loyalty card serial number so we assumed the cashier asks the customer for his id. 
-    It is not clear to us how the function computePointsForSale() should be called by the GUI.
-    We updated the loyalty card points after the payment as described in Scenario 6-4
-end note
-```
 
 ```plantuml
 note as N
@@ -613,7 +606,7 @@ actor "Administrator\nShop Manager\nCashier" as user
 
 autonumber
 
-user -> EZShop : startTransaction()
+user -> EZShop : startSaleTransaction()()
 activate  EZShop
 EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : Boolean
@@ -630,7 +623,7 @@ loop forEach product
     'EZShop <-- User : Boolean
     EZShop -> EZShop : getSaleTransactionById()
     EZShop-> EZShop : getProductTypeByCode()
-    EZShop -> SaleTransaction : AddUpdateDeleteProductInSale()
+    EZShop -> SaleTransaction : EditProductInSale()
     SaleTransaction -> SaleTransaction : isProductInSale()
     SaleTransaction -> ProductType : getSellPrice()
     SaleTransaction <-- ProductType : Double
@@ -771,7 +764,7 @@ EZShop <-- ReturnTransaction : SaleTransaction
 EZShop -> ReturnTransaction : getListOfProductsReturn()
 EZShop <-- ReturnTransaction : Map<ProductType, Integer>
 loop forEach ProductType in listOfProductsReturn
-    EZShop -> SaleTransaction : addUpdateDeleteProductInSale()
+    EZShop -> SaleTransaction : EditProductInSale()
     EZShop <-- SaleTransaction : boolean
     EZShop -> ProductType : updateProductQuantity()
     EZShop <-- ProductType : boolean
