@@ -288,32 +288,35 @@ end note
 ### Scenario 1.1 - Create Product Type X
 
 ```plantuml
-participant GUI as 1
-participant EZShop as 2
-participant User as 3
-participant ProductType as 4
+actor "Administrator\nShop Manager" as user
+autonumber
 
-1->2 : createProductType()
-2->3 : canEditProducts()
-2->4 : new ProdutctType()
-2->2 : addProductToInventory()
+user->EZShop : createProductType()
+activate EZShop
+EZShop->User : canEditProducts()
+User-->EZShop: Boolean
+EZShop->ProductType : new ProdutctType()
+EZShop<--ProductType : ProductType
+EZShop->EZShop : addProductToInventory()
+deactivate EZShop
 ```
 
 ### Scenario 1.3 - Modify Product Type pricePerUnit
 
 ```plantuml
-participant GUI as 1
-participant EZShop as 2
-participant User as 3
-participant ProductType as 4
+actor "Administrator\nShop Manager" as user
+autonumber
 
-1->2 : updateProduct()
-2->3 : canEditProducts()
-2->2 : getProductTypeByID()
-2->4 : setBarcode()
-2->4 : setDescription()
-2->4 : setSellPrice()
-2->4 : setNotes()
+user->EZShop : updateProduct()
+activate EZShop
+EZShop->User : canEditProducts()
+User --> EZShop : Boolean
+EZShop->EZShop : getProductTypeByID()
+EZShop->ProductType : setBarcode()
+EZShop->ProductType : setDescription()
+EZShop->ProductType : setSellPrice()
+EZShop->ProductType : setNotes()
+deactivate EZShop
 ```
 
 ## Use Case 2
@@ -321,26 +324,30 @@ participant ProductType as 4
 ### Scenario 2.1 - Create user and define rights
 
 ```plantuml
-participant GUI as 1
-participant EZShop as 2
-participant User as 3
+actor "Administrator" as user
+autonumber
 
-1->2 : createUser()
-2->3 : new User()
-2->2 : addUserToUsersList()
+user->EZShop : createUser()
+activate EZShop
+EZShop->User : new User()
+User -->EZShop : User
+EZShop->EZShop : addUserToUsersList()
+deactivate EZShop
 ```
 
 ### Scenario 2.3 - Create user and define rights
 
 ```plantuml
-participant GUI as 1
-participant EZShop as 2
-participant User as 3
+actor "Administrator" as user
+autonumber
 
-1->2 : updateUserRights()
-2->3 : canManageUsers()
-2->2 : getUser()
-2->3 : setRole()
+user->EZShop : updateUserRights()
+activate EZShop
+EZShop->User : canManageUsers()
+User --> EZShop : Boolean
+EZShop->EZShop : getUser()
+EZShop->User : setRole()
+deactivate EZShop
 ```
 
 ## Use Case 3
@@ -348,36 +355,35 @@ participant User as 3
 ### Scenario 3.1 - Order od Product Type Issued
 
 ```plantuml
-participant GUI as 1
-participant EZShop as 2
-participant User as 3
-participant Order as 4
+actor "Administrator\nShop Manager" as user
+autonumber
 
-1->2 : issueReorder()
-2->3 : canManageInventory()
-2->2 : getProductTypeByBarCode
-2->4 : new Order()
-2->2 : addOrderToOrdersList()
+user->EZShop : issueReorder()
+activate EZShop
+EZShop->User : canManageInventory()
+User --> EZShop : Boolean
+EZShop->EZShop : getProductTypeByBarCode()
+EZShop->Order : new Order()
+Order --> EZShop : Order
+EZShop->EZShop : addOrderToOrdersList()
+deactivate EZShop
 ```
 
 ### Scenario 3.3 - Record order of ProductType arrival
 
 ```plantuml
-participant GUI as 1
-participant EZShop as 2
-participant User as 3
-participant Order as 4
-participant ProductType as 5
+actor "Administrator\nShop Manager" as user
+autonumber
 
-1->2 : recordOrderArrival()
-2->3 : canManageInventory()
-2->2 : getOrderByID()
-2->4 : setOrderState()
-2->2 : getProductTypeByID()
-2->5 : setBarcode()
-2->5 : setDescription()
-2->5 : setSellPrice()
-2->5 : setNotes()
+user->EZShop : recordOrderArrival()
+activate EZShop
+EZShop->User : canManageInventory()
+User --> EZShop : Boolean
+EZShop->EZShop : getOrderByID()
+EZShop->Order : setOrderState()
+EZShop->EZShop : getProductTypeByID()
+EZShop->ProductType : setQuantity()
+deactivate EZShop
 ```
 
 ## Use Case 4
@@ -586,6 +592,9 @@ deactivate EZShop
 ### Scenarios 7.2:  Invalid credit card number
 
 ```plantuml
+actor "Administrator\nShop Manager\nCashier" as user
+autonumber
+
 user -> EZShop : receiveCreditCardPayment()
 activate  EZShop
 EZShop -> User : canManageSalesAndCustomers()
@@ -604,6 +613,9 @@ deactivate EZShop
 
 
 ```plantuml
+actor "Administrator\nShop Manager\nCashier" as user
+autonumber
+
 user -> EZShop : receiveCreditCardPayment()
 activate  EZShop
 EZShop -> User : canManageSalesAndCustomers()
