@@ -400,25 +400,48 @@ deactivate EZShop
 
 ## Use Case 4
 
-### Scenario 4.2: Attach card to customer record
+### Scenario 4.1, 4.2: Create customer and attach card to customer record
 
 ```plantuml
-EZShop -> EZShop : createCard()
-EZShop ->Customer : getCustomer()
-Customer -> Customer : getCustomerId()
-Customer --> EZShop : customerId
+actor "Administrator\nShop Manager\nCashier" as user
+autonumber
+
+user->EZShop : defineCustomer()
+activate EZShop
+EZShop->User : canManageSalesAndCustomers()
+User -->EZShop : Boolean
+EZShop->Customer : newCustomer()
+Customer -->EZShop : Customer
+EZShop->EZShop : addCustomerToCustomersList()
+EZShop-->user: Integer
+deactivate EZShop
+
+user->EZShop : createCard()
+activate EZShop
+EZShop->Customer : getCustomer()
+Customer -->EZShop : Customer
+EZShop->LoyaltyCard : newLoyaltyCard()
+LoyaltyCard --> EZShop : LoyaltyCard
+EZShop->LoyaltyCard : addCustomerToCustomersList()
 EZShop -> EZShop : attachCardToCustomer()
+EZShop-->user: Integer
+deactivate EZShop
 ```
 
-### Scenario 4.2: Detach card from customer record
+### Scenario 4.3, 4.4: Modify customer data of and/or detach card from customer record
 
 ```plantuml
-EZShop ->Customer : getCustomer()
-Customer -> Customer : getCustomerId()
-Customer --> EZShop : customerId
-Customer -> Customer : getCustomerName()
-Customer --> EZShop : customerName
-EZShop -> EZShop : modifyCustomer()
+actor "Administrator\nShop Manager\nCashier" as user
+autonumber
+
+user->EZShop : modifyCustomer()
+activate EZShop
+EZShop->User : canManageSalesAndCustomers()
+User -->EZShop : Boolean
+EZShop->Customer : getCustomer()
+Customer -->EZShop : Customer
+EZShop --> user : Boolean 
+deactivate EZShop
 ```
 
 ## Use Case 6 & 7
