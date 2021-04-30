@@ -2,9 +2,9 @@
 
 Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scaletta
 
-Date:
+Date: 30/04/2021
 
-Version:
+Version: 1.0
 
 # Contents
 
