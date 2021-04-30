@@ -555,19 +555,20 @@ EZShop <-- SaleTransaction : Boolean
 user <-- EZShop : Boolean
 deactivate EZShop
 
+user -> EZShop : receiveCashPayment()
+activate  EZShop
+EZShop -> EZShop : getSaleTransactionById()
+EZShop -> SaleTransaction : PaySaleAndReturnChange()
+EZShop <-- SaleTransaction : Double
+user <-- EZShop : Double
+deactivate EZShop
+
 user -> EZShop : computePointsForSale() 
 activate  EZShop
 EZShop -> EZShop : getSaleTransactionById()
 EZShop -> SaleTransaction : PointsForSale()
 EZShop <-- SaleTransaction : Integer
 user <-- EZShop : Integer
-deactivate EZShop
-
-user -> EZShop : receiveCashPayment()
-activate  EZShop
-EZShop -> EZShop : getSaleTransactionById()
-EZShop -> SaleTransaction : PaySaleAndReturnChange()
-EZShop <-- SaleTransaction : Double
 deactivate EZShop
 
 user -> EZShop : modifyPointsOnCard()
@@ -771,6 +772,15 @@ loop forEach ProductType in listOfProductsReturn
 end
 user <-- EZShop: boolean
 deactivate EZShop
+
+user -> EZShop : recordBalanceUpdate()
+activate EZShop
+EZShop -> BalanceOperation : new BalanceOperation()
+EZShop <-- BalanceOperation : BalanceOperation
+EZShop -> EZShop : addBalanceToBalancesList()
+user <-- EZShop : boolean
+deactivate EZShop
+
 ```
 
 ## Use Case 9
