@@ -129,6 +129,7 @@ class EZShop{
     + getProductTypeByCode(String productCode): ProductType
     + addOrderToOrdersList(Order o): Integer
     + removeOrderFromOrdersList(Order o): Boolean
+    + getCustomerByID(Integer ID): Customer
     + getNewSaleTransactionId(): Integer
     + addSaleToSalesList(SaleTransaction sale): void
     + removeSaleFromSalesList(SaleTransaction sale): void
@@ -169,6 +170,7 @@ class Customer{
 class LoyaltyCard{
     - cardId: String
     - cardPoints: Integer
+    - isAttached: boolean
 
     + updatePoints(Integer points)
 }
@@ -410,7 +412,7 @@ user->EZShop : defineCustomer()
 activate EZShop
 EZShop->User : canManageSalesAndCustomers()
 User -->EZShop : Boolean
-EZShop->Customer : newCustomer()
+EZShop->Customer : new Customer()
 Customer -->EZShop : Customer
 EZShop->EZShop : addCustomerToCustomersList()
 EZShop-->user: Integer
@@ -418,13 +420,20 @@ deactivate EZShop
 
 user->EZShop : createCard()
 activate EZShop
-EZShop->Customer : getCustomer()
-Customer -->EZShop : Customer
-EZShop->LoyaltyCard : newLoyaltyCard()
+EZShop->LoyaltyCard : new LoyaltyCard()
 LoyaltyCard --> EZShop : LoyaltyCard
-EZShop->LoyaltyCard : addCustomerToCustomersList()
-EZShop -> EZShop : attachCardToCustomer()
-EZShop-->user: Integer
+EZShop-->user : Integer
+deactivate EZShop
+
+user -> EZShop : attachCardToCustomer()
+activate EZShop
+EZShop->EZShop : getCustomerByID()
+EZShop->EZShop : getLoyaltyCard()
+EZShop->Customer : setCustomerCard()
+Customer--> EZShop : boolean
+EZShop ->LoyaltyCard : setIsAttached() 
+LoyaltyCard --> EZShop : boolean
+EZShop-->user : boolean
 deactivate EZShop
 ```
 
@@ -438,9 +447,15 @@ user->EZShop : modifyCustomer()
 activate EZShop
 EZShop->User : canManageSalesAndCustomers()
 User -->EZShop : Boolean
-EZShop->Customer : getCustomer()
-Customer -->EZShop : Customer
-EZShop --> user : Boolean 
+EZShop->EZShop : getCustomerByID()
+EZShop->Customer : setCustomerName()
+alt if newCustomerCard is not null
+    EZShop->Customer : setCustomerCard(newCustomerCard)
+    Customer->LoyaltyCard : oldCustomerCard.setIsAttached(false)
+    Customer->LoyaltyCard : newCustomerCard.setIsAttached(true)
+    
+end
+EZShop->user : boolean
 deactivate EZShop
 ```
 
