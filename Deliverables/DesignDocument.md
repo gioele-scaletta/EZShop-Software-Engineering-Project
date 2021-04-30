@@ -113,33 +113,36 @@ interface EZShopInterface {
 }
 
 class EZShop{
-    - customersList: List<Customer>
-    - ordersList: List<Order>
-    - salesList: List<SaleTransaction>
-    - returnsList: List<ReturnTransaction>
-    - productsList: List<ProductType>
-    - balanceOperationsList: List<BalanceOperation>
-    - usersList: List<User>
+    - customersList: Map<String, Customer>
+    - loyaltyCardsList: Map<String, LoyaltyCard>
+    - ordersList: Map<Integer, Order>
+    - salesList: Map<Integer, SaleTransaction>
+    - returnsList: Map<Integer, ReturnTransaction>
+    - productsList: Map<Integer,ProductType>
+    - balanceOperationsList: Map<Integer, BalanceOperation>
+    - usersList: Map<Integer, User>
     - loggedIn: User
 
-    + addUserToUsersList(User u): Boolean
-    + removeUserFromUserList(User u): Boolean
-    + addProductToProductsList(Product p): Integer
-    + removeProductFromProductsList(Product p): Boolean
-    + getProductTypeByCode(String productCode): ProductType
-    + addOrderToOrdersList(Order o): Integer
-    + removeOrderFromOrdersList(Order o): Boolean
-    + getCustomerByID(Integer ID): Customer
-    + getNewSaleTransactionId(): Integer
-    + addSaleToSalesList(SaleTransaction sale): void
-    + removeSaleFromSalesList(SaleTransaction sale): void
-    + getSaleTransactionById(Integer transactionId): SaleTransaction
-    + isValidCreditCard(String cardNumber): boolean
-    + sumDigits(int[] arr): Integer
-    + addBalanceToBalancesList(): void
-    + newBalanceUpdate(Double amount): void
-    + checkEnoughBalanceOnCardAndPay(String creditCard, Double amount): Boolean
-    + updateCreditCardBalance(String creditCard, Double amount): Boolean
+    - addUserToUsersList(User u): Boolean
+    - removeUserFromUserList(User u): Boolean
+    - getUserByUsername() : User
+    - addProductToProductsList(Product p): Boolean
+    - removeProductFromProductsList(Product p): Boolean
+    - getProductTypeByCode(String productCode): ProductType
+    - addOrderToOrdersList(Order o): Boolean
+    - removeOrderFromOrdersList(Order o): Boolean
+    - getCustomerByID(Integer ID): Customer
+    - addCustomerToCustomersList(Customer c): Boolean
+    - removeCustomerToCustomersList(Customer c): Boolean
+    - addSaleToSalesList(SaleTransaction sale): Boolean
+    - removeSaleFromSalesList(SaleTransaction sale): Boolean
+    - getSaleTransactionById(Integer transactionId): SaleTransaction
+    - isValidCreditCard(String cardNumber): Boolean
+    - sumDigits(int[] arr): Integer
+    - addBalanceToBalancesList(): Boolean
+    - newBalanceUpdate(Double amount): Boolean
+    - checkEnoughBalanceOnCardAndPay(String creditCard, Double amount): Boolean
+    - updateCreditCardBalance(String creditCard, Double amount): Boolean
 }
 
 note top: All methods in EZShopInterface are implemented in EZShop
@@ -147,6 +150,7 @@ note top: All methods in EZShopInterface are implemented in EZShop
 
 package it.polito.ezshop.model{
 class User{
+    - ID: Integer
     - role: String
     - username: String
     - password: String
@@ -253,6 +257,7 @@ EZShop --> "*" ReturnTransaction
 EZShop --> "*" Order
 EZShop --> "*" ProductType
 EZShop --> "*" BalanceOperation
+EZShop --> "*" LoyaltyCard
 
 Customer --> "0..1" LoyaltyCard
 SaleTransaction "1..*" --> "0..1" LoyaltyCard
@@ -458,6 +463,25 @@ end
 EZShop->user : boolean
 deactivate EZShop
 ```
+## Use Case 5
+
+### Scenario 5.1: Login
+```plantuml
+actor "Administrator\nShop Manager\nCashier" as user
+autonumber
+
+activate EZShop
+user->EZShop : login()
+EZShop->EZShop : getUserByUsername()
+alt if user is found
+    EZShop->User : getPassword()
+    alt if password is correct
+        EZShop-->user: return User
+    end
+end
+deactivate EZShop
+```
+
 
 ## Use Case 6 & 7
 
@@ -470,43 +494,45 @@ actor "Administrator\nShop Manager\nCashier" as user
 
 autonumber
 
-user -> EZShop : startReturnTransaction()
+user -> EZShop : startTransaction()
 activate  EZShop
 EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : Boolean
-EZShop -> EZShop : getNewSaleTransactionId()
 EZShop -> SaleTransaction : new SaleTransaction()
 EZShop <-- SaleTransaction : SaleTransaction
 EZShop -> EZShop : addSaleToSalesList()
 user <-- EZShop : Integer
 deactivate EZShop
 
-user -> EZShop : addProductToSale()
-activate  EZShop
-'EZShop -> User : canManageSalesAndCustomers()
-'EZShop <-- User : Boolean
-EZShop -> EZShop : getSaleTransactionById()
-EZShop-> EZShop : getProductTypeByCode()
-EZShop -> SaleTransaction : AddUpdateDeleteProductInSale()
-SaleTransaction -> SaleTransaction : isProductInSale()
-SaleTransaction -> ProductType : getSellPrice()
-SaleTransaction <-- ProductType : Double
-EZShop <-- SaleTransaction : Boolean
-user <-- EZShop : Boolean
-deactivate EZShop
+loop forEach product
+    user -> EZShop : addProductToSale()
+    activate  EZShop
+    'EZShop -> User : canManageSalesAndCustomers()
+    'EZShop <-- User : Boolean
+    EZShop -> EZShop : getSaleTransactionById()
+    EZShop-> EZShop : getProductTypeByCode()
+    EZShop -> SaleTransaction : AddUpdateDeleteProductInSale()
+    SaleTransaction -> SaleTransaction : isProductInSale()
+    SaleTransaction -> ProductType : getSellPrice()
+    SaleTransaction <-- ProductType : Double
+    EZShop <-- SaleTransaction : Boolean
+    user <-- EZShop : Boolean
+    deactivate EZShop
 
-user -> EZShop : applyDiscountRateToProduct()
-activate  EZShop
-'EZShop -> User : canManageSalesAndCustomers()
-'EZShop <-- User : Boolean
-EZShop -> EZShop : getSaleTransactionById()
-EZShop-> EZShop : getProductTypeByCode()
-EZShop -> SaleTransaction : ApplyDiscountToSaleProduct()
-SaleTransaction -> ProductType : getSellPrice()
-SaleTransaction <-- ProductType : Double
-EZShop <-- SaleTransaction : Boolean
-user <-- EZShop : Boolean
-deactivate EZShop
+
+    user -> EZShop : applyDiscountRateToProduct()
+    activate  EZShop
+    'EZShop -> User : canManageSalesAndCustomers()
+    'EZShop <-- User : Boolean
+    EZShop -> EZShop : getSaleTransactionById()
+    EZShop-> EZShop : getProductTypeByCode()
+    EZShop -> SaleTransaction : ApplyDiscountToSaleProduct()
+    SaleTransaction -> ProductType : getSellPrice()
+    SaleTransaction <-- ProductType : Double
+    EZShop <-- SaleTransaction : Boolean
+    user <-- EZShop : Boolean
+    deactivate EZShop
+end
 
 user -> EZShop : applyDiscountRateToSale()
 activate  EZShop
@@ -587,30 +613,31 @@ actor "Administrator\nShop Manager\nCashier" as user
 
 autonumber
 
-user -> EZShop : startReturnTransaction()
+user -> EZShop : startTransaction()
 activate  EZShop
 EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : Boolean
-EZShop -> EZShop : getNewSaleTransactionId()
 EZShop -> SaleTransaction : new SaleTransaction()
 EZShop <-- SaleTransaction : SaleTransaction
 EZShop -> EZShop : addSaleToSalesList()
 user <-- EZShop : Integer
 deactivate EZShop
 
-user -> EZShop : addProductToSale()
-activate  EZShop
-'EZShop -> User : canManageSalesAndCustomers()
-'EZShop <-- User : Boolean
-EZShop -> EZShop : getSaleTransactionById()
-EZShop-> EZShop : getProductTypeByCode()
-EZShop -> SaleTransaction : AddUpdateDeleteProductInSale()
-SaleTransaction -> SaleTransaction : isProductInSale()
-SaleTransaction -> ProductType : getSellPrice()
-SaleTransaction <-- ProductType : Double
-EZShop <-- SaleTransaction : Boolean
-user <-- EZShop : Boolean
-deactivate EZShop
+loop forEach product
+    user -> EZShop : addProductToSale()
+    activate  EZShop
+    'EZShop -> User : canManageSalesAndCustomers()
+    'EZShop <-- User : Boolean
+    EZShop -> EZShop : getSaleTransactionById()
+    EZShop-> EZShop : getProductTypeByCode()
+    EZShop -> SaleTransaction : AddUpdateDeleteProductInSale()
+    SaleTransaction -> SaleTransaction : isProductInSale()
+    SaleTransaction -> ProductType : getSellPrice()
+    SaleTransaction <-- ProductType : Double
+    EZShop <-- SaleTransaction : Boolean
+    user <-- EZShop : Boolean
+    deactivate EZShop
+end
 
 user -> EZShop : endSaleTransaction()
 activate  EZShop
