@@ -122,11 +122,17 @@ class EZShop{
     - usersList: List<User>
     - loggedIn: User
 
+    + addUserToUsersList(User u): Boolean
+    + removeUserFromUserList(User u): Boolean
+    + addProductToProductsList(Product p): Integer
+    + removeProductFromProductsList(Product p): Boolean
+    + getProductTypeByCode(String productCode): ProductType
+    + addOrderToOrdersList(Order o): Integer
+    + removeOrderFromOrdersList(Order o): Boolean
     + getNewSaleTransactionId(): Integer
     + addSaleToSalesList(SaleTransaction sale): void
     + removeSaleFromSalesList(SaleTransaction sale): void
     + getSaleTransactionById(Integer transactionId): SaleTransaction
-    + getProductTypeByCode(String productCode): ProductType
     + isValidCreditCard(String cardNumber): boolean
     + sumDigits(int[] arr): Integer
     + addBalanceToBalancesList(): void
@@ -233,7 +239,7 @@ class ProductType{
     - LevelID: Integer
 
     + isValidBarcode(String barcode): static boolean
-    + updateProductQuantity(Integer quantitytorem): void
+    + updateProductQuantity(Integer quantityDiff): boolean
 }
 
 EZShop -|> EZShopInterface : <<implements>>
@@ -298,6 +304,7 @@ User-->EZShop: Boolean
 EZShop->ProductType : new ProdutctType()
 EZShop<--ProductType : ProductType
 EZShop->EZShop : addProductToInventory()
+EZShop-->user : Integer
 deactivate EZShop
 ```
 
@@ -316,6 +323,7 @@ EZShop->ProductType : setBarcode()
 EZShop->ProductType : setDescription()
 EZShop->ProductType : setSellPrice()
 EZShop->ProductType : setNotes()
+EZShop-->user: boolean
 deactivate EZShop
 ```
 
@@ -332,10 +340,11 @@ activate EZShop
 EZShop->User : new User()
 User -->EZShop : User
 EZShop->EZShop : addUserToUsersList()
+EZShop-->user: Integer
 deactivate EZShop
 ```
 
-### Scenario 2.3 - Create user and define rights
+### Scenario 2.3 - Modify User Rights
 
 ```plantuml
 actor "Administrator" as user
@@ -347,6 +356,7 @@ EZShop->User : canManageUsers()
 User --> EZShop : Boolean
 EZShop->EZShop : getUser()
 EZShop->User : setRole()
+EZShop --> user: boolean
 deactivate EZShop
 ```
 
@@ -366,6 +376,7 @@ EZShop->EZShop : getProductTypeByBarCode()
 EZShop->Order : new Order()
 Order --> EZShop : Order
 EZShop->EZShop : addOrderToOrdersList()
+EZShop --> user: Integer
 deactivate EZShop
 ```
 
@@ -382,7 +393,8 @@ User --> EZShop : Boolean
 EZShop->EZShop : getOrderByID()
 EZShop->Order : setOrderState()
 EZShop->EZShop : getProductTypeByID()
-EZShop->ProductType : setQuantity()
+EZShop->ProductType : updateProductQuantity()
+EZShop --> user: boolean
 deactivate EZShop
 ```
 
