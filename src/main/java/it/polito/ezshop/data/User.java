@@ -17,4 +17,6 @@ public interface User {
     String getRole();
 
     void setRole(String role);
+
+    boolean canManageSaleTransactions();
 }
