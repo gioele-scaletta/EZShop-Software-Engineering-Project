@@ -157,44 +157,329 @@ public class EZShop implements EZShopInterface {
         return null;
     }
 
+    /**
+     * This method saves a new customer into the system. The customer's name should be unique.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param customerName the name of the customer to be registered
+     *
+     * @return the id (>0) of the new customer if successful, -1 otherwise
+     *
+     * @throws InvalidCustomerNameException if the customer name is empty or null
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
     @Override
     public Integer defineCustomer(String customerName) throws InvalidCustomerNameException, UnauthorizedException {
-        return null;
+
+        // Exceptions
+        if (customerName.isEmpty() || customerName == null){
+            throw new InvalidCustomerNameException("The customer's name is empty or null");
+        }
+        if (){
+            throw new UnauthorizedException("There is no logged user or this user has not the rights to create a new customer");
+        }
+
+        // The customer's name should be unique
+        for (Customer c: customers) {
+            if(c.getCustomerName() == customerName) {
+                return -1;
+            }
+        }
+
+        // Get an unique id
+
+        // Create a new customer and add him to the customer list
+        Customer c = new Customer (customerName, id);
+        this.customers.add(c);
+
+        return id;
     }
 
+    /**
+     * This method updates the data of a customer with given <id>. This method can be used to assign/delete a card to a
+     * customer. If <newCustomerCard> has a numeric value than this value will be assigned as new card code, if it is an
+     * empty string then any existing card code connected to the customer will be removed and, finally, if it assumes the
+     * null value then the card code related to the customer should not be affected from the update. The card code should
+     * be unique and should be a string of 10 digits.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param id the id of the customer to be updated
+     * @param newCustomerName the new name to be assigned
+     * @param newCustomerCard the new card code to be assigned. If it is empty it means that the card must be deleted,
+     *                        if it is null then we don't want to update the cardNumber
+     *
+     * @return true if the update is successful
+     *          false if the update fails ( cardCode assigned to another user, db unreacheable)
+     *
+     * @throws InvalidCustomerNameException if the customer name is empty or null
+     * @throws InvalidCustomerCardException if the customer card is empty, null or if it is not in a valid format (string with 10 digits)
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
     @Override
     public boolean modifyCustomer(Integer id, String newCustomerName, String newCustomerCard) throws InvalidCustomerNameException, InvalidCustomerCardException, InvalidCustomerIdException, UnauthorizedException {
-        return false;
+
+        // Exceptions
+        if (customerName.isEmpty() || customerName == null){
+            throw new InvalidCustomerNameException("The customer's name is empty or null");
+        }
+
+        if ( (customerCard.length() != 10 && !customerCard.isEmpty()) || customerCard == null){
+            throw new InvalidCustomerCardException("The customer's card is null or it is not in a valid format");
+        }
+
+        if (){
+            throw new UnauthorizedException("There is no logged user or this user has not the rights to modify a customer");
+        }
+
+        // Update customer name
+        Customer c = this.getCustomer(id);
+        c.setCustomerName(newCustomerName)
+
+    
+        // Detach if newCustomerCard is an empty string
+        if (newCustomerCard.isEmpty()){
+            c.setCustomerCard(newCustomerCard);
+            c.points = 0;
+            return true;
+        }
+
+        // Update the card number if newCustomerCard is not null
+        if(newCustomerCard == null){
+            return false;
+        }
+        c.setCustomerCard(newCustomerCard);
+
+        return true;
     }
+
+
+    /**
+     * This method deletes a customer with given id from the system.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param id the id of the customer to be deleted
+     * @return true if the customer was successfully deleted
+     *          false if the user does not exists or if we have problems to reach the db
+     *
+     * @throws InvalidCustomerIdException if the id is null, less than or equal to 0.
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
 
     @Override
     public boolean deleteCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
-        return false;
+
+        // Exceptions
+        if (id <= 0  || id == null){
+            throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
+        }
+
+        if (){
+            throw new UnauthorizedException("There is no logged user or this user has not the rights to delete a customer");
+        }
+
+        // Get the customer by id
+        Customer c = this.getCustomer(id);
+
+        // Check if customer is null
+        if (c == null){
+            return false;
+        }
+
+        // Remove c from customer list
+        this.customers.remove(c);
+
+        // Remove the object c referencing it to null, therefore its attributes are also eliminated: its id, 
+        // its customerName and its customerCard
+        c = null;
+
+        return true;
     }
 
+    /**
+     * This method returns a customer with given id.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param id the id of the customer
+     *
+     * @return the customer with given id
+     *          null if that user does not exists
+     *
+     * @throws InvalidCustomerIdException if the id is null, less than or equal to 0.
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+    */
     @Override
     public Customer getCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
+
+        // Exceptions
+        if (id <= 0  || id == null){
+            throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
+        }
+
+        if (){
+            throw new UnauthorizedException("There is no logged user or this user has not the rights to get a customer");
+        }
+
+        // Search in the customer list and if the customer is found it is returned
+        for (Customer c: customers){
+            if (c.getId() == id){
+                return c;
+            }
+        }
+
+        // If the customer is not found, null is returned
         return null;
     }
+
+
+    /**
+     * This method returns a list containing all registered users.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @return the list of all the customers registered
+     *
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
 
     @Override
     public List<Customer> getAllCustomers() throws UnauthorizedException {
-        return null;
+        
+        // Exception
+        if (){
+            throw new UnauthorizedException("There is no logged user or this user has not the rights to get all customers");
+        }
+
+        return this.customers;
     }
 
+
+     /**
+     * This method returns a string containing the code of a new assignable card.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @return the code of a new available card. An empty string if the db is unreachable
+     *
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
     @Override
     public String createCard() throws UnauthorizedException {
-        return null;
+
+        // Exception
+        if (){
+            throw new UnauthorizedException("There is no logged user or this user has not the rights to create a new card");
+        }
+
+        // An empty string is the db is unreachable ???
+
+         return null;
     }
 
+
+    /**
+     * This method assigns a card with given card code to a customer with given identifier. A card with given card code
+     * can be assigned to one customer only.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param customerCard the number of the card to be attached to a customer
+     * @param customerId the id of the customer the card should be assigned to
+     *
+     * @return true if the operation was successful
+     *          false if the card is already assigned to another user, if there is no customer with given id, if the db is unreachable
+     *
+     * @throws InvalidCustomerIdException if the id is null, less than or equal to 0.
+     * @throws InvalidCustomerCardException if the card is null, empty or in an invalid format
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
     @Override
     public boolean attachCardToCustomer(String customerCard, Integer customerId) throws InvalidCustomerIdException, InvalidCustomerCardException, UnauthorizedException {
-        return false;
+
+        // Exceptions
+        if (id <= 0  || id == null){
+            throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
+        }
+
+        if (customerCard.length() != 10 || customerCard.isEmpty() || customerCard == null) {
+            throw new InvalidCustomerCardException("The customer's card is null, empty or it is not in a valid format");
+        }
+
+        if (){
+            throw new UnauthorizedException("There is no logged user or this user has not the rights to attach a card to customer");
+        }
+
+        // Return false if the card is already assigned to another user
+        for (Customer c: customers) {
+            if (c.getCustomerCard() == customerCard) {
+                return false;
+            }
+        }
+
+        // Return false if there is no customer with given id
+        Customer c = getCustomer(id);
+        if (c == null) {
+            return false
+        }
+
+        // False if the db is unreachable ???
+
+        // Attach card to customer c
+        c.setCustomerCard(customerCard);
+        return true;
     }
+
+
+    /**
+     * This method updates the points on a card adding to the number of points available on the card the value assumed by
+     * <pointsToBeAdded>. The points on a card should always be greater than or equal to 0.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param customerCard the card the points should be added to
+     * @param pointsToBeAdded the points to be added or subtracted ( this could assume a negative value)
+     *
+     * @return true if the operation is successful
+     *          false   if there is no card with given code,
+     *                  if pointsToBeAdded is negative and there were not enough points on that card before this operation,
+     *                  if we cannot reach the db.
+     *
+     * @throws InvalidCustomerCardException if the card is null, empty or in an invalid format
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
 
     @Override
     public boolean modifyPointsOnCard(String customerCard, int pointsToBeAdded) throws InvalidCustomerCardException, UnauthorizedException {
-        return false;
+
+        // Exceptions
+        if (customerCard.length() != 10 || customerCard.isEmpty() || customerCard == null) {
+            throw new InvalidCustomerCardException("The customer's card is null, empty or it is not in a valid format");
+        }
+
+        if (){
+            throw new UnauthorizedException("There is no logged user or this user has not the rights to modify points on a card");
+        }
+
+        Customer customer;
+
+        for (Customer c: customers) {
+            if (c.getCustomerCard() == customerCard) {
+                customer = c;
+            }
+        }
+
+        // Return false if there is no card with given code assigned to a customer
+        if (customer == null){
+            return false;
+        }
+        
+        Integer points = customer.getPoints();
+        Integer totalPoints = points + pointsToBeAdded;
+
+        // The points on a card should always be greater than or equal to 0.
+        if (totalPoints <= 0) {
+            return false;
+        }
+
+        // False if the db is unreachable ???
+
+        customer.setPoints(totalPoints);
+        return true;
     }
 
 
