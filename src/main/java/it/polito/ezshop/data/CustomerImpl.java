@@ -59,7 +59,7 @@ public class CustomerImpl implements Customer{
 
     @Override
     public void setPoints(Integer points) {
-        this.points = this.points + points;
+        this.points = points;
     }
 
 }
