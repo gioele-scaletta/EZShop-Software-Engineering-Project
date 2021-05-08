@@ -189,7 +189,7 @@ public class EZShop implements EZShopInterface {
         // Get an unique id
         Integer id = 1;
         for (Customer c: customers) {
-          if (c.getId() == id) {
+          if (c.getId() >= id) {
             id = c.getId() + 1;
           }
         }
@@ -229,8 +229,8 @@ public class EZShop implements EZShopInterface {
             throw new InvalidCustomerNameException("The customer's name is empty or null");
         }
 
-        if ( (customerCard.length() != 10 && !customerCard.isEmpty()) || customerCard == null){
-            throw new InvalidCustomerCardException("The customer's card is null or it is not in a valid format");
+        if (customerCard.length() != 10){
+            throw new InvalidCustomerCardException("The customer's card is not in a valid format");
         }
 
         if (this.loggedIn == null){
@@ -251,10 +251,10 @@ public class EZShop implements EZShopInterface {
 
         // Update the card number if newCustomerCard is not null
         if(newCustomerCard == null){
-            return false;
+            return true;
         }
-        c.setCustomerCard(newCustomerCard);
 
+        c.setCustomerCard(newCustomerCard);
         return true;
     }
 
