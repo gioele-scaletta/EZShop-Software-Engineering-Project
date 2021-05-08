@@ -6,6 +6,11 @@ public class ProductTypeImpl implements ProductType{
     private String description;
     private Double sellPrice;
     private Integer quantity;
+
+    public Double getProductDiscountRate() {
+        return productDiscountRate;
+    }
+
     private Double productDiscountRate;
     private String notes;
     private Integer aisleID;
