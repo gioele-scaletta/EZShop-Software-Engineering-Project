@@ -187,6 +187,12 @@ public class EZShop implements EZShopInterface {
         }
 
         // Get an unique id
+        Integer id = 1;
+        for (Customer c: customers) {
+          if (c.getId() == id) {
+            id = c.getId() + 1;
+          }
+        }
 
         // Create a new customer and add him to the customer list
         Customer c = new Customer (customerName, id);
