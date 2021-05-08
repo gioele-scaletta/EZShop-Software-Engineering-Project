@@ -175,7 +175,7 @@ public class EZShop implements EZShopInterface {
         if (customerName.isEmpty() || customerName == null){
             throw new InvalidCustomerNameException("The customer's name is empty or null");
         }
-        if (){
+        if (this.loggedIn == null){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to create a new customer");
         }
 
@@ -227,7 +227,7 @@ public class EZShop implements EZShopInterface {
             throw new InvalidCustomerCardException("The customer's card is null or it is not in a valid format");
         }
 
-        if (){
+        if (this.loggedIn == null){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to modify a customer");
         }
 
@@ -273,7 +273,7 @@ public class EZShop implements EZShopInterface {
             throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
         }
 
-        if (){
+        if (this.loggedIn == null){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to delete a customer");
         }
 
@@ -315,7 +315,7 @@ public class EZShop implements EZShopInterface {
             throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
         }
 
-        if (){
+        if (this.loggedIn == null){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to get a customer");
         }
 
@@ -344,7 +344,7 @@ public class EZShop implements EZShopInterface {
     public List<Customer> getAllCustomers() throws UnauthorizedException {
         
         // Exception
-        if (){
+        if (this.loggedIn == null){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to get all customers");
         }
 
@@ -364,7 +364,7 @@ public class EZShop implements EZShopInterface {
     public String createCard() throws UnauthorizedException {
 
         // Exception
-        if (){
+        if (this.loggedIn == null){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to create a new card");
         }
 
@@ -401,7 +401,7 @@ public class EZShop implements EZShopInterface {
             throw new InvalidCustomerCardException("The customer's card is null, empty or it is not in a valid format");
         }
 
-        if (){
+        if (this.loggedIn == null){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to attach a card to customer");
         }
 
@@ -451,7 +451,7 @@ public class EZShop implements EZShopInterface {
             throw new InvalidCustomerCardException("The customer's card is null, empty or it is not in a valid format");
         }
 
-        if (){
+        if (this.loggedIn == null){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to modify points on a card");
         }
 
