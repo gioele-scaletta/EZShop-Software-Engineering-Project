@@ -419,9 +419,9 @@ public class EZShop implements EZShopInterface {
         }
 
         // Return false if there is no customer with given id
-        Customer c = getCustomer(id);
+        Customer c = getCustomer(customerId);
         if (c == null) {
-            return false
+            return false;
         }
 
         // False if the db is unreachable ???
@@ -461,7 +461,7 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException("There is no logged user or this user has not the rights to modify points on a card");
         }
 
-        Customer customer;
+        Customer customer = null;
 
         for (Customer c: customers) {
             if (c.getCustomerCard() == customerCard) {
