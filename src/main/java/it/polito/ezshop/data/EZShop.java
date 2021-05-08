@@ -59,7 +59,7 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public Integer createUser(String username, String password, String role) throws InvalidUsernameException, InvalidPasswordException, InvalidRoleException {
-        return null;
+        User u = new UserImpl(username, password, role);
     }
 
     @Override
