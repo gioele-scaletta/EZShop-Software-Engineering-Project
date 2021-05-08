@@ -239,13 +239,13 @@ public class EZShop implements EZShopInterface {
 
         // Update customer name
         Customer c = this.getCustomer(id);
-        c.setCustomerName(newCustomerName)
+        c.setCustomerName(newCustomerName);
 
     
         // Detach if newCustomerCard is an empty string
         if (newCustomerCard.isEmpty()){
             c.setCustomerCard(newCustomerCard);
-            c.points = 0;
+            c.setPoints(0);
             return true;
         }
 
