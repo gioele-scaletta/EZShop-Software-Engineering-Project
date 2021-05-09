@@ -2,31 +2,20 @@ package it.polito.ezshop.data;
 
 import it.polito.ezshop.exceptions.*;
 
+import java.sql.*;
 import java.time.LocalDate;
-import java.util.List;
-import javax.print.attribute.standard.JobKOctets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.lang.Exception;
-import java.io.PrintStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 
 
 public class EZShop implements EZShopInterface {
 
 
-    private List<CustomerImpl> customers;
+    private List<Customer> customers;
     private List<OrderImpl> orders;
     private List<SaleTransactionImpl> salesList;
     private List<ReturnTransactionImpl> returnsList;
@@ -38,6 +27,7 @@ public class EZShop implements EZShopInterface {
     private User loggedIn;
     private Integer latestUserID;
     private Integer latestProductTypeID;
+    Connection conn;
 
     public EZShop(){
         this.customers = new ArrayList<>();
@@ -50,7 +40,51 @@ public class EZShop implements EZShopInterface {
         this.loggedIn = null;
         this.latestUserID = 1;
         this.latestProductTypeID = 1;
+
+        try {
+            this.conn = DriverManager.getConnection("jdbc:sqlite:Database.sqlite");
+        } catch (SQLException var2) {
+            var2.printStackTrace();
+        }
+
+        System.out.println("Connection with db ok");
+
+        //LOAD customers list
+        String customerssql = "SELECT * FROM CUSTOMERS";
+
+        try (
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(customerssql)) {
+
+            // loop through the result set
+            while (rs.next()) {
+                CustomerImpl c=new CustomerImpl(rs.getInt("CustomerId"),rs.getString("CustomerName"),rs.getString("CustomerCard"),rs.getInt("Points"));
+                customers.add(c);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        //Load Sales list
+
+        String salessql = "SELECT * FROM SALESTRANSACTIONS";
+
+        try (
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(salessql)) {
+
+            // loop through the result set
+            while (rs.next()) {
+                int tid=rs.getInt("transactionId");
+                SaleTransactionImpl sale=new SaleTransactionImpl(tid,rs.getString("State"),rs.getString("PaymentType"),rs.getDouble("Amount"),rs.getDouble("discountRate"),getCustomerById(rs.getInt("transactionCardId")),getBalanceById(rs.getInt("BalanceOperation")), getProdListForSaleDB(tid) );
+                salesList.add(sale);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
     }
+
 
     @Override
     public void reset() {
@@ -59,8 +93,32 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public Integer createUser(String username, String password, String role) throws InvalidUsernameException, InvalidPasswordException, InvalidRoleException {
-        User u = new UserImpl(username, password, role);
-    }
+            if (!username.isEmpty() && username != null) {
+                if (!password.isEmpty() && password != null) {
+                    String sql = "INSERT INTO UserTable(Username,Password,Role) VALUES(?,?,?)";
+
+                    try {
+                        PreparedStatement pstmt = this.conn.prepareStatement(sql);
+                        pstmt.setString(1, username);
+                        pstmt.setString(2, password);
+                        pstmt.setString(3, role);
+                        pstmt.executeUpdate();
+                    } catch (SQLException var6) {
+                        System.out.println(var6.getMessage());
+                    }
+
+                    Integer var7 = this.latestUserID;
+                    this.latestUserID = this.latestUserID + 1;
+                    return var7;
+                } else {
+                    System.out.println("Invalid password");
+                    return -1;
+                }
+            } else {
+                System.out.println("Invalid username");
+                return -1;
+            }
+        }
 
     @Override
     public boolean deleteUser(Integer id) throws InvalidUserIdException, UnauthorizedException {
@@ -187,9 +245,15 @@ public class EZShop implements EZShopInterface {
         }
 
         // Get an unique id
+        Integer id = 1;
+        for (Customer c: customers) {
+          if (c.getId() >= id) {
+            id = c.getId() + 1;
+          }
+        }
 
         // Create a new customer and add him to the customer list
-        Customer c = new Customer (customerName, id);
+        CustomerImpl c = new CustomerImpl (customerName, id);
         this.customers.add(c);
 
         return id;
@@ -219,12 +283,12 @@ public class EZShop implements EZShopInterface {
     public boolean modifyCustomer(Integer id, String newCustomerName, String newCustomerCard) throws InvalidCustomerNameException, InvalidCustomerCardException, InvalidCustomerIdException, UnauthorizedException {
 
         // Exceptions
-        if (customerName.isEmpty() || customerName == null){
+        if (newCustomerName.isEmpty() || newCustomerName == null){
             throw new InvalidCustomerNameException("The customer's name is empty or null");
         }
 
-        if ( (customerCard.length() != 10 && !customerCard.isEmpty()) || customerCard == null){
-            throw new InvalidCustomerCardException("The customer's card is null or it is not in a valid format");
+        if (newCustomerCard.length() != 10){
+            throw new InvalidCustomerCardException("The customer's card is not in a valid format");
         }
 
         if (this.loggedIn == null){
@@ -233,22 +297,22 @@ public class EZShop implements EZShopInterface {
 
         // Update customer name
         Customer c = this.getCustomer(id);
-        c.setCustomerName(newCustomerName)
+        c.setCustomerName(newCustomerName);
 
     
         // Detach if newCustomerCard is an empty string
         if (newCustomerCard.isEmpty()){
             c.setCustomerCard(newCustomerCard);
-            c.points = 0;
+            c.setPoints(0);
             return true;
         }
 
         // Update the card number if newCustomerCard is not null
         if(newCustomerCard == null){
-            return false;
+            return true;
         }
-        c.setCustomerCard(newCustomerCard);
 
+        c.setCustomerCard(newCustomerCard);
         return true;
     }
 
@@ -393,7 +457,7 @@ public class EZShop implements EZShopInterface {
     public boolean attachCardToCustomer(String customerCard, Integer customerId) throws InvalidCustomerIdException, InvalidCustomerCardException, UnauthorizedException {
 
         // Exceptions
-        if (id <= 0  || id == null){
+        if (customerId <= 0  || customerId == null){
             throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
         }
 
@@ -413,9 +477,9 @@ public class EZShop implements EZShopInterface {
         }
 
         // Return false if there is no customer with given id
-        Customer c = getCustomer(id);
+        Customer c = getCustomer(customerId);
         if (c == null) {
-            return false
+            return false;
         }
 
         // False if the db is unreachable ???
@@ -455,7 +519,7 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException("There is no logged user or this user has not the rights to modify points on a card");
         }
 
-        Customer customer;
+        Customer customer = null;
 
         for (Customer c: customers) {
             if (c.getCustomerCard() == customerCard) {
@@ -493,9 +557,10 @@ public class EZShop implements EZShopInterface {
     public Integer startSaleTransaction() throws UnauthorizedException {
         if(!loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            //throw new UnauthorizedException();
-            return -1;
+            throw new UnauthorizedException();
+            //return -1;
         }
+
 
         Integer newtransactionId=getNewSaleTransactionId();
         SaleTransactionImpl sale= new SaleTransactionImpl(newtransactionId);
@@ -523,16 +588,41 @@ public class EZShop implements EZShopInterface {
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation*/
     @Override
     public boolean addProductToSale(Integer transactionId, String productCode, int amount) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException {
-        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
+        if(!loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            //throw new UnauthorizedException();
-            return false;
+            throw new UnauthorizedException();
+            //return false;
         }
 
-        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        //MISSING handle invalid transactionId
 
-        return sale.EditProductInSale(getProductTypeByCode(productCode), amount);
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        if (sale==null){
+            throw new InvalidTransactionIdException();
+
+        }
+
+
+        ProductTypeImpl product= getProductTypeByCode(productCode);
+        if (product==null){
+            throw new InvalidProductCodeException();
+        }
+        if (product==null) return false;
+
+        if ((product.getQuantity()< amount)||(amount <0)){
+            throw new InvalidQuantityException();
+        }
+
+        //AMOUNT AND PROD LIST UPDATED ONLY AT THE END IN DB
+        if(!loggedIn.canManageSaleTransactions())return false;
+        if (sale==null) return false;
+        if (product==null) return false;
+        if ((product.getQuantity()< amount)||(amount <0)) return false;
+
+        if(sale.EditProductInSale(product, amount)) {
+            return true;
+        } else{
+            return false;
+        }
     }
 
     /**
@@ -556,19 +646,39 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean deleteProductFromSale(Integer transactionId, String productCode, int amount) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException {
-        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
+        if(!loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            //throw new UnauthorizedException();
-            return false;
+            throw new UnauthorizedException();
+            //return false;
         }
 
-
-        //MISSING handling exceptions
-
         SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        if (sale==null){
+            throw new InvalidTransactionIdException();
+        }
 
-        return sale.EditProductInSale(getProductTypeByCode(productCode), -amount);
+        ProductTypeImpl product= getProductTypeByCode(productCode);
+        if (product==null){
+            throw new InvalidProductCodeException();
+        }
 
+        if ((product.getQuantity()< amount)||(amount <0)){
+            throw new InvalidQuantityException();
+        }
+
+        //AMOUNT IN DB UPDATED ONLY AT THE END
+
+        if(!loggedIn.canManageSaleTransactions())return false;
+        if (sale==null) return false;
+        if (product==null) return false;
+        if ((product.getQuantity()< amount)||(amount <0)) return false;
+
+        if(sale.EditProductInSale(product, -amount)) {
+
+            return true;
+        } else{
+            return false;
+        }
 
     }
 
@@ -594,17 +704,30 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidDiscountRateException, UnauthorizedException {
-        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
+        if(!loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            //throw new UnauthorizedException();
-            return false;
+            throw new UnauthorizedException();
+            //return false;
         }
 
         SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        if (sale==null){
+            throw new InvalidTransactionIdException();
+        }
 
-        //MISSING handle invalid transactionId
-        //MISSING handle invalid productCode
-        //MISSING handle invalid discountRate
+        ProductTypeImpl product= getProductTypeByCode(productCode);
+        if (product==null){
+            throw new InvalidProductCodeException();
+        }
+
+
+        if ((discountRate <0)||(discountRate >= 1)){
+            throw new InvalidDiscountRateException();
+        }
+        if(!loggedIn.canManageSaleTransactions())return false;
+        if (sale==null) return false;
+        if (product==null) return false;
+        if ((discountRate <0)||(discountRate >= 1)) return false;
 
         return sale.ApplyDiscountToSaleProduct(discountRate, getProductTypeByCode(productCode));
     }
@@ -625,21 +748,27 @@ public class EZShop implements EZShopInterface {
      * @throws InvalidDiscountRateException if the discount rate is less than 0 or if it greater than or equal to 1.00
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
-    public boolean applyDiscountRateToSale(Integer transactionId, double discountRate) /*throws InvalidTransactionIdException, InvalidDiscountRateException, UnauthorizedException*/{
-
-        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
+    public boolean applyDiscountRateToSale(Integer transactionId, double discountRate) throws InvalidTransactionIdException, InvalidDiscountRateException, UnauthorizedException {
+        if(!loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            //throw new UnauthorizedException();
-            return false;
+            throw new UnauthorizedException();
+            //return false;
         }
 
         SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        if (sale==null){
+            throw new InvalidTransactionIdException();
+        }
 
-        //MISSING handle invalid transactionId
-        //MISSING handle invalid productCode
-        //MISSING handle invalid discountRate
+        if ((discountRate <0)||(discountRate >= 1)){
+            throw new InvalidDiscountRateException();
+        }
 
-        return sale.ApplyDiscountToSaleAll(discountRate);//if discount rate out of bound returns false
+        if(!loggedIn.canManageSaleTransactions())return false;
+        if (sale==null) return false;
+        if ((discountRate <0)||(discountRate >= 1)) return false;
+
+        return sale.ApplyDiscountToSaleAll(discountRate);
 
     }
 
@@ -661,12 +790,17 @@ public class EZShop implements EZShopInterface {
     public int computePointsForSale(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
         if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            //throw new UnauthorizedException();
+            throw new UnauthorizedException();
 
         }
 
         SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        //MISSING handle invalid transactionId (ret -1)
+        if (sale==null){
+            throw new InvalidTransactionIdException();
+        }
+
+        if (sale==null) return -1;
+
 
         return sale.PointsForSale();
     }
@@ -690,12 +824,19 @@ public class EZShop implements EZShopInterface {
     public boolean endSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
         if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            //throw new UnauthorizedException();
-            return false;
+            throw new UnauthorizedException();
+           // return false;
         }
 
+
         SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        //MISSING handle invalid transactionId
+        if (sale==null){
+            throw new InvalidTransactionIdException();
+        }
+
+        if(!loggedIn.canManageSaleTransactions())return false;
+        if (sale==null) return false;
+
 
         return sale.EndSaleUpdateProductQuantity();
     }
@@ -719,15 +860,23 @@ public class EZShop implements EZShopInterface {
     public boolean deleteSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
         if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            //throw new UnauthorizedException();
-            return false;
+            throw new UnauthorizedException();
+            //return false;
         }
 
-
         SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        if (sale==null){
+            throw new InvalidTransactionIdException();
+        }
+
+        if(!loggedIn.canManageSaleTransactions())return false;
+        if (sale==null) return false;
+
+        //DB??? io metto dopo
+
         sale.AbortSaleUpdateProductQuantity();
         RemoveSaleFromSalesList(sale);
-        return true; //exceptions manca
+        return true;
     }
 
 
@@ -746,12 +895,21 @@ public class EZShop implements EZShopInterface {
     public SaleTransaction getSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
         if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            //throw new UnauthorizedException();
-            return null;
+            throw new UnauthorizedException();
+
         }
 
-        return getSaleTransactionById(transactionId);
-        //exceptions manca
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        if (sale==null){
+            throw new InvalidTransactionIdException();
+        }
+
+        if(!loggedIn.canManageSaleTransactions())return null;
+        if (sale==null) return null;
+
+
+        return sale;
+
     }
 
     @Override
@@ -799,11 +957,32 @@ public class EZShop implements EZShopInterface {
      * @throws InvalidPaymentException if the cash is less than or equal to 0*/
     @Override
     public double receiveCashPayment(Integer transactionId, double cash) throws InvalidTransactionIdException, InvalidPaymentException, UnauthorizedException {
-        SaleTransactionImpl sale=getSaleTransactionById(transactionId);
+        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
+            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
+            throw new UnauthorizedException();
+        }
+
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        if (sale==null){
+            throw new InvalidTransactionIdException();
+        }
+
+        if(cash<=0){
+            throw new InvalidPaymentException();
+        }
+
+        if (sale==null) return -1;
+        if(cash<=0) return -1;
 
         Double change=sale.PaySaleAndReturnChange(cash, true);
-        newBalanceUpdate(cash);
-        return change;
+        if(change!=-1) {
+            SaleConfirmedEnsurePersistence(sale);
+            newBalanceUpdate(cash);
+
+            return change;
+        } else{
+            return -1;
+        }
     }
 
 
@@ -831,20 +1010,35 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean receiveCreditCardPayment(Integer transactionId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException {
-
-        //Check enogh money on card MISSING
-        //store card MISSING
-        SaleTransactionImpl sale=getSaleTransactionById(transactionId);
-
-        if(isValidCreditCard(creditCard)) {
-            sale.PaySaleAndReturnChange(sale.getCurrentAmount(), false);
-            newBalanceUpdate(sale.getCurrentAmount());
-            return true;
-
+        if(!loggedIn.canManageSaleTransactions()) {
+            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
+            throw new UnauthorizedException();
         }
-        sale.AbortSaleUpdateProductQuantity();
-        RemoveSaleFromSalesList(sale);
-        return false;
+
+        if(!isValidCreditCard(creditCard)) {
+            throw new InvalidCreditCardException();
+        }
+
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        if (sale==null){
+            throw new InvalidTransactionIdException();
+        }
+
+        if (sale==null) return false;
+        if(!isValidCreditCard(creditCard)) return false;
+        //CHECK ENOUGH MONEY ON CARD MISSING
+        //STORE CARD MISSING
+
+        sale.PaySaleAndReturnChange(sale.getCurrentAmount(), false);
+        SaleConfirmedEnsurePersistence(sale);
+        newBalanceUpdate(sale.getCurrentAmount());
+        return true;
+
+
+        //CHEK IF I NEED THIS OR HANDLED BY DELETE TRNSACTION
+        //sale.AbortSaleUpdateProductQuantity();
+        //RemoveSaleFromSalesList(sale);
+
     }
 
     @Override
@@ -876,7 +1070,117 @@ public class EZShop implements EZShopInterface {
 
 
     //ADDED METHODS FOR FR 6 AND 7 PART
-    //ADDED METHODS
+
+
+    private void SaleConfirmedEnsurePersistence(SaleTransactionImpl sale ){
+
+        //UPDATE SALETRANSACTIONTABLE
+        String sql = "INSERT INTO SALETRANSACTIONS(transactionId,State,PaymentType, Amount, discountRate, transactionCardId, BalanceOperationId) VALUES(?,?,?,?,?,?,?)";
+
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setInt(1, sale.getTicketNumber());
+            pstmt.setString(2, sale.getStateString());
+            pstmt.setString(3, sale.getPayString());
+            pstmt.setDouble(4, sale.getPrice());
+            pstmt.setDouble(5, sale.getDiscountRate());
+            pstmt.setInt(6, sale.getTransactionCard().getId());
+            pstmt.setInt(7, sale.getSaleOperationRecord().getBalanceId());
+            pstmt.executeUpdate();
+        } catch (SQLException var6) {
+            System.out.println(var6.getMessage());
+        }
+
+        Integer tid=sale.getTicketNumber();
+
+     //UPDATE SALESANDPRODUCTS TABLE
+      sale.getListOfProductsSale().entrySet().stream().forEach(el-> {
+
+            String salesandproductssql = "INSERT INTO SALESANDPRODUCTS(transactionId,BarCode,Quantity) VALUES(?,?,?)";
+
+            try (
+                    PreparedStatement pstmt = conn.prepareStatement(salesandproductssql)) {
+
+                // set the value of the parameter
+                pstmt.setInt(1, sale.getTicketNumber());
+                pstmt.setString(2, el.getKey().getBarCode());
+                pstmt.setInt(3, el.getValue());
+                //
+                ResultSet rs = pstmt.executeQuery();
+
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+
+            //UPDATE INVENTORY
+          String salesprodsql = "UPDATE PRODUCTTYPES SET Quantity=Quantity-? WHERE BarCode=?";
+
+          try (
+                  PreparedStatement pstmt = conn.prepareStatement(salesandproductssql)) {
+
+              // set the value of the parameter
+              pstmt.setInt(1, el.getValue());
+              pstmt.setString(2, el.getKey().getBarCode());
+
+              //
+              ResultSet rs = pstmt.executeQuery();
+
+          } catch (SQLException e) {
+              System.out.println(e.getMessage());
+          }
+
+
+      });
+            //UPDATE CUSTOMER POINTS
+
+          String salecustomersql = "UPDATE CUSTOMERS SET Points=? WHERE customerId=?";
+
+          try (
+                  PreparedStatement pstmt = conn.prepareStatement(salecustomersql)) {
+
+              // set the value of the parameter
+              pstmt.setInt(1, sale.getTransactionCard().getPoints());
+              pstmt.setInt(2, sale.getTransactionCard().getId());
+              ResultSet rs = pstmt.executeQuery();
+
+          } catch (SQLException e) {
+              System.out.println(e.getMessage());
+          }
+
+    }
+
+    private HashMap<ProductTypeImpl, Integer> getProdListForSaleDB(int tid) {
+
+        String salesandproductssql = "SELECT * FROM SALESANDPRODUCTS WHERE transactionId=?";
+        HashMap< ProductTypeImpl, Integer> map= new HashMap<>();
+        try (
+                PreparedStatement pstmt  = conn.prepareStatement(salesandproductssql)){
+
+            // set the value of the parameter
+            pstmt.setDouble(1,tid);
+            //
+            ResultSet rs  = pstmt.executeQuery();
+
+            // loop through the result set
+            while (rs.next()) {
+                String prod =rs.getString("BarCode");
+                map.put(getProductTypeByCode(prod), rs.getInt("Quantity"));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return map;
+    }
+
+    private CustomerImpl getCustomerById(int transactionCardId) {
+        return (CustomerImpl) customers.stream().filter(c->c.getId()==transactionCardId);
+    }
+
+    private BalanceOperationImpl getBalanceById(int balanceOperation) {
+        return (BalanceOperationImpl) balanceOperationsList.stream().filter(c->c.getBalanceId()==balanceOperation);
+    }
+
     public Integer getNewSaleTransactionId(){
         return salesList.stream().map(e -> e.getTicketNumber()).max(Integer::compare).get()+1;
     }
@@ -885,6 +1189,7 @@ public class EZShop implements EZShopInterface {
         salesList.add(sale);
     }
 
+    //MANCA DB UPDATE
     public void RemoveSaleFromSalesList(SaleTransactionImpl sale) {
         salesList.remove(sale);
     }
@@ -951,12 +1256,35 @@ public class EZShop implements EZShopInterface {
     }
 
     public void newBalanceUpdate(Double amount){
-        //tobeimplemented
+      int  id=balanceOperationsList.stream().map(e -> e.getBalanceId()).max(Integer::compare).get()+1;
+
+      LocalDate now = LocalDate.now();
+        if(amount>0){
+           BalanceOperationImpl bal=new BalanceOperationImpl(id,now,amount,"CREDIT" );
+            addBalanceToBalancesList(bal);
+        } else{
+            BalanceOperationImpl bala=new BalanceOperationImpl(id,now,amount,"DEBIT" );
+            addBalanceToBalancesList(bala);
+        }
 
     }
 
-    public void addBalanceToBalancesList(){
-        //tobimplemented
+    public void addBalanceToBalancesList(BalanceOperationImpl b){
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        balanceOperationsList.add(b);
+        String sql = "INSERT INTO BALANCEOPERATIONS(balanceID,Date, Amount, Type) VALUES(?,?,?,?)";
+
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setInt(1, b.getBalanceId());
+            pstmt.setString(2, dtf.format(b.getDate()));
+            pstmt.setDouble(3, b.getAmount());
+            pstmt.setString(4, b.getType());
+
+            pstmt.executeUpdate();
+        } catch (SQLException var6) {
+            System.out.println(var6.getMessage());
+        }
     }
 
     public boolean attachCardToSale(LoyaltyCardImpl customerCard){

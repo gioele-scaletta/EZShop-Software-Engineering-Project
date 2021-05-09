@@ -21,6 +21,24 @@ public class CustomerImpl implements Customer{
         // The customer starts with 0 points on the fidelity card
         this.points = 0; 
     }
+    public void updatePoints(Integer tmp) {
+        this.points=this.points+tmp;
+    }
+    public CustomerImpl(int customerId, String customerName, String customerCard, Integer points) {
+        // Customer name
+        this.customerName = customerName;
+
+        // A fidelity card has not been attached to the client
+        this.customerCard = customerCard;
+
+        // Customer id
+        this.id = customerId;
+
+
+        this.points = points;
+
+
+    }
 
     @Override
     public String getCustomerName() {

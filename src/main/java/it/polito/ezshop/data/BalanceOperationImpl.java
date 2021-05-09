@@ -8,6 +8,13 @@ public class BalanceOperationImpl implements BalanceOperation {
     private double money;
     private String type;
 
+    public BalanceOperationImpl(int balanceId, LocalDate date, double money, String type) {
+        this.balanceId = balanceId;
+        this.date = date;
+        this.money = money;
+        this.type = type;
+    }
+
 
     @Override
     public int getBalanceId() {
@@ -47,5 +54,9 @@ public class BalanceOperationImpl implements BalanceOperation {
     @Override
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Double getAmount() {
+        return this.money;
     }
 }
