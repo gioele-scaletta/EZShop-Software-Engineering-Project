@@ -12,8 +12,9 @@ public class EZShop {
 
     public static void main(String[] args) throws InvalidPasswordException, InvalidRoleException, InvalidUsernameException {
         EZShopInterface ezShop = new it.polito.ezshop.data.EZShop();
-        //EZShopGUI gui = new EZShopGUI(ezShop);
-        ezShop.createUser("marco2", "password", "administrator");
+        EZShopGUI gui = new EZShopGUI(ezShop);
+     //   ezShop.createUser("marco2", "password", "administrator");
+       // ezShop.login()
 
     }
 

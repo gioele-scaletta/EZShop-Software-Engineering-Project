@@ -7,6 +7,19 @@ public class ProductTypeImpl implements ProductType{
     private Double sellPrice;
     private Integer quantity;
 
+    public ProductTypeImpl(Integer productID, String barcode, String description, Double sellPrice, Integer quantity, Double productDiscountRate, String notes, Integer aisleID, String rackID, Integer levelID) {
+        this.productID = productID;
+        this.barcode = barcode;
+        this.description = description;
+        this.sellPrice = sellPrice;
+        this.quantity = quantity;
+        this.productDiscountRate = productDiscountRate;
+        this.notes = notes;
+        this.aisleID = aisleID;
+        this.rackID = rackID;
+        this.levelID = levelID;
+    }
+
     public Double getProductDiscountRate() {
         return productDiscountRate;
     }

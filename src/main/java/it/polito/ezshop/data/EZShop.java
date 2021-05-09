@@ -2,7 +2,7 @@ package it.polito.ezshop.data;
 
 import it.polito.ezshop.exceptions.*;
 
-import javax.persistence.criteria.CriteriaBuilder;
+//import javax.persistence.criteria.CriteriaBuilder;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 public class EZShop implements EZShopInterface {
 
-
+    /* NO MORE NEEDED SINCE WE USE DB
     private List<Customer> customers;
     private List<OrderImpl> orders;
     private List<SaleTransactionImpl> salesList;
@@ -22,19 +22,24 @@ public class EZShop implements EZShopInterface {
     private List<ProductTypeImpl> productsList;
     private List<LoyaltyCardImpl> cardsList;
 
+
+     */
     private UserImpl loggedIn;
     private Integer latestUserID;
     private Integer latestProductTypeID;
+    private Integer flag =0;
+    SaleTransactionImpl currentsale;
     Connection conn;
 
     public EZShop() {
+       /* NO MORE NEEDED SINCE WE USE DB
         this.customers = new ArrayList<>();
         this.orders = new ArrayList<>();
         this.customers = new ArrayList<>();
         this.returnsList = new ArrayList<>();
         this.balanceOperationsList = new ArrayList<>();
         this.usersList = new ArrayList<>();
-        this.productsList = new ArrayList<>();
+        this.productsList = new ArrayList<>(); */
         this.loggedIn = null;
         this.latestUserID = 1;
         this.latestProductTypeID = 1;
@@ -47,39 +52,6 @@ public class EZShop implements EZShopInterface {
 
         System.out.println("Connection with db ok");
 
-        //LOAD customers list
-        String customerssql = "SELECT * FROM CUSTOMERS";
-
-        try (
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(customerssql)) {
-
-            // loop through the result set
-            while (rs.next()) {
-                CustomerImpl c = new CustomerImpl(rs.getInt("CustomerId"), rs.getString("CustomerName"), rs.getString("CustomerCard"), rs.getInt("Points"));
-                customers.add(c);
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-
-        //Load Sales list
-
-        String salessql = "SELECT * FROM SALESTRANSACTIONS";
-
-        try (
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(salessql)) {
-
-            // loop through the result set
-            while (rs.next()) {
-                int tid = rs.getInt("transactionId");
-                SaleTransactionImpl sale = new SaleTransactionImpl(tid, rs.getString("State"), rs.getString("PaymentType"), rs.getDouble("Amount"), rs.getDouble("discountRate"), getCustomerById(rs.getInt("transactionCardId")), getBalanceById(rs.getInt("BalanceOperation")), getProdListForSaleDB(tid));
-                salesList.add(sale);
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
 
     }
 
@@ -130,6 +102,7 @@ public class EZShop implements EZShopInterface {
             pstmt.setString(2, password);
             pstmt.setString(3, role.toLowerCase());
             pstmt.executeUpdate();
+
             try (ResultSet generatedKeys = pstmt.getGeneratedKeys()){
                 Integer id = generatedKeys.getInt("Id");
                 return id;
@@ -649,8 +622,8 @@ public class EZShop implements EZShopInterface {
 
 
         Integer newtransactionId=getNewSaleTransactionId();
-        SaleTransactionImpl sale= new SaleTransactionImpl(newtransactionId);
-        addSaleToSalesList(sale);
+        currentsale = new SaleTransactionImpl(newtransactionId);
+        //addSaleToSalesList(sale); NO MROE SICNE WE USE DB
         return newtransactionId;
     }
 
@@ -961,7 +934,7 @@ public class EZShop implements EZShopInterface {
         //DB??? io metto dopo
 
         sale.AbortSaleUpdateProductQuantity();
-        RemoveSaleFromSalesList(sale);
+        //RemoveSaleFromSalesList(sale);
         return true;
     }
 
@@ -1158,6 +1131,142 @@ public class EZShop implements EZShopInterface {
     //ADDED METHODS FOR FR 6 AND 7 PART
 
 
+    //GET OBJECT FROM ID AND DB
+    private CustomerImpl getCustomerById(int transactionCardId) {
+        //return (CustomerImpl) customers.stream().filter(c->c.getId()==transactionCardId);
+
+        String getnewid = "SELECT * FROM CUSTOMERS WHERE CustomerId=?";
+        CustomerImpl c=null;
+        try (
+                PreparedStatement pstmt  = conn.prepareStatement(getnewid)){
+
+            pstmt.setInt(1, transactionCardId);
+            ResultSet rs    = pstmt.executeQuery(getnewid);
+
+            c =new  CustomerImpl(rs.getInt("CustomerId"),rs.getString("CustomerName"), rs.getString("CustomerCard"), rs.getInt("Points")  );
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return c;
+    }
+
+    private BalanceOperationImpl getBalanceById(int balanceOperation) {
+        // return (BalanceOperationImpl) balanceOperationsList.stream().filter(c->c.getBalanceId()==balanceOperation);
+        String getnewid = "SELECT * FROM BALANCEOPERATIONS WHERE BalanceId=?";
+        BalanceOperationImpl bal=null;
+        try (
+                PreparedStatement pstmt  = conn.prepareStatement(getnewid)){
+
+            pstmt.setInt(1,balanceOperation);
+            ResultSet rs    = pstmt.executeQuery(getnewid);
+
+            bal =new  BalanceOperationImpl(rs.getInt("BalanceId"),LocalDate.parse(rs.getString("Date")), rs.getDouble("amount"), rs.getString("Type")  );
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return bal;
+
+    }
+
+    SaleTransactionImpl getSaleTransactionById(Integer transactionId) {
+
+        if (currentsale.getTicketNumber()==transactionId){
+            return currentsale;
+        }
+/* NO MORE LISTSS USING DB NOW
+        for (SaleTransactionImpl e : salesList ){
+            if(e.getTicketNumber()==transactionId){
+                return e;
+            }
+        }
+        return null;
+        // throw ...
+        */
+        String getnewid = "SELECT * FROM SALETRANSACTIONS WHERE transactionId=?";
+        SaleTransactionImpl sale=null;
+        try (
+                PreparedStatement pstmt  = conn.prepareStatement(getnewid)){
+
+            pstmt.setInt(1,transactionId);
+            ResultSet rs    = pstmt.executeQuery(getnewid);
+
+            sale =new SaleTransactionImpl(transactionId, rs.getString("State"), rs.getString("PaymentType"), rs.getDouble("Amount"), rs.getDouble("discountRate"), getCustomerById(rs.getInt("transactionCardId")), getBalanceById(rs.getInt("BalanceOperation")), getProdListForSaleDB(transactionId));
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return sale;
+
+    }
+
+    ProductTypeImpl getProductTypeByCode(String productCode){
+       /* for (ProductTypeImpl p : productsList) {
+            if (productCode.equals(p.getBarCode())){
+                return p;
+            }
+        }
+        return null;
+        // throw ...*/
+
+        String getnewid_ = "SELECT * FROM PRODUCTTYPES WHERE BarCode=?";
+        ProductTypeImpl prod=null;
+        try (
+                PreparedStatement pstmt  = conn.prepareStatement(getnewid_)){
+
+            pstmt.setString(1,productCode);
+            ResultSet rs    = pstmt.executeQuery(getnewid_);
+            prod =new ProductTypeImpl(rs.getInt("productId"), rs.getString("BarCode"),rs.getString("Description"),rs.getDouble("SellPrice"),rs.getInt("Quantity"),rs.getDouble("prodDiscoutRate"),rs.getString("notes"),rs.getInt("aisleID"),rs.getString("rackID"),rs.getInt("levelID"));
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return prod;
+    }
+
+    //GET NEW ID
+
+    public Integer getNewSaleTransactionId(){
+        Integer tid=-1;
+        String getnewid = "SELECT COALESCE(MAX(transactionId),'0') FROM SALETRANSACTIONS";
+
+        try (
+                Statement stmt  = conn.createStatement();
+                ResultSet rs    = stmt.executeQuery(getnewid)){
+
+            tid=rs.getInt("transactionId");
+
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return tid;
+    }
+
+    private int getNewBalanceOperationId() {
+        Integer tid=-1;
+        String getnewid = "SELECT COALESCE(MAX(BalanceId),'0') FROM SALETRANSACTIONS";
+
+        try (
+                Statement stmt  = conn.createStatement();
+                ResultSet rs    = stmt.executeQuery(getnewid)){
+
+            tid=rs.getInt("BalanceIdId");
+
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return tid;
+    }
+
+    //PERSISTENCE WHEN SALE FINISHES
+
     private void SaleConfirmedEnsurePersistence(SaleTransactionImpl sale ){
 
         //UPDATE SALETRANSACTIONTABLE
@@ -1235,6 +1344,44 @@ public class EZShop implements EZShopInterface {
 
     }
 
+    public void newBalanceUpdate(Double amount){
+        int  id=getNewBalanceOperationId();
+
+        LocalDate now = LocalDate.now();
+        if(amount>0){
+            BalanceOperationImpl bal=new BalanceOperationImpl(id,now,amount,"CREDIT" );
+            addBalanceToBalancesList(bal);
+        } else{
+            BalanceOperationImpl bala=new BalanceOperationImpl(id,now,amount,"DEBIT" );
+            addBalanceToBalancesList(bala);
+        }
+
+    }
+
+
+
+
+    public void addBalanceToBalancesList(BalanceOperationImpl b){
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        //balanceOperationsList.add(b); NO MORE SINCE NO MORE LISTS
+        String sql = "INSERT INTO BALANCEOPERATIONS(balanceID,Date, Amount, Type) VALUES(?,?,?,?)";
+
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setInt(1, b.getBalanceId());
+            pstmt.setString(2, dtf.format(b.getDate()));
+            pstmt.setDouble(3, b.getAmount());
+            pstmt.setString(4, b.getType());
+
+            pstmt.executeUpdate();
+        } catch (SQLException var6) {
+            System.out.println(var6.getMessage());
+        }
+    }
+
+
+    //GET LIST OF PRODUCTS RELATED TO A SALE CAN BE USEFUL FOR RERURN TRANSACTION
+
     private HashMap<ProductTypeImpl, Integer> getProdListForSaleDB(int tid) {
 
         String salesandproductssql = "SELECT * FROM SALESANDPRODUCTS WHERE transactionId=?";
@@ -1259,47 +1406,19 @@ public class EZShop implements EZShopInterface {
         return map;
     }
 
-    private CustomerImpl getCustomerById(int transactionCardId) {
-        return (CustomerImpl) customers.stream().filter(c->c.getId()==transactionCardId);
-    }
 
-    private BalanceOperationImpl getBalanceById(int balanceOperation) {
-        return (BalanceOperationImpl) balanceOperationsList.stream().filter(c->c.getBalanceId()==balanceOperation);
-    }
 
-    public Integer getNewSaleTransactionId(){
-        return salesList.stream().map(e -> e.getTicketNumber()).max(Integer::compare).get()+1;
-    }
-
+   /* NO MORE NEEDED SINCE WE DON'T LOAD LIST AT THE START
     public void addSaleToSalesList(SaleTransactionImpl sale){
         salesList.add(sale);
-    }
+    }*/
 
-    //MANCA DB UPDATE
+    /*NO MORE NEEDED SINCE WE DON'T LOAD LIST AT THE START
     public void RemoveSaleFromSalesList(SaleTransactionImpl sale) {
         salesList.remove(sale);
-    }
+    }*/
 
-    SaleTransactionImpl getSaleTransactionById(Integer transactionId) /*throw*/{
 
-        for (SaleTransactionImpl e : salesList ){
-            if(e.getTicketNumber()==transactionId){
-                return e;
-            }
-        }
-        return null;
-        // throw ...
-    }
-
-    ProductTypeImpl getProductTypeByCode(String productCode){
-        for (ProductTypeImpl p : productsList) {
-            if (productCode.equals(p.getBarCode())){
-                return p;
-            }
-        }
-        return null;
-        // throw ...
-    }
 
     public boolean isValidCreditCard(String cardNumber)
     {
@@ -1341,50 +1460,6 @@ public class EZShop implements EZShopInterface {
         return Arrays.stream(arr).sum();
     }
 
-    public void newBalanceUpdate(Double amount){
-      int  id=balanceOperationsList.stream().map(e -> e.getBalanceId()).max(Integer::compare).get()+1;
 
-      LocalDate now = LocalDate.now();
-        if(amount>0){
-           BalanceOperationImpl bal=new BalanceOperationImpl(id,now,amount,"CREDIT" );
-            addBalanceToBalancesList(bal);
-        } else{
-            BalanceOperationImpl bala=new BalanceOperationImpl(id,now,amount,"DEBIT" );
-            addBalanceToBalancesList(bala);
-        }
 
-    }
-
-    public void addBalanceToBalancesList(BalanceOperationImpl b){
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-        balanceOperationsList.add(b);
-        String sql = "INSERT INTO BALANCEOPERATIONS(balanceID,Date, Amount, Type) VALUES(?,?,?,?)";
-
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
-            pstmt.setInt(1, b.getBalanceId());
-            pstmt.setString(2, dtf.format(b.getDate()));
-            pstmt.setDouble(3, b.getAmount());
-            pstmt.setString(4, b.getType());
-
-            pstmt.executeUpdate();
-        } catch (SQLException var6) {
-            System.out.println(var6.getMessage());
-        }
-    }
-
-    public boolean attachCardToSale(LoyaltyCardImpl customerCard){
-        return true;
-    }
-
-    LoyaltyCardImpl getCardById(String customerCard) /*throw*/{
-
-        for (LoyaltyCardImpl e : cardsList ){
-            if(e.getCardId()==customerCard){
-                return e;
-            }
-        }
-        return null;
-        // throw ...
-    }
 }
