@@ -9,6 +9,8 @@ import java.util.*;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
+import java.io.*;
+
 
 public class EZShop implements EZShopInterface {
 
@@ -1040,6 +1042,7 @@ public class EZShop implements EZShopInterface {
 
             return change;
         } else{
+            //BE CAREFUL CHECK I ASSUME THAT THEN LATER DELETESALETRANSACTION WILL BE CALLED
             return -1;
         }
     }
@@ -1068,7 +1071,7 @@ public class EZShop implements EZShopInterface {
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
     @Override
-    public boolean receiveCreditCardPayment(Integer transactionId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException {
+    public boolean receiveCreditCardPayment(Integer transactionId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException{
         if(!loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
@@ -1085,19 +1088,46 @@ public class EZShop implements EZShopInterface {
 
         if (sale==null) return false;
         if(!isValidCreditCard(creditCard)) return false;
+
         //CHECK ENOUGH MONEY ON CARD MISSING
-        //STORE CARD MISSING
+        File file = new File("./CARDS.txt");
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
-        sale.PaySaleAndReturnChange(sale.getCurrentAmount(), false);
-        SaleConfirmedEnsurePersistence(sale);
-        newBalanceUpdate(sale.getCurrentAmount());
-        return true;
+        String st;
+        Double amount=-1.0;
+        while (true) {
+            try {
+                if (!((st = br.readLine()) != null)){
+                    String[] s= st.split(",");
+                    if(s[0].equals(creditCard)){
+                      amount=Double.parseDouble(s[1]);
+                    }
+                    break;}
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
+            if(amount==-1){
+                return false;
+            } else{
+                if(sale.PaySaleAndReturnChange(amount, false)>=0){
+                    SaleConfirmedEnsurePersistence(sale);
+                    newBalanceUpdate(sale.getCurrentAmount());
+                    return true;
+                } else{
+                    return false;
+                    //BE CAREFUL CHECK I ASSUME THAT THEN LATER DELETESALETRANSACTION WILL BE CALLED
+                }
+            }
 
-        //CHEK IF I NEED THIS OR HANDLED BY DELETE TRNSACTION
-        //sale.AbortSaleUpdateProductQuantity();
-        //RemoveSaleFromSalesList(sale);
+        }
 
+        return false;
     }
 
     @Override

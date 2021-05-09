@@ -1,5 +1,6 @@
 package it.polito.ezshop.data;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,42 +11,14 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     Integer transactionId;
     Double amount;
-    List<TicketEntry> listOfProductsEntries= new ArrayList<>();
-
-
     enum State{PAYED, CLOSED, INPROGRESS};
-
-    public String getStateString() {
-        return state.toString();
-    }
-
     State state;
     enum PaymentType{CARD, CASH};
-
-    public String getPayString() {
-        return pay.toString();
-    }
-
     PaymentType pay;
     Double discountRate;
-
-
-   public HashMap<ProductTypeImpl, Integer> getListOfProductsSale() {
-        return listOfProductsSale;
-    }
-
-   HashMap< ProductTypeImpl, Integer> listOfProductsSale =new HashMap<>();
-
-    public CustomerImpl getTransactionCard() {
-        return transactionCard;
-    }
-
+    HashMap< ProductTypeImpl, Integer> listOfProductsSale =new HashMap<>();
+    List<TicketEntry> listOfProductsEntries;
     CustomerImpl transactionCard;
-
-    public BalanceOperation getSaleOperationRecord() {
-        return saleOperationRecord;
-    }
-
     BalanceOperation saleOperationRecord;
 
 
@@ -74,6 +47,7 @@ public class SaleTransactionImpl implements SaleTransaction {
 		this.listOfProductsSale=listofprod;
         listofprod.entrySet().stream().forEach(e->{
 		   TicketEntryImpl t=  new TicketEntryImpl(e.getKey().getBarCode(), e.getKey().getProductDescription(), e.getValue(), e.getKey().getSellPrice(), e.getKey().getProductDiscountRate());
+
             listOfProductsEntries.add(t);
         });
 		this.transactionCard = transactionCardId;
@@ -82,7 +56,19 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     }
 
-
+    public HashMap<ProductTypeImpl, Integer> getListOfProductsSale() {
+        return listOfProductsSale;
+    }
+    public String getPayString() {
+        return pay.toString();
+    }
+    public String getStateString() {
+        return state.toString();
+    }
+    public CustomerImpl getTransactionCard() {
+        return transactionCard;
+    }
+    public BalanceOperation getSaleOperationRecord() {return saleOperationRecord; }
 
     @Override
     public Integer getTicketNumber() {
