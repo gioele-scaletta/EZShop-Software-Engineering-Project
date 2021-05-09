@@ -10,15 +10,15 @@ public interface User {
 
     void setId(Integer id);
 
-    String getUsername() throws InvalidUsernameException;
+    String getUsername();
 
-    void setUsername(String username) throws InvalidUsernameException;
+    void setUsername(String username);
 
     String getPassword();
 
-    void setPassword(String password) throws InvalidPasswordException;
+    void setPassword(String password);
 
     String getRole();
 
-    void setRole(String role) throws InvalidRoleException;
+    void setRole(String role);
 }

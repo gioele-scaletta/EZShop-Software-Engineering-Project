@@ -4,6 +4,8 @@ import it.polito.ezshop.exceptions.InvalidPasswordException;
 import it.polito.ezshop.exceptions.InvalidRoleException;
 import it.polito.ezshop.exceptions.InvalidUsernameException;
 
+import javax.management.relation.Role;
+
 public class UserImpl implements User{
 
     private Integer id;
@@ -11,22 +13,20 @@ public class UserImpl implements User{
     private String password;
     private RoleType role;
 
+
     private enum RoleType {cashier, administrator, shopmanager};
 
-    public UserImpl(String username, String password, String role) throws InvalidUsernameException, InvalidPasswordException, InvalidRoleException{
-        if(username.isBlank())
-            throw new InvalidUsernameException();
-        if(password.isBlank())
-            throw new InvalidPasswordException();
-        if(role.isBlank())
-            throw new InvalidRoleException();
+    public UserImpl(Integer id, String username, String password, String role) {
+        this.id = id;
         this.username = username;
         this.password = password;
-        try {
-            this.role = RoleType.valueOf(role.toLowerCase());
-        } catch(IllegalArgumentException e) {
-            throw new InvalidRoleException();
-        }
+        this.role = RoleType.valueOf(role.toLowerCase());
+    }
+
+    public UserImpl(String username, String password, String role) {
+        this.username = username;
+        this.password = password;
+        this.role = RoleType.valueOf(role.toLowerCase());
     }
 
     @Override
@@ -45,11 +45,7 @@ public class UserImpl implements User{
     }
 
     @Override
-    public void setUsername(String username) throws InvalidUsernameException {
-        if(username.isBlank())
-            throw new InvalidUsernameException();
-        this.username = username;
-    }
+    public void setUsername(String username) { this.username = username; }
 
     @Override
     public String getPassword() {
@@ -57,11 +53,7 @@ public class UserImpl implements User{
     }
 
     @Override
-    public void setPassword(String password) throws InvalidPasswordException {
-        if(password.isBlank())
-            throw new InvalidPasswordException();
-        this.password = password;
-    }
+    public void setPassword(String password) { this.password = password; }
 
     @Override
     public String getRole() {
@@ -69,12 +61,15 @@ public class UserImpl implements User{
     }
 
     @Override
-    public void setRole(String role) throws InvalidRoleException {
+    public void setRole(String role) { this.role = RoleType.valueOf(role.toLowerCase()); }
+
+    public static boolean isAllowedRole(String role) {
         try {
-            this.role = RoleType.valueOf(role.toLowerCase());
-        } catch(IllegalArgumentException e) {
-            throw new InvalidRoleException();
+            RoleType r = RoleType.valueOf(role.toLowerCase());
+        } catch(Exception e) {
+            return false;
         }
+        return true;
     }
 
     //Permission for FR1

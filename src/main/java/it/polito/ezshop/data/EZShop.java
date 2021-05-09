@@ -2,12 +2,10 @@ package it.polito.ezshop.data;
 
 import it.polito.ezshop.exceptions.*;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
@@ -24,12 +22,12 @@ public class EZShop implements EZShopInterface {
     private List<ProductTypeImpl> productsList;
     private List<LoyaltyCardImpl> cardsList;
 
-    private User loggedIn;
+    private UserImpl loggedIn;
     private Integer latestUserID;
     private Integer latestProductTypeID;
     Connection conn;
 
-    public EZShop(){
+    public EZShop() {
         this.customers = new ArrayList<>();
         this.orders = new ArrayList<>();
         this.customers = new ArrayList<>();
@@ -58,7 +56,7 @@ public class EZShop implements EZShopInterface {
 
             // loop through the result set
             while (rs.next()) {
-                CustomerImpl c=new CustomerImpl(rs.getInt("CustomerId"),rs.getString("CustomerName"),rs.getString("CustomerCard"),rs.getInt("Points"));
+                CustomerImpl c = new CustomerImpl(rs.getInt("CustomerId"), rs.getString("CustomerName"), rs.getString("CustomerCard"), rs.getInt("Points"));
                 customers.add(c);
             }
         } catch (SQLException e) {
@@ -75,8 +73,8 @@ public class EZShop implements EZShopInterface {
 
             // loop through the result set
             while (rs.next()) {
-                int tid=rs.getInt("transactionId");
-                SaleTransactionImpl sale=new SaleTransactionImpl(tid,rs.getString("State"),rs.getString("PaymentType"),rs.getDouble("Amount"),rs.getDouble("discountRate"),getCustomerById(rs.getInt("transactionCardId")),getBalanceById(rs.getInt("BalanceOperation")), getProdListForSaleDB(tid) );
+                int tid = rs.getInt("transactionId");
+                SaleTransactionImpl sale = new SaleTransactionImpl(tid, rs.getString("State"), rs.getString("PaymentType"), rs.getDouble("Amount"), rs.getDouble("discountRate"), getCustomerById(rs.getInt("transactionCardId")), getBalanceById(rs.getInt("BalanceOperation")), getProdListForSaleDB(tid));
                 salesList.add(sale);
             }
         } catch (SQLException e) {
@@ -93,46 +91,134 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public Integer createUser(String username, String password, String role) throws InvalidUsernameException, InvalidPasswordException, InvalidRoleException {
-            if (!username.isEmpty() && username != null) {
-                if (!password.isEmpty() && password != null) {
-                    String sql = "INSERT INTO UserTable(Username,Password,Role) VALUES(?,?,?)";
+        //Check if username is valid
+        if (username.isBlank()) {
+            System.out.println("Invalid username");
+            throw new InvalidUsernameException();
+        }
+        //Check if password is valid
+        if (password.isBlank()) {
+            System.out.println("Invalid password");
+            throw new InvalidPasswordException();
+        }
+        //Check if role is valid
+        if(role.isBlank() || !UserImpl.isAllowedRole(role)) {
+            System.out.println("Invalid password");
+            throw new InvalidRoleException();
+        }
 
-                    try {
-                        PreparedStatement pstmt = this.conn.prepareStatement(sql);
-                        pstmt.setString(1, username);
-                        pstmt.setString(2, password);
-                        pstmt.setString(3, role);
-                        pstmt.executeUpdate();
-                    } catch (SQLException var6) {
-                        System.out.println(var6.getMessage());
-                    }
-
-                    Integer var7 = this.latestUserID;
-                    this.latestUserID = this.latestUserID + 1;
-                    return var7;
-                } else {
-                    System.out.println("Invalid password");
-                    return -1;
-                }
-            } else {
-                System.out.println("Invalid username");
+        //Checking if username is already present
+        String sql = "SELECT * FROM USERS AS U WHERE U.Username=?";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() != false) {
+                System.out.println("User " + username + " is already present");
                 return -1;
             }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return -1;
         }
+
+        //Inserting user
+        String sql2 = "INSERT INTO USERS(Username,Password,Role) VALUES(?,?,?)";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+            pstmt.setString(3, role.toLowerCase());
+            pstmt.executeUpdate();
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()){
+                Integer id = generatedKeys.getInt("Id");
+                return id;
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+
+
 
     @Override
     public boolean deleteUser(Integer id) throws InvalidUserIdException, UnauthorizedException {
-        return false;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageUsers()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Check if id is valid
+        if (id == null || id<=0) {
+            System.out.println("Invalid id");
+            throw new InvalidUserIdException();
+        }
+
+        //Deleting user
+        String sql2 = "DELETE FROM USERS WHERE ID=?";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     @Override
     public List<User> getAllUsers() throws UnauthorizedException {
-        return null;
+        String sql = "SELECT * FROM USERS";
+        List<User> users = new ArrayList<>();
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            try (ResultSet rs = pstmt.executeQuery()){
+                while(rs.next()) {
+                    Integer id = rs.getInt("Id");
+                    String username = rs.getString("Username");
+                    String password = rs.getString("Password");
+                    String role = rs.getString("Role");
+                    users.add(new UserImpl(id,username,password,role));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+        return users;
     }
 
     @Override
     public User getUser(Integer id) throws InvalidUserIdException, UnauthorizedException {
-        return null;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageUsers()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Check if id is valid
+        if (id == null || id<=0) {
+            System.out.println("Invalid id");
+            throw new InvalidUserIdException();
+        }
+        String sql = "SELECT * FROM USERS AS U WHERE U.Id=? ";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setInt(1,id);
+            try (ResultSet rs = pstmt.executeQuery()){
+                Integer id_u = rs.getInt("Id");
+                String username = rs.getString("Username");
+                String password = rs.getString("Password");
+                String role = rs.getString("Role");
+                return new UserImpl(id_u,username,password,role);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
     }
 
     @Override
