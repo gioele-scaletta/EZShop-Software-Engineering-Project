@@ -48,12 +48,11 @@ public class EZShop implements EZShopInterface {
 
         try {
             this.conn = DriverManager.getConnection("jdbc:sqlite:Database.sqlite");
-        } catch (SQLException var2) {
-            var2.printStackTrace();
+        } catch (SQLException throwables) {
+            System.err.println("Error with db connection");
+            throw new RuntimeException(throwables);
         }
-
         System.out.println("Connection with db ok");
-
 
     }
 
@@ -77,7 +76,7 @@ public class EZShop implements EZShopInterface {
         }
         //Check if role is valid
         if(role.isBlank() || !UserImpl.isAllowedRole(role)) {
-            System.out.println("Invalid password");
+            System.out.println("Invalid role");
             throw new InvalidRoleException();
         }
 
@@ -92,27 +91,41 @@ public class EZShop implements EZShopInterface {
                 return -1;
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
-            return -1;
+           e.printStackTrace();
+           return -1;
+        }
+
+        //Calculating new ID
+        Integer id;
+        String sql2 = "SELECT MAX(Id) FROM USERS";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() == false)
+                id = 1;
+            else
+                id = rs.getInt(1) + 1;
+
+        } catch (SQLException e){
+            System.err.println("Error with db connection");
+            throw new RuntimeException(e);
         }
 
         //Inserting user
-        String sql2 = "INSERT INTO USERS(Username,Password,Role) VALUES(?,?,?)";
+        String sql3 = "INSERT INTO USERS(Id,Username,Password,Role) VALUES(?,?,?,?)";
         try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
-            pstmt.setString(1, username);
-            pstmt.setString(2, password);
-            pstmt.setString(3, role.toLowerCase());
+            PreparedStatement pstmt = this.conn.prepareStatement(sql3);
+            pstmt.setInt(1,id);
+            pstmt.setString(2, username);
+            pstmt.setString(3, password);
+            pstmt.setString(4, role.toLowerCase());
             pstmt.executeUpdate();
-
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()){
-                Integer id = generatedKeys.getInt("Id");
-                return id;
-            }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             return -1;
         }
+        System.out.println("User " + username + " with role " + role.toLowerCase() + " and id " + id + " has been added to the application");
+        return id;
     }
 
 
@@ -131,36 +144,53 @@ public class EZShop implements EZShopInterface {
             throw new InvalidUserIdException();
         }
 
-        //Deleting user
-        String sql2 = "DELETE FROM USERS WHERE ID=?";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
-            pstmt.setInt(1, id);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        //Checking if user is trying to delete himself
+        if(id == loggedIn.getId()) {
+            System.out.println("User cannot delete himself");
             return false;
         }
+
+        //Deleting user
+        String sql = "DELETE FROM USERS WHERE Id=?";
+        int numDeleted;
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setInt(1, id);
+            numDeleted = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        if(numDeleted == 0) {
+            System.out.println("There's no user with id " + id);
+            return false;
+        }
+        System.out.println("User with id " + id + " has been deleted successfully");
         return true;
     }
 
     @Override
     public List<User> getAllUsers() throws UnauthorizedException {
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageUsers()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
         String sql = "SELECT * FROM USERS";
         List<User> users = new ArrayList<>();
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql);
-            try (ResultSet rs = pstmt.executeQuery()){
-                while(rs.next()) {
-                    Integer id = rs.getInt("Id");
-                    String username = rs.getString("Username");
-                    String password = rs.getString("Password");
-                    String role = rs.getString("Role");
-                    users.add(new UserImpl(id,username,password,role));
-                }
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()) {
+                Integer id = rs.getInt("Id");
+                String username = rs.getString("Username");
+                String password = rs.getString("Password");
+                String role = rs.getString("Role");
+                users.add(new UserImpl(id,username,password,role));
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             return null;
         }
         return users;
@@ -191,24 +221,110 @@ public class EZShop implements EZShopInterface {
                 return new UserImpl(id_u,username,password,role);
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
 
     @Override
     public boolean updateUserRights(Integer id, String role) throws InvalidUserIdException, InvalidRoleException, UnauthorizedException {
-        return false;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageUsers()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Check if id is valid
+        if (id == null || id<=0) {
+            System.out.println("Invalid id");
+            throw new InvalidUserIdException();
+        }
+
+        //Check if role is valid
+        if(role.isBlank() || !UserImpl.isAllowedRole(role)) {
+            System.out.println("Invalid role");
+            throw new InvalidRoleException();
+        }
+
+        //Updating user
+        String sql = "UPDATE USERS SET Role=? WHERE Id=?";
+        int numUpdated;
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setString(1, role.toLowerCase());
+            pstmt.setInt(2,id);
+            numUpdated = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        if(numUpdated == 0) {
+            System.out.println("There's no user with id " + id);
+            return false;
+        }
+        System.out.println("User with id " + id + " has now role " + role.toLowerCase());
+        return true;
     }
 
     @Override
     public User login(String username, String password) throws InvalidUsernameException, InvalidPasswordException {
-        return null;
+        //Checking if username is null or empty
+        if(username.isBlank()) {
+            System.out.println("Invalid login username");
+            throw new InvalidUsernameException();
+        }
+        //Checking if password is null or empty
+        if(password.isBlank()) {
+            System.out.println("Invalid login password");
+            throw new InvalidPasswordException();
+        }
+
+        //Checking if there's already a logged in user
+        if(this.loggedIn!=null) {
+            System.out.println("User " + this.loggedIn.getUsername() + " is already logged in. Perform log out first");
+            return null;
+        }
+
+        //Checking if the username is present and retrieving it
+        String sql = "SELECT * FROM USERS AS U where U.Username=?";
+        UserImpl userObj;
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setString(1,username);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() == false) {
+                System.out.println("User " + username + " is not present");
+                return null;
+            }
+            //Building the user object
+            userObj = new UserImpl(rs.getInt(1),rs.getString(2),rs.getString(3),rs.getString(4));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        //Checking if the password matches
+        if(!password.equals(userObj.getPassword())) {
+            System.out.println("Invalid password for the user " + username);
+            return null;
+        }
+
+        //Setting the logged in user
+        this.loggedIn = userObj;
+        System.out.println("User " + username + " has successfully logged in");
+        return userObj;
     }
 
     @Override
     public boolean logout() {
-        return false;
+        if(loggedIn == null) {
+            System.out.println("There's no logged in user");
+            return false;
+        }
+        loggedIn = null;
+        System.out.println("Logged out successfully");
+        return true;
     }
 
     @Override
@@ -289,7 +405,7 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public Integer defineCustomer(String customerName) throws InvalidCustomerNameException, UnauthorizedException {
-
+        /*
         // Exceptions
         if (customerName.isEmpty() || customerName == null){
             throw new InvalidCustomerNameException("The customer's name is empty or null");
@@ -317,7 +433,8 @@ public class EZShop implements EZShopInterface {
         CustomerImpl c = new CustomerImpl (customerName, id);
         this.customers.add(c);
 
-        return id;
+        return id;*/
+        return -1;
     }
 
     /**
@@ -392,7 +509,7 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public boolean deleteCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
-
+        /*
         // Exceptions
         if (id <= 0  || id == null){
             throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
@@ -416,7 +533,7 @@ public class EZShop implements EZShopInterface {
         // Remove the object c referencing it to null, therefore its attributes are also eliminated: its id, 
         // its customerName and its customerCard
         c = null;
-
+        */
         return true;
     }
 
@@ -434,7 +551,7 @@ public class EZShop implements EZShopInterface {
     */
     @Override
     public Customer getCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
-
+        /*
         // Exceptions
         if (id <= 0  || id == null){
             throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
@@ -452,6 +569,7 @@ public class EZShop implements EZShopInterface {
         }
 
         // If the customer is not found, null is returned
+        */
         return null;
     }
 
@@ -467,13 +585,14 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public List<Customer> getAllCustomers() throws UnauthorizedException {
-        
+        /*
         // Exception
         if (this.loggedIn == null){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to get all customers");
         }
-
         return this.customers;
+        */
+        return null;
     }
 
 
@@ -516,7 +635,7 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean attachCardToCustomer(String customerCard, Integer customerId) throws InvalidCustomerIdException, InvalidCustomerCardException, UnauthorizedException {
-
+        /*
         // Exceptions
         if (customerId <= 0  || customerId == null){
             throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
@@ -547,6 +666,7 @@ public class EZShop implements EZShopInterface {
 
         // Attach card to customer c
         c.setCustomerCard(customerCard);
+        */
         return true;
     }
 
@@ -570,7 +690,7 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public boolean modifyPointsOnCard(String customerCard, int pointsToBeAdded) throws InvalidCustomerCardException, UnauthorizedException {
-
+        /*
         // Exceptions
         if (customerCard.length() != 10 || customerCard.isEmpty() || customerCard == null) {
             throw new InvalidCustomerCardException("The customer's card is null, empty or it is not in a valid format");
@@ -604,6 +724,7 @@ public class EZShop implements EZShopInterface {
         // False if the db is unreachable ???
 
         customer.setPoints(totalPoints);
+        */
         return true;
     }
 

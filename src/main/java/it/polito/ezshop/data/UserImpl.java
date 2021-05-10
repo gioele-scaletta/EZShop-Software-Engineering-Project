@@ -14,7 +14,7 @@ public class UserImpl implements User{
     private RoleType role;
 
 
-    private enum RoleType {cashier, administrator, shopmanager};
+    private enum RoleType {cashier, administrator, shopmanager}
 
     public UserImpl(Integer id, String username, String password, String role) {
         this.id = id;
@@ -63,6 +63,16 @@ public class UserImpl implements User{
     @Override
     public void setRole(String role) { this.role = RoleType.valueOf(role.toLowerCase()); }
 
+    @Override
+    public String toString() {
+        return "UserImpl{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", role=" + role +
+                '}';
+    }
+
     public static boolean isAllowedRole(String role) {
         try {
             RoleType r = RoleType.valueOf(role.toLowerCase());
@@ -80,7 +90,7 @@ public class UserImpl implements User{
             case cashier: permission = false; break;
             case shopmanager: permission = false; break;
             default: permission = false;
-        };
+        }
         return permission;
     }
 
@@ -92,7 +102,7 @@ public class UserImpl implements User{
             case cashier: permission = true; break;
             case shopmanager: permission = false; break;
             default: permission = false;
-        };
+        }
         return permission;
     }
 
@@ -104,7 +114,7 @@ public class UserImpl implements User{
             case cashier: permission = true; break;
             case shopmanager: permission = true; break;
             default: permission = false;
-        };
+        }
         return permission;
     }
 
@@ -116,7 +126,7 @@ public class UserImpl implements User{
             case cashier: permission = true; break;
             case shopmanager: permission = false; break;
             default: permission = false;
-        };
+        }
         return permission;
     }
 
@@ -128,7 +138,7 @@ public class UserImpl implements User{
             case cashier: permission = true; break;
             case shopmanager: permission = true; break;
             default: permission = false;
-        };
+        }
         return permission;
     }
 
@@ -140,7 +150,7 @@ public class UserImpl implements User{
             case cashier: permission = true; break;
             case shopmanager: permission = true; break;
             default: permission = false;
-        };
+        }
         return permission;
     }
 
@@ -153,7 +163,7 @@ public class UserImpl implements User{
             case cashier: permission = true; break;
             case shopmanager: permission = true; break;
             default: permission = false;
-        };
+        }
         return permission;
     }
 
@@ -165,7 +175,7 @@ public class UserImpl implements User{
             case cashier: permission = true; break;
             case shopmanager: permission = false; break;
             default: permission = false;
-        };
+        }
         return permission;
     }
 }
