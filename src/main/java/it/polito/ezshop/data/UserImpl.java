@@ -14,19 +14,13 @@ public class UserImpl implements User{
     private RoleType role;
 
 
-    private enum RoleType {cashier, administrator, shopmanager}
+    private enum RoleType {Cashier, Administrator, ShopManager}
 
     public UserImpl(Integer id, String username, String password, String role) {
         this.id = id;
         this.username = username;
         this.password = password;
-        this.role = RoleType.valueOf(role.toLowerCase());
-    }
-
-    public UserImpl(String username, String password, String role) {
-        this.username = username;
-        this.password = password;
-        this.role = RoleType.valueOf(role.toLowerCase());
+        this.role = RoleType.valueOf(role);
     }
 
     @Override
@@ -61,7 +55,7 @@ public class UserImpl implements User{
     }
 
     @Override
-    public void setRole(String role) { this.role = RoleType.valueOf(role.toLowerCase()); }
+    public void setRole(String role) { this.role = RoleType.valueOf(role); }
 
     @Override
     public String toString() {
@@ -69,13 +63,13 @@ public class UserImpl implements User{
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
-                ", role=" + role +
+                ", role=" + role.toString() +
                 '}';
     }
 
     public static boolean isAllowedRole(String role) {
         try {
-            RoleType r = RoleType.valueOf(role.toLowerCase());
+            RoleType r = RoleType.valueOf(role);
         } catch(Exception e) {
             return false;
         }
@@ -86,9 +80,9 @@ public class UserImpl implements User{
     public boolean canManageUsers(){
         boolean permission;
         switch (role) {
-            case administrator: permission = true; break;
-            case cashier: permission = false; break;
-            case shopmanager: permission = false; break;
+            case Administrator: permission = true; break;
+            case Cashier: permission = false; break;
+            case ShopManager: permission = false; break;
             default: permission = false;
         }
         return permission;
@@ -98,9 +92,9 @@ public class UserImpl implements User{
     public boolean canManageProductList(){
         boolean permission;
         switch (role) {
-            case administrator: permission = true; break;
-            case cashier: permission = true; break;
-            case shopmanager: permission = false; break;
+            case Administrator: permission = true; break;
+            case Cashier: permission = true; break;
+            case ShopManager: permission = false; break;
             default: permission = false;
         }
         return permission;
@@ -110,9 +104,9 @@ public class UserImpl implements User{
     public boolean canListProducts(){
         boolean permission;
         switch (role) {
-            case administrator: permission = true; break;
-            case cashier: permission = true; break;
-            case shopmanager: permission = true; break;
+            case Administrator: permission = true; break;
+            case Cashier: permission = true; break;
+            case ShopManager: permission = true; break;
             default: permission = false;
         }
         return permission;
@@ -122,9 +116,9 @@ public class UserImpl implements User{
     public boolean canManageInventory(){
         boolean permission;
         switch (role) {
-            case administrator: permission = true; break;
-            case cashier: permission = true; break;
-            case shopmanager: permission = false; break;
+            case Administrator: permission = true; break;
+            case Cashier: permission = true; break;
+            case ShopManager: permission = false; break;
             default: permission = false;
         }
         return permission;
@@ -134,9 +128,9 @@ public class UserImpl implements User{
     public boolean canManageCustomers(){
         boolean permission;
         switch (role) {
-            case administrator: permission = true; break;
-            case cashier: permission = true; break;
-            case shopmanager: permission = true; break;
+            case Administrator: permission = true; break;
+            case Cashier: permission = true; break;
+            case ShopManager: permission = true; break;
             default: permission = false;
         }
         return permission;
@@ -146,22 +140,21 @@ public class UserImpl implements User{
     public boolean canManageSaleTransactions(){
         boolean permission;
         switch (role) {
-            case administrator: permission = true; break;
-            case cashier: permission = true; break;
-            case shopmanager: permission = true; break;
+            case Administrator: permission = true; break;
+            case Cashier: permission = true; break;
+            case ShopManager: permission = true; break;
             default: permission = false;
         }
         return permission;
     }
 
-
     //Permission for FR7
     public boolean canManagePayments(){
         boolean permission;
         switch (role) {
-            case administrator: permission = true; break;
-            case cashier: permission = true; break;
-            case shopmanager: permission = true; break;
+            case Administrator: permission = true; break;
+            case Cashier: permission = true; break;
+            case ShopManager: permission = true; break;
             default: permission = false;
         }
         return permission;
@@ -171,9 +164,9 @@ public class UserImpl implements User{
     public boolean canManageAccounting(){
         boolean permission;
         switch (role) {
-            case administrator: permission = true; break;
-            case cashier: permission = true; break;
-            case shopmanager: permission = false; break;
+            case Administrator: permission = true; break;
+            case Cashier: permission = true; break;
+            case ShopManager: permission = false; break;
             default: permission = false;
         }
         return permission;

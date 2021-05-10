@@ -118,13 +118,13 @@ public class EZShop implements EZShopInterface {
             pstmt.setInt(1,id);
             pstmt.setString(2, username);
             pstmt.setString(3, password);
-            pstmt.setString(4, role.toLowerCase());
+            pstmt.setString(4, role);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
             return -1;
         }
-        System.out.println("User " + username + " with role " + role.toLowerCase() + " and id " + id + " has been added to the application");
+        System.out.println("User " + username + " with role " + role + " and id " + id + " has been added to the application");
         return id;
     }
 
@@ -209,21 +209,28 @@ public class EZShop implements EZShopInterface {
             System.out.println("Invalid id");
             throw new InvalidUserIdException();
         }
+        //Retrieving user;
         String sql = "SELECT * FROM USERS AS U WHERE U.Id=? ";
+        User u;
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql);
             pstmt.setInt(1,id);
-            try (ResultSet rs = pstmt.executeQuery()){
-                Integer id_u = rs.getInt("Id");
-                String username = rs.getString("Username");
-                String password = rs.getString("Password");
-                String role = rs.getString("Role");
-                return new UserImpl(id_u,username,password,role);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() == false) {
+                System.out.println("User with id " + id + " is not present");
+                return null;
             }
+            Integer id_u = rs.getInt("Id");
+            String username = rs.getString("Username");
+            String password = rs.getString("Password");
+            String role = rs.getString("Role");
+            u = new UserImpl(id_u,username,password,role);
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
+        System.out.println("Data for user with id " + id + " has been retrieved with success");
+        return u;
     }
 
     @Override
@@ -737,6 +744,7 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public Integer startSaleTransaction() throws UnauthorizedException {
+        /*
         if(!loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
@@ -748,6 +756,8 @@ public class EZShop implements EZShopInterface {
         currentsale = new SaleTransactionImpl(newtransactionId);
         //addSaleToSalesList(sale); NO MROE SICNE WE USE DB
         return newtransactionId;
+        */
+        return -1;
     }
 
 
@@ -770,6 +780,7 @@ public class EZShop implements EZShopInterface {
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation*/
     @Override
     public boolean addProductToSale(Integer transactionId, String productCode, int amount) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException {
+        /*
         if(!loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
@@ -805,6 +816,8 @@ public class EZShop implements EZShopInterface {
         } else{
             return false;
         }
+         */
+        return false;
     }
 
     /**
@@ -828,6 +841,7 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean deleteProductFromSale(Integer transactionId, String productCode, int amount) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException {
+        /*
         if(!loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
@@ -861,7 +875,8 @@ public class EZShop implements EZShopInterface {
         } else{
             return false;
         }
-
+        */
+         return false;
     }
 
 
@@ -912,6 +927,7 @@ public class EZShop implements EZShopInterface {
         if ((discountRate <0)||(discountRate >= 1)) return false;
 
         return sale.ApplyDiscountToSaleProduct(discountRate, getProductTypeByCode(productCode));
+
     }
 
     /**
