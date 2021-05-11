@@ -1563,9 +1563,50 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
 
-        // TODO
+        // Check if a user exchanges the order of the dates
+        if ((from != null) && (to != null)) {
+            if (to.isBefore(from)) {
+                LocalDate tmp = from;
+                from = to;
+                to = tmp;
+            }
+        }
 
-        return null;
+        String query = "SELECT * FROM BALANCEOPERATIONS";
+        List<BalanceOperation> balanceOperations = new ArrayList<>();
+        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()) {
+                int balanceId = rs.getInt("balanceId");
+                LocalDate date = LocalDate.parse(rs.getString("date"));
+                double amount = rs.getDouble("amount");
+                String type = rs.getString("type");
+
+                if ((from != null) && (to != null)) {
+                    if ((date.isAfter(from) || (date.isEqual(from))) && ((date.isBefore(to)) || (date.isEqual(to)))) {
+                        balanceOperations.add(new BalanceOperationImpl(balanceId, date, amount, type));
+                    }
+                }
+                if ((from != null) && (to == null)) {
+                    if (date.isAfter(from) || date.isEqual(from)) {
+                        balanceOperations.add(new BalanceOperationImpl(balanceId, date, amount, type));
+                    }
+                }
+                if ((from == null) && (to != null)) {
+                    if (date.isBefore(to) || date.isEqual(to)) {
+                        balanceOperations.add(new BalanceOperationImpl(balanceId, date, amount, type));
+                    }
+                }
+                if ((from == null) && (to == null)) {
+                    balanceOperations.add(new BalanceOperationImpl(balanceId, date, amount, type));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return balanceOperations;
     }
 
     /**
@@ -1582,9 +1623,19 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
 
-        // TODO
+        String query = "SELECT * FROM BALANCEOPERATIONS";
+        double currentBalance = 0;
+        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()) {
+                currentBalance += rs.getDouble("amount");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
 
-        return 0;
+        return currentBalance;
     }
 
 
