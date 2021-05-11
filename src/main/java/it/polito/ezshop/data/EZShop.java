@@ -258,7 +258,7 @@ public class EZShop implements EZShopInterface {
         int numUpdated;
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql);
-            pstmt.setString(1, role.toLowerCase());
+            pstmt.setString(1, role);
             pstmt.setInt(2,id);
             numUpdated = pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -286,7 +286,6 @@ public class EZShop implements EZShopInterface {
             System.out.println("Invalid login password");
             throw new InvalidPasswordException();
         }
-
         //Checking if there's already a logged in user
         if(this.loggedIn!=null) {
             System.out.println("User " + this.loggedIn.getUsername() + " is already logged in. Perform log out first");
@@ -336,42 +335,416 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public Integer createProductType(String description, String productCode, double pricePerUnit, String note) throws InvalidProductDescriptionException, InvalidProductCodeException, InvalidPricePerUnitException, UnauthorizedException {
-        return null;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageProductList()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+        //Checking if description is null or empty
+        if(description.isBlank()) {
+            System.out.println("Invalid product description");
+            throw new InvalidProductDescriptionException();
+        }
+        //Checking if barcode is null or empty and if it is valid
+        if(productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
+            System.out.println("Invalid product code");
+            throw new InvalidProductCodeException();
+        }
+        //Checking if pricePerUnit is >0
+        if(pricePerUnit<=0) {
+            System.out.println("Invalid price per unit");
+            throw new InvalidPricePerUnitException();
+        }
+
+        //Checking if product barcode is already present
+        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setString(1, productCode);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() != false) {
+                System.out.println("Product with barcode " + productCode + " is already present");
+                return -1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+
+        //Calculating new product ID
+        Integer id;
+        String sql2 = "SELECT MAX(productId) FROM PRODUCTTYPES";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() == false)
+                id = 1;
+            else
+                id = rs.getInt(1) + 1;
+
+        } catch (SQLException e){
+            System.err.println("Error with db connection");
+            e.printStackTrace();
+            return -1;
+        }
+
+        //Inserting product
+        String sql3 = "INSERT INTO PRODUCTTYPES(productId,BarCode,Description,SellPrice,Quantity,prodDiscountRate,notes) VALUES(?,?,?,?,0,0,?)";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql3);
+            pstmt.setInt(1,id);
+            pstmt.setString(2, productCode);
+            pstmt.setString(3, description);
+            pstmt.setDouble(4, pricePerUnit);
+            pstmt.setString(5, (note==null) ? "" : note);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error with db connection");
+            e.printStackTrace();
+            return -1;
+        }
+        System.out.println("Product " + description + " with cost " + pricePerUnit + " and productId " + id + " has been added to the application");
+        return id;
     }
 
     @Override
     public boolean updateProduct(Integer id, String newDescription, String newCode, double newPrice, String newNote) throws InvalidProductIdException, InvalidProductDescriptionException, InvalidProductCodeException, InvalidPricePerUnitException, UnauthorizedException {
-        return false;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageProductList()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Check if product id is valid
+        if (id == null || id<=0) {
+            System.out.println("Invalid product id");
+            throw new InvalidProductIdException();
+        }
+        //Checking if description is null or empty
+        if(newDescription.isBlank()) {
+            System.out.println("Invalid product description");
+            throw new InvalidProductDescriptionException();
+        }
+        //Checking if barcode is null or empty and if it is valid
+        if(newCode.isBlank()||!ProductTypeImpl.isValidCode(newCode)) {
+            System.out.println("Invalid product code");
+            throw new InvalidProductCodeException();
+        }
+        //Checking if pricePerUnit is >0
+        if(newPrice<=0) {
+            System.out.println("Invalid price per unit");
+            throw new InvalidPricePerUnitException();
+        }
+
+        //Checking if product barcode is already present
+        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setString(1, newCode);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() != false) {
+                System.out.println("Product with barcode " + newCode + " is already present");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        //Updating product
+        String sql2 = "UPDATE PRODUCTTYPES SET Description=?, BarCode=?, SellPrice=?, notes=? WHERE productId=?";
+        int numUpdated;
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+            pstmt.setString(1, newDescription);
+            pstmt.setString(2, newCode);
+            pstmt.setDouble(3, newPrice);
+            pstmt.setString(4, newNote);
+            pstmt.setInt(5,id);
+            numUpdated = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        if(numUpdated == 0) {
+            System.out.println("There's no product with id " + id);
+            return false;
+        }
+        System.out.println("Product with " + id + " has been updated");
+        return true;
     }
 
     @Override
     public boolean deleteProductType(Integer id) throws InvalidProductIdException, UnauthorizedException {
-        return false;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageProductList()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Check if id is valid
+        if (id == null || id<=0) {
+            System.out.println("Invalid id");
+            throw new InvalidProductIdException();
+        }
+
+        //Deleting user
+        String sql = "DELETE FROM PRODUCTTYPES WHERE productId=?";
+        int numDeleted;
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setInt(1, id);
+            numDeleted = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        if(numDeleted == 0) {
+            System.out.println("There's no product with id " + id);
+            return false;
+        }
+        System.out.println("Product with id " + id + " has been deleted successfully");
+        return true;
     }
 
     @Override
     public List<ProductType> getAllProductTypes() throws UnauthorizedException {
-        return null;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canListProducts()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        String sql = "SELECT * FROM PRODUCTTYPES";
+        List<ProductType> products = new ArrayList<>();
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()) {
+                Integer productId = rs.getInt("productId");
+                String barcode = rs.getString("BarCode");
+                String description = rs.getString("Description");
+                Double sellPrice = rs.getDouble("SellPrice");
+                Integer quantity = rs.getInt("Quantity");
+                Double prodDiscountRate = rs.getDouble("prodDiscountRate");
+                String notes = rs.getString("notes");
+                Integer aisleId = rs.getInt("aisleID");
+                String rackId = rs.getString("rackID");
+                Integer levelId = rs.getInt("levelID");
+                products.add(new ProductTypeImpl(productId,barcode,description,sellPrice,quantity,prodDiscountRate,notes,aisleId,rackId,levelId));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return products;
     }
 
     @Override
     public ProductType getProductTypeByBarCode(String barCode) throws InvalidProductCodeException, UnauthorizedException {
-        return null;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageProductList()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+        //Checking if barcode is null or empty and if it is valid
+        if(barCode.isBlank()||!ProductTypeImpl.isValidCode(barCode)) {
+            System.out.println("Invalid product code");
+            throw new InvalidProductCodeException();
+        }
+
+        //Retrieving product
+        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.productId=? ";
+        ProductType p;
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setString(1,barCode);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() == false) {
+                System.out.println("Product with id " + barCode + " is not present");
+                return null;
+            }
+            Integer productId = rs.getInt("productId");
+            String barcode = rs.getString("BarCode");
+            String description = rs.getString("Description");
+            Double sellPrice = rs.getDouble("SellPrice");
+            Integer quantity = rs.getInt("Quantity");
+            Double prodDiscountRate = rs.getDouble("prodDiscountRate");
+            String notes = rs.getString("notes");
+            Integer aisleId = rs.getInt("aisleID");
+            String rackId = rs.getString("rackID");
+            Integer levelId = rs.getInt("levelID");
+            p = new ProductTypeImpl(productId,barcode,description,sellPrice,quantity,prodDiscountRate,notes,aisleId,rackId,levelId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        System.out.println("Data for product with barcode " + barCode + " has been retrieved with success");
+        return p;
     }
 
     @Override
     public List<ProductType> getProductTypesByDescription(String description) throws UnauthorizedException {
-        return null;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageProductList()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.Description=?";
+        List<ProductType> products = new ArrayList<>();
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setString(1,description);
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()) {
+                Integer productId = rs.getInt("productId");
+                String barcode = rs.getString("BarCode");
+                Double sellPrice = rs.getDouble("SellPrice");
+                Integer quantity = rs.getInt("Quantity");
+                Double prodDiscountRate = rs.getDouble("prodDiscountRate");
+                String notes = rs.getString("notes");
+                Integer aisleId = rs.getInt("aisleID");
+                String rackId = rs.getString("rackID");
+                Integer levelId = rs.getInt("levelID");
+                products.add(new ProductTypeImpl(productId,barcode,description,sellPrice,quantity,prodDiscountRate,notes,aisleId,rackId,levelId));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return products;
     }
 
     @Override
     public boolean updateQuantity(Integer productId, int toBeAdded) throws InvalidProductIdException, UnauthorizedException {
-        return false;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageInventory()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Check if product id is valid
+        if (productId == null || productId<=0) {
+            System.out.println("Invalid product id");
+            throw new InvalidProductIdException();
+        }
+
+        //Check if product exists and retrieving it
+        String sql = "SELECT * FROM PRODUCTTYPES WHERE productId=?";
+        ProductType p = null;
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setInt(1,productId);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() == false) {
+                System.out.println("Product with id " + productId + " is not present");
+                return false;
+            }
+            String barcode = rs.getString("BarCode");
+            String description = rs.getString("Description");
+            Double sellPrice = rs.getDouble("SellPrice");
+            Integer quantity = rs.getInt("Quantity");
+            Double prodDiscountRate = rs.getDouble("prodDiscountRate");
+            String notes = rs.getString("notes");
+            Integer aisleId = rs.getInt("aisleID");
+            String rackId = rs.getString("rackID");
+            Integer levelId = rs.getInt("levelID");
+            p = new ProductTypeImpl(productId,barcode,description,sellPrice,quantity,prodDiscountRate,notes,aisleId,rackId,levelId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //Checking if quantity update won't go negative
+        if(p.getQuantity()+toBeAdded < 0) {
+            System.out.println("It's impossible to update product " + productId + " to have a negative quantity");
+            return false;
+        }
+
+        //Checking if location is set
+        if(p.getLocation().equals("")) {
+            System.out.println("Cannot set quantity if location is not set first");
+            return false;
+        }
+
+        //Updating product
+        String sql2 = "UPDATE PRODUCTTYPES SET Quantity=? WHERE productId=?";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+            pstmt.setInt(1, toBeAdded);
+            pstmt.setInt(2, productId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        System.out.println("Quantity " + toBeAdded + " has now been added to the ");
+        return true;
     }
 
     @Override
     public boolean updatePosition(Integer productId, String newPos) throws InvalidProductIdException, InvalidLocationException, UnauthorizedException {
-        return false;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageInventory()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Check if product id is valid
+        if (productId == null || productId<=0) {
+            System.out.println("Invalid product id");
+            throw new InvalidProductIdException();
+        }
+
+        //Check if position is valid
+        if(newPos == null || !ProductTypeImpl.isValidLocation(newPos))
+        {
+            System.out.println("Invalid position");
+            throw new InvalidLocationException();
+        }
+
+        Integer aisleId = ProductTypeImpl.extractAisleId(newPos);
+        String rackId = ProductTypeImpl.extractRackId(newPos);
+        Integer levelId = ProductTypeImpl.extractLevelId(newPos);
+
+        //Checking if location is already occupied
+        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.aisleID=? AND P.rackID=? AND P.levelID=?";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setInt(1, aisleId);
+            pstmt.setString(2, rackId);
+            pstmt.setInt(3, levelId);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() != false) {
+                System.out.println("Location " + newPos + " is already occupied");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        //Updating product
+        String sql2 = "UPDATE PRODUCTTYPES SET aisleID=?, rackID=?, levelID=? WHERE productId=?";
+        int numUpdated;
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+            pstmt.setInt(1, aisleId);
+            pstmt.setString(2, rackId);
+            pstmt.setInt(3, levelId);
+            pstmt.setInt(4, productId);
+            numUpdated = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        if(numUpdated == 0) {
+            System.out.println("There's no product with id " + productId);
+            return false;
+        }
+        System.out.println("Product with " + productId + " has been updated");
+        return true;
     }
 
     @Override
