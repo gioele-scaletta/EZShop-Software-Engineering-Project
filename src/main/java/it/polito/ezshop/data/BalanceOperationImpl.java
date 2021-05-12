@@ -15,6 +15,10 @@ public class BalanceOperationImpl implements BalanceOperation {
         this.type = type;
     }
 
+    public BalanceOperationImpl() {
+
+    }
+
 
     @Override
     public int getBalanceId() {

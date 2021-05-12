@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
 import java.io.*;
+import java.util.stream.Collectors;
 
 
 public class EZShop implements EZShopInterface {
@@ -554,34 +555,8 @@ public class EZShop implements EZShopInterface {
             throw new InvalidProductCodeException();
         }
 
-        //Retrieving product
-        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.productId=? ";
-        ProductType p;
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
-            pstmt.setString(1,barCode);
-            ResultSet rs = pstmt.executeQuery();
-            if(rs.isBeforeFirst() == false) {
-                System.out.println("Product with id " + barCode + " is not present");
-                return null;
-            }
-            Integer productId = rs.getInt("productId");
-            String barcode = rs.getString("BarCode");
-            String description = rs.getString("Description");
-            Double sellPrice = rs.getDouble("SellPrice");
-            Integer quantity = rs.getInt("Quantity");
-            Double prodDiscountRate = rs.getDouble("prodDiscountRate");
-            String notes = rs.getString("notes");
-            Integer aisleId = rs.getInt("aisleID");
-            String rackId = rs.getString("rackID");
-            Integer levelId = rs.getInt("levelID");
-            p = new ProductTypeImpl(productId,barcode,description,sellPrice,quantity,prodDiscountRate,notes,aisleId,rackId,levelId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-        System.out.println("Data for product with barcode " + barCode + " has been retrieved with success");
-        return p;
+        return getProductTypeByCode(barCode);
+
     }
 
     @Override
@@ -1117,8 +1092,8 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public Integer startSaleTransaction() throws UnauthorizedException {
-        /*
-        if(!loggedIn.canManageSaleTransactions()) {
+
+        if( loggedIn == null || !loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
             //return -1;
@@ -1128,9 +1103,9 @@ public class EZShop implements EZShopInterface {
         Integer newtransactionId=getNewSaleTransactionId();
         currentsale = new SaleTransactionImpl(newtransactionId);
         //addSaleToSalesList(sale); NO MROE SICNE WE USE DB
+        System.out.println(currentsale.getTicketNumber());
         return newtransactionId;
-        */
-        return -1;
+       // return -1;
     }
 
 
@@ -1153,8 +1128,8 @@ public class EZShop implements EZShopInterface {
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation*/
     @Override
     public boolean addProductToSale(Integer transactionId, String productCode, int amount) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException {
-        /*
-        if(!loggedIn.canManageSaleTransactions()) {
+
+        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
             //return false;
@@ -1169,12 +1144,15 @@ public class EZShop implements EZShopInterface {
 
 
         ProductTypeImpl product= getProductTypeByCode(productCode);
+       // System.out.println("ok2");
+
         if (product==null){
             throw new InvalidProductCodeException();
         }
         if (product==null) return false;
 
-        if ((product.getQuantity()< amount)||(amount <0)){
+        System.out.println(product.getQuantity());
+        if ((product.getQuantity() < amount)||(amount <0)){
             throw new InvalidQuantityException();
         }
 
@@ -1189,8 +1167,8 @@ public class EZShop implements EZShopInterface {
         } else{
             return false;
         }
-         */
-        return false;
+
+        //return false;
     }
 
     /**
@@ -1214,8 +1192,8 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean deleteProductFromSale(Integer transactionId, String productCode, int amount) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException {
-        /*
-        if(!loggedIn.canManageSaleTransactions()) {
+
+        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
             //return false;
@@ -1231,7 +1209,7 @@ public class EZShop implements EZShopInterface {
             throw new InvalidProductCodeException();
         }
 
-        if ((product.getQuantity()< amount)||(amount <0)){
+        if ((currentsale.listOfProductsSale.get(product)<amount )|| (amount <0)){
             throw new InvalidQuantityException();
         }
 
@@ -1240,7 +1218,7 @@ public class EZShop implements EZShopInterface {
         if(!loggedIn.canManageSaleTransactions())return false;
         if (sale==null) return false;
         if (product==null) return false;
-        if ((product.getQuantity()< amount)||(amount <0)) return false;
+        if ((product.getQuantity() < amount)||(amount <0)) return false;
 
         if(sale.EditProductInSale(product, -amount)) {
 
@@ -1248,8 +1226,8 @@ public class EZShop implements EZShopInterface {
         } else{
             return false;
         }
-        */
-         return false;
+
+         //return false;
     }
 
 
@@ -1274,7 +1252,7 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidDiscountRateException, UnauthorizedException {
-        if(!loggedIn.canManageSaleTransactions()) {
+        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
             //return false;
@@ -1290,8 +1268,9 @@ public class EZShop implements EZShopInterface {
             throw new InvalidProductCodeException();
         }
 
+        //System.out.println(discountRate);
 
-        if ((discountRate <0)||(discountRate >= 1)){
+        if ((discountRate <=0)||(discountRate >= 1)){
             throw new InvalidDiscountRateException();
         }
         if(!loggedIn.canManageSaleTransactions())return false;
@@ -1320,7 +1299,7 @@ public class EZShop implements EZShopInterface {
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
     public boolean applyDiscountRateToSale(Integer transactionId, double discountRate) throws InvalidTransactionIdException, InvalidDiscountRateException, UnauthorizedException {
-        if(!loggedIn.canManageSaleTransactions()) {
+        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
             //return false;
@@ -1331,13 +1310,13 @@ public class EZShop implements EZShopInterface {
             throw new InvalidTransactionIdException();
         }
 
-        if ((discountRate <0)||(discountRate >= 1)){
+        if ((discountRate <=0)||(discountRate >= 1)){
             throw new InvalidDiscountRateException();
         }
 
         if(!loggedIn.canManageSaleTransactions())return false;
         if (sale==null) return false;
-        if ((discountRate <0)||(discountRate >= 1)) return false;
+        if ((discountRate <=0)||(discountRate >= 1)) return false;
 
         return sale.ApplyDiscountToSaleAll(discountRate);
 
@@ -1359,7 +1338,7 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public int computePointsForSale(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
-        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
+        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
 
@@ -1393,7 +1372,7 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean endSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
-        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
+        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
            // return false;
@@ -1405,7 +1384,7 @@ public class EZShop implements EZShopInterface {
             throw new InvalidTransactionIdException();
         }
 
-        if(!loggedIn.canManageSaleTransactions())return false;
+        if(loggedIn == null || !loggedIn.canManageSaleTransactions())return false;
         if (sale==null) return false;
 
 
@@ -1429,7 +1408,7 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public boolean deleteSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
-        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
+        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
             //return false;
@@ -1447,6 +1426,7 @@ public class EZShop implements EZShopInterface {
 
         sale.AbortSaleUpdateProductQuantity();
         //RemoveSaleFromSalesList(sale);
+        currentsale=null;
         return true;
     }
 
@@ -1464,7 +1444,7 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public SaleTransaction getSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
-        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
+        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
 
@@ -1707,8 +1687,9 @@ public class EZShop implements EZShopInterface {
 
         Double change=sale.PaySaleAndReturnChange(cash, true);
         if(change!=-1) {
-            SaleConfirmedEnsurePersistence(sale);
-            newBalanceUpdate(cash);
+
+            SaleConfirmedEnsurePersistence(sale,  newBalanceUpdate(sale.getPrice()));
+
 
             return change;
         } else{
@@ -1760,7 +1741,7 @@ public class EZShop implements EZShopInterface {
         if(!isValidCreditCard(creditCard)) return false;
 
         //CHECK ENOUGH MONEY ON CARD MISSING
-        File file = new File("./CARDS.txt");
+        File file = new File("CARDS.txt");
         BufferedReader br = null;
         try {
             br = new BufferedReader(new FileReader(file));
@@ -1768,16 +1749,20 @@ public class EZShop implements EZShopInterface {
             e.printStackTrace();
         }
 
+
         String st;
+        String[] s;
         Double amount=-1.0;
-        while (true) {
-            try {
-                if (!((st = br.readLine()) != null)){
-                    String[] s= st.split(",");
-                    if(s[0].equals(creditCard)){
-                      amount=Double.parseDouble(s[1]);
+        try {
+        while ((st = br.readLine()) != null) {
+
+                    s = st.split(",");
+                    if (s[0].equals(creditCard)) {
+                        amount = Double.parseDouble(s[1]);
+                        break;
                     }
-                    break;}
+
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -1786,8 +1771,8 @@ public class EZShop implements EZShopInterface {
                 return false;
             } else{
                 if(sale.PaySaleAndReturnChange(amount, false)>=0){
-                    SaleConfirmedEnsurePersistence(sale);
-                    newBalanceUpdate(sale.getCurrentAmount());
+                    SaleConfirmedEnsurePersistence(sale,newBalanceUpdate(sale.getPrice()));
+
                     return true;
                 } else{
                     return false;
@@ -1797,8 +1782,6 @@ public class EZShop implements EZShopInterface {
 
         }
 
-        return false;
-    }
 
     /**
      * This method record the payment of a closed return transaction with given id. The return value of this method is the
@@ -1931,6 +1914,8 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public List<BalanceOperation> getCreditsAndDebits(LocalDate from, LocalDate to) throws UnauthorizedException {
+
+
         // Check if there is no logged user or if it has not the rights to perform the operation
         if (loggedIn == null || !loggedIn.canManageAccounting()) {
             throw new UnauthorizedException();
@@ -1944,14 +1929,14 @@ public class EZShop implements EZShopInterface {
                 to = tmp;
             }
         }
-
         String query = "SELECT * FROM BALANCEOPERATIONS";
         List<BalanceOperation> balanceOperations = new ArrayList<>();
         try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
             ResultSet rs = pstmt.executeQuery();
+
             while(rs.next()) {
                 int balanceId = rs.getInt("balanceId");
-                LocalDate date = LocalDate.parse(rs.getString("date"));
+                LocalDate date = LocalDate.parse(rs.getString("Date"));
                 double amount = rs.getDouble("amount");
                 String type = rs.getString("type");
 
@@ -2027,10 +2012,10 @@ public class EZShop implements EZShopInterface {
                 PreparedStatement pstmt  = conn.prepareStatement(getnewid)){
 
             pstmt.setInt(1, transactionCardId);
-            ResultSet rs    = pstmt.executeQuery(getnewid);
-
-            c =new  CustomerImpl(rs.getInt("CustomerId"),rs.getString("CustomerName"), rs.getString("CustomerCard"), rs.getInt("Points")  );
-
+            ResultSet rs    = pstmt.executeQuery();
+            if(rs.isBeforeFirst()) {
+                c = new CustomerImpl(rs.getInt("CustomerId"), rs.getString("CustomerName"), rs.getString("CustomerCard"), rs.getInt("Points"));
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -2045,15 +2030,24 @@ public class EZShop implements EZShopInterface {
                 PreparedStatement pstmt  = conn.prepareStatement(getnewid)){
 
             pstmt.setInt(1,balanceOperation);
-            ResultSet rs    = pstmt.executeQuery(getnewid);
+            ResultSet rs    = pstmt.executeQuery();
 
-            bal =new  BalanceOperationImpl(rs.getInt("BalanceId"),LocalDate.parse(rs.getString("Date")), rs.getDouble("amount"), rs.getString("Type")  );
-
+            if(rs.isBeforeFirst()) {
+                bal = new BalanceOperationImpl(rs.getInt("BalanceId"), LocalDate.parse(rs.getString("Date")), rs.getDouble("amount"), rs.getString("Type"));
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         return bal;
 
+    }
+    private BalanceOperationImpl getBal(int b) {
+        BalanceOperationImpl ba=getBalanceById(b);
+        if(ba!=null){
+            return ba;
+        } else{
+            return new BalanceOperationImpl();
+        }
     }
 
     SaleTransactionImpl getSaleTransactionById(Integer transactionId) {
@@ -2061,80 +2055,111 @@ public class EZShop implements EZShopInterface {
             return currentsale;
         }
 
+
         String query = "SELECT * FROM SALETRANSACTIONS WHERE transactionId=?";
         SaleTransactionImpl sale = null;
+        System.out.println("getting sale id");
         try (PreparedStatement pstmt  = this.conn.prepareStatement(query)) {
             pstmt.setInt(1,transactionId);
             ResultSet rs = pstmt.executeQuery();
 
             if(rs.isBeforeFirst()) {
-                sale = new SaleTransactionImpl(transactionId, rs.getString("State"), rs.getString("PaymentType"), rs.getDouble("Amount"), rs.getDouble("discountRate"), getCustomerById(rs.getInt("transactionCardId")), getBalanceById(rs.getInt("BalanceOperation")), getProdListForSaleDB(transactionId));
+
+                sale = new SaleTransactionImpl(transactionId, rs.getString("State"), rs.getString("PaymentType"), rs.getDouble("Amount"), rs.getDouble("discountRate"), getCustomerById(rs.getInt("transactionCardId")), getBal(rs.getInt("BalanceOperation")), getProdListForSaleDB(transactionId));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-
+        System.out.println("getting sale id");
         return sale;
     }
 
-    ProductTypeImpl getProductTypeByCode(String productCode){
-        String query = "SELECT * FROM PRODUCTTYPES WHERE BarCode=?";
-        ProductTypeImpl prod = null;
-        try (PreparedStatement pstmt  = this.conn.prepareStatement(query)){
-            pstmt.setString(1,productCode);
-            ResultSet rs    = pstmt.executeQuery();
 
-            if(rs.isBeforeFirst()) {
-                prod = new ProductTypeImpl(rs.getInt("productId"), rs.getString("BarCode"), rs.getString("Description"), rs.getDouble("SellPrice"), rs.getInt("Quantity"), rs.getDouble("prodDiscoutRate"), rs.getString("notes"), rs.getInt("aisleID"), rs.getString("rackID"), rs.getInt("levelID"));
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+
+    ProductTypeImpl getProductTypeByCode(String barCode){
+
+        //IF PRODUCT IS INVOLVED IN CURRENT SALE THE UP TO DATE INFORMATION ARE STORED ONLY IN RAM AT THE MOMENT
+        List<ProductTypeImpl> prodl=null;
+       prodl= currentsale.listOfProductsSale.keySet().stream().filter(e->e.getBarCode().equals(barCode)).collect(Collectors.toList());
+
+        if (prodl.size()>0){
+           // System.out.println("ok");
+            return prodl.get(0);
         }
 
-        return prod;
+        //Retrieving product
+        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=? ";
+        ProductTypeImpl p;
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setString(1,barCode);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() == false) {
+                System.out.println("Product with id " + barCode + " is not present");
+                return null;
+            }
+            Integer productId = rs.getInt("productId");
+            String barcode = rs.getString("BarCode");
+            String description = rs.getString("Description");
+            Double sellPrice = rs.getDouble("SellPrice");
+            Integer quantity = rs.getInt("Quantity");
+            Double prodDiscountRate = rs.getDouble("prodDiscountRate");
+            String notes = rs.getString("notes");
+            Integer aisleId = rs.getInt("aisleID");
+            String rackId = rs.getString("rackID");
+            Integer levelId = rs.getInt("levelID");
+            p = new ProductTypeImpl(productId,barcode,description,sellPrice,quantity,prodDiscountRate,notes,aisleId,rackId,levelId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        System.out.println("Data for product with barcode " + barCode + " has been retrieved with success");
+        return p;
+
     }
 
     //GET NEW ID
 
     public Integer getNewSaleTransactionId(){
         Integer tid=-1;
-        String getnewid = "SELECT COALESCE(MAX(transactionId),'0') FROM SALETRANSACTIONS";
+
+        String getnewid = "SELECT COALESCE(MAX(transactionId),0) FROM SALETRANSACTIONS";
 
         try (
                 Statement stmt  = conn.createStatement();
                 ResultSet rs    = stmt.executeQuery(getnewid)){
 
-            tid=rs.getInt("transactionId");
+            tid=rs.getInt(1);
 
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
 
-        return tid;
+        return tid+1;
     }
 
     private int getNewBalanceOperationId() {
         Integer tid=-1;
-        String getnewid = "SELECT COALESCE(MAX(BalanceId),'0') FROM SALETRANSACTIONS";
+        String getnewid = "SELECT COALESCE(MAX(BalanceId),'0') FROM BALANCEOPERATIONS";
 
         try (
                 Statement stmt  = conn.createStatement();
                 ResultSet rs    = stmt.executeQuery(getnewid)){
 
-            tid=rs.getInt("BalanceIdId");
+            tid=rs.getInt(1);
 
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
 
-        return tid;
+        return tid+1;
     }
 
     //PERSISTENCE WHEN SALE FINISHES
 
-    private void SaleConfirmedEnsurePersistence(SaleTransactionImpl sale ){
+    private void SaleConfirmedEnsurePersistence(SaleTransactionImpl sale, BalanceOperationImpl b){
 
         //UPDATE SALETRANSACTIONTABLE
         String sql = "INSERT INTO SALETRANSACTIONS(transactionId,State,PaymentType, Amount, discountRate, transactionCardId, BalanceOperationId) VALUES(?,?,?,?,?,?,?)";
@@ -2146,8 +2171,9 @@ public class EZShop implements EZShopInterface {
             pstmt.setString(3, sale.getPayString());
             pstmt.setDouble(4, sale.getPrice());
             pstmt.setDouble(5, sale.getDiscountRate());
-            pstmt.setInt(6, sale.getTransactionCard().getId());
-            pstmt.setInt(7, sale.getSaleOperationRecord().getBalanceId());
+          //  MISSING I NEED THAT WHO WRITES MODIFY POINTS ON CARD ASSOCIATE THE CARD WITH THE SALE
+            pstmt.setInt(6, 1/*sale.getTransactionCard().getId()*/   );
+            pstmt.setInt(7, b.getBalanceId());
             pstmt.executeUpdate();
         } catch (SQLException var6) {
             System.out.println(var6.getMessage());
@@ -2155,37 +2181,46 @@ public class EZShop implements EZShopInterface {
 
         Integer tid=sale.getTicketNumber();
 
+       // HashMap<ProductTypeImpl, Integer> map= new HashMap<>();
      //UPDATE SALESANDPRODUCTS TABLE
-      sale.getListOfProductsSale().entrySet().stream().forEach(el-> {
+      sale.getListOfProductsSale().entrySet().stream().forEach((el)-> {
+       // map=sale.getListOfProductsSale();
+       // for(HashMap.Entry<ProductTypeImpl, Integer> el : map.entrySet()){
+      //  Iterator it=sale.getListOfProductsSale().entrySet().iterator();
+       //         while(it.hasNext()){
 
-            String salesandproductssql = "INSERT INTO SALESANDPRODUCTS(transactionId,BarCode,Quantity) VALUES(?,?,?)";
+            String sl = "INSERT INTO SALESANDPRODUCTS(transactionId,BarCode,Quantity) VALUES(?,?,?)";
 
             try (
-                    PreparedStatement pstmt = conn.prepareStatement(salesandproductssql)) {
+                    PreparedStatement pstmt = this.conn.prepareStatement(sl)) {
 
                 // set the value of the parameter
-                pstmt.setInt(1, sale.getTicketNumber());
+
+                pstmt.setInt(1, tid);
                 pstmt.setString(2, el.getKey().getBarCode());
                 pstmt.setInt(3, el.getValue());
                 //
-                ResultSet rs = pstmt.executeQuery();
+                pstmt.executeUpdate();
+
 
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
 
             //UPDATE INVENTORY
-          String salesprodsql = "UPDATE PRODUCTTYPES SET Quantity=Quantity-? WHERE BarCode=?";
+          String sp = "UPDATE PRODUCTTYPES SET Quantity=Quantity-? WHERE BarCode=?";
 
           try (
-                  PreparedStatement pstmt = conn.prepareStatement(salesandproductssql)) {
+                  PreparedStatement pstmt = conn.prepareStatement(sp)) {
 
               // set the value of the parameter
+
+
               pstmt.setInt(1, el.getValue());
               pstmt.setString(2, el.getKey().getBarCode());
 
               //
-              ResultSet rs = pstmt.executeQuery();
+              pstmt.executeUpdate();
 
           } catch (SQLException e) {
               System.out.println(e.getMessage());
@@ -2193,6 +2228,8 @@ public class EZShop implements EZShopInterface {
 
 
       });
+
+         /* !!!!PROBABLY NOT NEEDED SINCE POINTS ARE UPDATED THROUGH MODIFYPOINTS ON CARD AND NOT IN MY PART
             //UPDATE CUSTOMER POINTS
 
           String salecustomersql = "UPDATE CUSTOMERS SET Points=? WHERE customerId=?";
@@ -2201,26 +2238,29 @@ public class EZShop implements EZShopInterface {
                   PreparedStatement pstmt = conn.prepareStatement(salecustomersql)) {
 
               // set the value of the parameter
-              pstmt.setInt(1, sale.getTransactionCard().getPoints());
+              pstmt.setInt(1,sale.getTransactionCard().getPoints());
               pstmt.setInt(2, sale.getTransactionCard().getId());
               ResultSet rs = pstmt.executeQuery();
 
           } catch (SQLException e) {
               System.out.println(e.getMessage());
           }
-
+*/
+          sale=null;
     }
 
-    public void newBalanceUpdate(Double amount){
+    public BalanceOperationImpl newBalanceUpdate(Double amount){
         int  id=getNewBalanceOperationId();
 
         LocalDate now = LocalDate.now();
         if(amount>0){
             BalanceOperationImpl bal=new BalanceOperationImpl(id,now,amount,"CREDIT" );
             addBalanceToBalancesList(bal);
+            return bal;
         } else{
             BalanceOperationImpl bala=new BalanceOperationImpl(id,now,amount,"DEBIT" );
             addBalanceToBalancesList(bala);
+            return bala;
         }
 
     }
@@ -2229,9 +2269,9 @@ public class EZShop implements EZShopInterface {
 
 
     public void addBalanceToBalancesList(BalanceOperationImpl b){
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         //balanceOperationsList.add(b); NO MORE SINCE NO MORE LISTS
-        String sql = "INSERT INTO BALANCEOPERATIONS(balanceID,Date, Amount, Type) VALUES(?,?,?,?)";
+        String sql = "INSERT INTO BALANCEOPERATIONS(BalanceId,Date, Amount, Type) VALUES(?,?,?,?)";
 
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql);

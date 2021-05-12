@@ -11,6 +11,11 @@ public class ProductTypeImpl implements ProductType{
     private String description;
     private Double sellPrice;
     private Integer quantity;
+
+    public void setProductDiscountRate(Double productDiscountRate) {
+        this.productDiscountRate = productDiscountRate;
+    }
+
     private Double productDiscountRate;
     private String notes;
     private Integer aisleId;
@@ -45,6 +50,8 @@ public class ProductTypeImpl implements ProductType{
     }
 
     public static boolean isValidCode(String productCode) {
+
+
         Long p;
         //Checking if lenght is correct
         if(productCode.length()<12 || productCode.length()>14)
@@ -72,6 +79,8 @@ public class ProductTypeImpl implements ProductType{
             return true;
         else
             return false;
+
+
     }
 
     public static boolean isValidLocation(String location) {
@@ -166,7 +175,7 @@ public class ProductTypeImpl implements ProductType{
         return this.sellPrice;
     }
     public void updateProductQuantity(Integer changequantity) {
-        this.quantity=this.quantity-changequantity;
+        this.quantity=this.quantity+changequantity;
     }
 
 }
