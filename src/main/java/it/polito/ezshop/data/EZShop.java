@@ -61,6 +61,18 @@ public class EZShop implements EZShopInterface {
     @Override
     public void reset() {
 
+        try {
+
+            Statement st = conn.createStatement();
+            String deleteAllCustomers = "DELETE FROM CUSTOMERS WHERE CustomerId > 0";
+            st.executeUpdate(deleteAllCustomers);
+
+        }
+        catch (Exception e) {
+            System.out.println("Error with db connection");
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -747,340 +759,457 @@ public class EZShop implements EZShopInterface {
         return null;
     }
 
-    /**
-     * This method saves a new customer into the system. The customer's name should be unique.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @param customerName the name of the customer to be registered
-     *
-     * @return the id (>0) of the new customer if successful, -1 otherwise
-     *
-     * @throws InvalidCustomerNameException if the customer name is empty or null
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
     @Override
     public Integer defineCustomer(String customerName) throws InvalidCustomerNameException, UnauthorizedException {
-        /*
+
         // Exceptions
-        if (customerName.isEmpty() || customerName == null){
+        if (customerName == null || customerName.isEmpty()){
             throw new InvalidCustomerNameException("The customer's name is empty or null");
         }
-        if (this.loggedIn == null){
+
+        if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to create a new customer");
         }
 
-        // The customer's name should be unique
-        for (Customer c: customers) {
-            if(c.getCustomerName() == customerName) {
-                return -1;
+        try {
+
+            Statement st = conn.createStatement();
+            ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
+
+            // The customer's name should be unique
+            while (res.next()){
+                if (res.getString("CustomerName").equals(customerName)) {
+                    return -1;
+                }
             }
+
+            // Get an unique id
+
+            // Initial value
+            Integer id = 1;
+
+            // Boolean to know if the value of the id was found in the db
+            Boolean modified = true;
+
+            // If the id value has not been modified, it means that it is unique and the while loop ends
+            while (modified) {
+                modified = false;
+
+                Statement st2 = conn.createStatement();
+                ResultSet res2 = st2.executeQuery("SELECT * FROM CUSTOMERS");
+
+                while (res2.next()){
+                    if (res2.getInt("CustomerId") == id) {
+                        // This id value has been found, it means that it is not unique
+                        // Try with the following value
+                        id = res2.getInt("CustomerId") + 1;
+                        modified = true;
+                        break;
+                    }
+                }
+            }
+
+            // Create a new customer into the customer table
+            Statement st3 = conn.createStatement();
+            String insertCustomer = "INSERT INTO CUSTOMERS (CustomerId, CustomerName, CustomerCard, Points) VALUES ("+id+",'"+customerName+"','', 0)";
+            st3.executeUpdate(insertCustomer);
+
+            return id;
+
         }
 
-        // Get an unique id
-        Integer id = 1;
-        for (Customer c: customers) {
-          if (c.getId() >= id) {
-            id = c.getId() + 1;
-          }
+        catch (Exception e) {
+            System.out.println("Error with db connection");
+            e.printStackTrace();
+            return -1;
         }
 
-        // Create a new customer and add him to the customer list
-        CustomerImpl c = new CustomerImpl (customerName, id);
-        this.customers.add(c);
-
-        return id;*/
-        return -1;
     }
 
-    /**
-     * This method updates the data of a customer with given <id>. This method can be used to assign/delete a card to a
-     * customer. If <newCustomerCard> has a numeric value than this value will be assigned as new card code, if it is an
-     * empty string then any existing card code connected to the customer will be removed and, finally, if it assumes the
-     * null value then the card code related to the customer should not be affected from the update. The card code should
-     * be unique and should be a string of 10 digits.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @param id the id of the customer to be updated
-     * @param newCustomerName the new name to be assigned
-     * @param newCustomerCard the new card code to be assigned. If it is empty it means that the card must be deleted,
-     *                        if it is null then we don't want to update the cardNumber
-     *
-     * @return true if the update is successful
-     *          false if the update fails ( cardCode assigned to another user, db unreacheable)
-     *
-     * @throws InvalidCustomerNameException if the customer name is empty or null
-     * @throws InvalidCustomerCardException if the customer card is empty, null or if it is not in a valid format (string with 10 digits)
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
     @Override
-    public boolean modifyCustomer(Integer id, String newCustomerName, String newCustomerCard) throws InvalidCustomerNameException, InvalidCustomerCardException, InvalidCustomerIdException, UnauthorizedException {
+    public boolean modifyCustomer(Integer id, String newCustomerName, String newCustomerCard) throws InvalidCustomerNameException, InvalidCustomerCardException, UnauthorizedException{
 
         // Exceptions
-        if (newCustomerName.isEmpty() || newCustomerName == null){
+        if (newCustomerName == null || newCustomerName.isEmpty()){
             throw new InvalidCustomerNameException("The customer's name is empty or null");
         }
 
-        if (newCustomerCard.length() != 10){
-            throw new InvalidCustomerCardException("The customer's card is not in a valid format");
-        }
+        if (newCustomerCard != null && !newCustomerCard.isEmpty()) {
 
-        if (this.loggedIn == null){
-            throw new UnauthorizedException("There is no logged user or this user has not the rights to modify a customer");
-        }
+            if (newCustomerCard.length() != 10 ){
+                throw new InvalidCustomerCardException("The customer's card is not in a valid format");
+            }
 
-        // Update customer name
-        Customer c = this.getCustomer(id);
-        c.setCustomerName(newCustomerName);
-
-    
-        // Detach if newCustomerCard is an empty string
-        if (newCustomerCard.isEmpty()){
-            c.setCustomerCard(newCustomerCard);
-            c.setPoints(0);
-            return true;
-        }
-
-        // Update the card number if newCustomerCard is not null
-        if(newCustomerCard == null){
-            return true;
-        }
-
-        c.setCustomerCard(newCustomerCard);
-        return true;
-    }
-
-
-    /**
-     * This method deletes a customer with given id from the system.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @param id the id of the customer to be deleted
-     * @return true if the customer was successfully deleted
-     *          false if the user does not exists or if we have problems to reach the db
-     *
-     * @throws InvalidCustomerIdException if the id is null, less than or equal to 0.
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
-
-    @Override
-    public boolean deleteCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
-        /*
-        // Exceptions
-        if (id <= 0  || id == null){
-            throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
-        }
-
-        if (this.loggedIn == null){
-            throw new UnauthorizedException("There is no logged user or this user has not the rights to delete a customer");
-        }
-
-        // Get the customer by id
-        Customer c = this.getCustomer(id);
-
-        // Check if customer is null
-        if (c == null){
-            return false;
-        }
-
-        // Remove c from customer list
-        this.customers.remove(c);
-
-        // Remove the object c referencing it to null, therefore its attributes are also eliminated: its id, 
-        // its customerName and its customerCard
-        c = null;
-        */
-        return true;
-    }
-
-    /**
-     * This method returns a customer with given id.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @param id the id of the customer
-     *
-     * @return the customer with given id
-     *          null if that user does not exists
-     *
-     * @throws InvalidCustomerIdException if the id is null, less than or equal to 0.
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-    */
-    @Override
-    public Customer getCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
-        /*
-        // Exceptions
-        if (id <= 0  || id == null){
-            throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
-        }
-
-        if (this.loggedIn == null){
-            throw new UnauthorizedException("There is no logged user or this user has not the rights to get a customer");
-        }
-
-        // Search in the customer list and if the customer is found it is returned
-        for (Customer c: customers){
-            if (c.getId() == id){
-                return c;
+            // Check if newCustomerCard contains only digits
+            try {
+                Integer.parseInt(newCustomerCard);
+            }
+            catch(Exception e) {
+                throw new InvalidCustomerCardException("The customer's card is not in a valid format");
             }
         }
 
-        // If the customer is not found, null is returned
-        */
-        return null;
+        if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
+            throw new UnauthorizedException("There is no logged user or this user has not the rights to modify a customer");
+        }
+
+
+        try {
+
+            // Update customer name if newCustomerName is unique and the id is found
+            Statement st = conn.createStatement();
+            ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
+
+            Boolean idFound = false;
+
+            while (res.next()){
+                if (res.getString("CustomerName").equals(newCustomerName) && res.getInt("CustomerId") != id) {
+                    return false;
+                }
+
+                if (res.getInt("CustomerId") == id) {
+                    idFound = true;
+                }
+            }
+
+            if (!idFound) { return false;}
+
+            Statement st1 = conn.createStatement();
+            String updateCustomerName = "UPDATE CUSTOMERS SET CustomerName = '"+newCustomerName+"' WHERE CustomerId="+id+" ";
+            st1.executeUpdate(updateCustomerName);
+
+            // Update the card number if newCustomerCard is not null
+            if(newCustomerCard != null){
+
+
+                // Detach if newCustomerCard is an empty string
+                if (newCustomerCard.isEmpty()){
+
+                    Statement st3 = conn.createStatement();
+                    String detachCustomerCard = "UPDATE CUSTOMERS SET CustomerCard = '' WHERE CustomerId="+id+" ";
+                    st3.executeUpdate(detachCustomerCard);
+
+                    Statement st4 = conn.createStatement();
+                    String removePoints = "UPDATE CUSTOMERS SET Points = 0 WHERE CustomerId="+id+" ";
+                    st4.executeUpdate(removePoints);
+
+                    return true;
+                }
+
+                // Check if newCustomerCard is already attached
+                else {
+
+                    Statement st5 = conn.createStatement();
+                    ResultSet res5 = st5.executeQuery("SELECT * FROM CUSTOMERS");
+
+                    while (res5.next()){
+                        if (res5.getString("CustomerCard").equals(newCustomerCard)) {
+                            return false;
+                        }
+                    }
+
+                }
+
+                Statement st6 = conn.createStatement();
+                String modifyCustomerCard = "UPDATE CUSTOMERS SET CustomerCard = '"+newCustomerCard+"' WHERE CustomerId="+id+" ";
+                st6.executeUpdate(modifyCustomerCard);
+
+            }
+
+            return true;
+
+        }
+
+        catch (Exception e) {
+            System.out.println("Error with db connection");
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    @Override
+    public boolean deleteCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
+
+        // Exceptions
+        if (id == null  || id <= 0){
+            throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
+        }
+
+        if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
+            throw new UnauthorizedException("There is no logged user or this user has not the rights to delete a customer");
+        }
+
+        try {
+
+            // Delete customer if his id is found
+            Statement st = conn.createStatement();
+            ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
+
+            Boolean idFound = false;
+
+            while (res.next()){
+                if (res.getInt("CustomerId") == id){
+                    idFound = true;
+                }
+            }
+
+            if (!idFound) { return false;}
+
+            Statement st1 = conn.createStatement();
+            String deleteCustomer = "DELETE FROM CUSTOMERS WHERE CustomerId="+id+"";
+            st1.executeUpdate(deleteCustomer);
+            return true;
+
+        }
+        catch (Exception e) {
+            System.out.println("Error with db connection");
+            e.printStackTrace();
+            return false;
+        }
+
     }
 
 
-    /**
-     * This method returns a list containing all registered users.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @return the list of all the customers registered
-     *
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
+    @Override
+    public Customer getCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
+
+        // Exceptions
+        if (id == null  || id <= 0){
+            throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
+        }
+
+
+        if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
+            throw new UnauthorizedException("There is no logged user or this user has not the rights to get a customer");
+        }
+
+
+        try {
+
+            Customer c;
+
+            Statement st = conn.createStatement();
+            ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
+
+            while (res.next()){
+                if (res.getInt("CustomerId") == id) {
+                    c = new CustomerImpl( res.getString("CustomerName"), res.getString("CustomerCard"), res.getInt("CustomerId"), res.getInt("Points") );
+                    return c;
+                }
+            }
+
+            // If the customer is not found, null is returned
+            return null;
+        }
+
+        catch (Exception e) {
+            System.out.println("Error with db connection");
+            e.printStackTrace();
+            return null;
+        }
+
+    }
 
     @Override
     public List<Customer> getAllCustomers() throws UnauthorizedException {
-        /*
+
         // Exception
-        if (this.loggedIn == null){
+        if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to get all customers");
         }
-        return this.customers;
-        */
-        return null;
+
+        List<Customer> customerList = new ArrayList<Customer>();
+
+        try {
+
+            Customer c;
+
+            Statement st = conn.createStatement();
+            ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
+
+            while (res.next()){
+                c = new CustomerImpl( res.getString("CustomerName"), res.getString("CustomerCard"), res.getInt("CustomerId"), res.getInt("Points") );
+                customerList.add(c);
+            }
+
+            return customerList;
+        }
+
+        catch (Exception e) {
+            System.out.println("Error with db connection");
+            e.printStackTrace();
+            return customerList;
+        }
+
+
     }
 
-
-     /**
-     * This method returns a string containing the code of a new assignable card.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @return the code of a new available card. An empty string if the db is unreachable
-     *
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
     @Override
     public String createCard() throws UnauthorizedException {
 
         // Exception
-        if (this.loggedIn == null){
+        if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to create a new card");
         }
 
-        // An empty string is the db is unreachable ???
+        try {
 
-         return null;
+            // Get an unique customerCard
+
+            // Initial value
+            Integer customerCardInt = 0;
+
+            // Boolean to know if the value of the card was found in the db
+            Boolean modified = true;
+
+            // If the card value has not been modified, it means that it is unique and the while loop ends
+
+            while (modified) {
+                modified = false;
+
+                Statement st = conn.createStatement();
+                ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
+
+                while (res.next()){
+                    if ( !res.getString("CustomerCard").isEmpty() ) {
+                        if ( Integer.parseInt(res.getString("CustomerCard")) == customerCardInt ) {
+                            // This card value has been found, it means that it is not unique
+                            // Try with the following value
+                            customerCardInt = customerCardInt +1 ;
+                            modified = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            String customerCardString = Integer.toString(customerCardInt);
+
+            while ( customerCardString.length() < 10 ) {
+                customerCardString = 0 + customerCardString;
+            }
+
+
+            return customerCardString;
+        }
+
+        catch (Exception e) {
+            System.out.println("Error with db connection");
+            e.printStackTrace();
+            return "";
+        }
+
     }
 
-
-    /**
-     * This method assigns a card with given card code to a customer with given identifier. A card with given card code
-     * can be assigned to one customer only.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @param customerCard the number of the card to be attached to a customer
-     * @param customerId the id of the customer the card should be assigned to
-     *
-     * @return true if the operation was successful
-     *          false if the card is already assigned to another user, if there is no customer with given id, if the db is unreachable
-     *
-     * @throws InvalidCustomerIdException if the id is null, less than or equal to 0.
-     * @throws InvalidCustomerCardException if the card is null, empty or in an invalid format
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
     @Override
     public boolean attachCardToCustomer(String customerCard, Integer customerId) throws InvalidCustomerIdException, InvalidCustomerCardException, UnauthorizedException {
-        /*
+
         // Exceptions
-        if (customerId <= 0  || customerId == null){
+        if (customerId == null  || customerId <= 0){
             throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
         }
 
-        if (customerCard.length() != 10 || customerCard.isEmpty() || customerCard == null) {
+        if (customerCard == null || customerCard.length() != 10 || customerCard.isEmpty()) {
             throw new InvalidCustomerCardException("The customer's card is null, empty or it is not in a valid format");
         }
 
-        if (this.loggedIn == null){
+        if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to attach a card to customer");
         }
 
-        // Return false if the card is already assigned to another user
-        for (Customer c: customers) {
-            if (c.getCustomerCard() == customerCard) {
+
+        try {
+
+            Statement st = conn.createStatement();
+            ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
+
+            // Return false if the card is already assigned to another user
+            while (res.next()){
+                if (res.getString("CustomerCard").equals(customerCard)) {
+                    return false;
+                }
+            }
+
+            // Return false if there is no customer with given id
+            Customer c = getCustomer(customerId);
+            if (c == null) {
                 return false;
             }
+
+            // Attach card to customer c
+            Statement st2 = conn.createStatement();
+            String updateCustomer = "UPDATE CUSTOMERS SET CustomerCard = '"+customerCard+"' WHERE CustomerId="+customerId+" ";
+            st2.executeUpdate(updateCustomer);
+
+            return true;
+
+
         }
 
-        // Return false if there is no customer with given id
-        Customer c = getCustomer(customerId);
-        if (c == null) {
+        catch (Exception e) {
+            System.out.println("Error with db connection");
+            e.printStackTrace();
             return false;
         }
 
-        // False if the db is unreachable ???
 
-        // Attach card to customer c
-        c.setCustomerCard(customerCard);
-        */
-        return true;
+
     }
 
-
-    /**
-     * This method updates the points on a card adding to the number of points available on the card the value assumed by
-     * <pointsToBeAdded>. The points on a card should always be greater than or equal to 0.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @param customerCard the card the points should be added to
-     * @param pointsToBeAdded the points to be added or subtracted ( this could assume a negative value)
-     *
-     * @return true if the operation is successful
-     *          false   if there is no card with given code,
-     *                  if pointsToBeAdded is negative and there were not enough points on that card before this operation,
-     *                  if we cannot reach the db.
-     *
-     * @throws InvalidCustomerCardException if the card is null, empty or in an invalid format
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
-
     @Override
-    public boolean modifyPointsOnCard(String customerCard, int pointsToBeAdded) throws InvalidCustomerCardException, UnauthorizedException {
-        /*
+    public boolean modifyPointsOnCard(String customerCard, int pointsToBeAdded) throws InvalidCustomerCardException, UnauthorizedException{
+
         // Exceptions
-        if (customerCard.length() != 10 || customerCard.isEmpty() || customerCard == null) {
+        if (customerCard == null || customerCard.length() != 10 || customerCard.isEmpty()) {
             throw new InvalidCustomerCardException("The customer's card is null, empty or it is not in a valid format");
         }
 
-        if (this.loggedIn == null){
+        if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to modify points on a card");
         }
 
-        Customer customer = null;
 
-        for (Customer c: customers) {
-            if (c.getCustomerCard() == customerCard) {
-                customer = c;
+        try {
+
+            Customer c = null;
+            Statement st = conn.createStatement();
+            ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
+
+
+            while (res.next()){
+                if (res.getString("CustomerCard").equals(customerCard)) {
+                    c = getCustomer(res.getInt("CustomerId"));
+                }
             }
+
+            // Return false if there is no card with given code assigned to a customer
+            if (c == null){
+                return false;
+            }
+
+            Integer points = c.getPoints();
+            Integer totalPoints = points + pointsToBeAdded;
+
+            // The points on a card should always be greater than or equal to 0.
+            if (totalPoints < 0) {
+                return false;
+            }
+
+            Statement st2 = conn.createStatement();
+            String updatePoints = "UPDATE CUSTOMERS SET Points = '"+totalPoints+"' WHERE CustomerCard='"+customerCard+"'";
+            st2.executeUpdate(updatePoints);
+
+            return true;
+
         }
 
-        // Return false if there is no card with given code assigned to a customer
-        if (customer == null){
+        catch (Exception e) {
+            System.out.println("Error with db connection");
+            e.printStackTrace();
             return false;
         }
-        
-        Integer points = customer.getPoints();
-        Integer totalPoints = points + pointsToBeAdded;
 
-        // The points on a card should always be greater than or equal to 0.
-        if (totalPoints <= 0) {
-            return false;
-        }
-
-        // False if the db is unreachable ???
-
-        customer.setPoints(totalPoints);
-        */
-        return true;
     }
 
 
@@ -2003,6 +2132,7 @@ public class EZShop implements EZShopInterface {
 
 
     //GET OBJECT FROM ID AND DB
+
     private CustomerImpl getCustomerById(int transactionCardId) {
         //return (CustomerImpl) customers.stream().filter(c->c.getId()==transactionCardId);
 
@@ -2014,7 +2144,8 @@ public class EZShop implements EZShopInterface {
             pstmt.setInt(1, transactionCardId);
             ResultSet rs    = pstmt.executeQuery();
             if(rs.isBeforeFirst()) {
-                c = new CustomerImpl(rs.getInt("CustomerId"), rs.getString("CustomerName"), rs.getString("CustomerCard"), rs.getInt("Points"));
+                c = new CustomerImpl( rs.getString("CustomerName"), rs.getString("CustomerCard"), rs.getInt("CustomerId"), rs.getInt("Points") );
+
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
