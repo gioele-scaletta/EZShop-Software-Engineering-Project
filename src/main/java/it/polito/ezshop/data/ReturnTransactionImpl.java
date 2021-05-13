@@ -4,17 +4,25 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class ReturnTransactionImpl {
-    private Integer returnId;
-    private Integer saleTransactionId;
-    Map<ProductTypeImpl, Integer> listOfProductsReturn = new HashMap<>();
-    private Double amount;
-    enum PaymentType{CREDIT_CARD, CASH};
-    SaleTransactionImpl.PaymentType paymentType;
-    private Boolean commit;
+    private enum State{INPROGRESS, UNDONE, COMMIT, DELETED};
+    private enum PaymentType{CARD, CASH};
 
-    public ReturnTransactionImpl(Integer returnId, Integer saleTransactionId) {
+    private Integer returnId;
+    private SaleTransaction saleTransaction;
+    private Map<ProductTypeImpl, Integer> listOfProductsReturn;
+    private State state;
+    private PaymentType paymentType;
+    private Double amount;
+    private BalanceOperation balanceOperation;
+
+    public ReturnTransactionImpl(Integer returnId, SaleTransaction saleTransaction, Map<ProductTypeImpl, Integer> listOfProductsReturn, String state, String paymentType, Double amount, BalanceOperation balanceOperation) {
         this.returnId = returnId;
-        this.saleTransactionId = saleTransactionId;
+        this.saleTransaction = saleTransaction;
+        this.listOfProductsReturn = listOfProductsReturn;
+        this.state = State.valueOf(state);
+        this.paymentType = PaymentType.valueOf(paymentType);
+        this.amount = amount;
+        this.balanceOperation = balanceOperation;
     }
 
     public Integer getReturnId() {
@@ -25,12 +33,12 @@ public class ReturnTransactionImpl {
         this.returnId = returnId;
     }
 
-    public Integer getSaleTransactionId() {
-        return saleTransactionId;
+    public SaleTransaction getSaleTransaction() {
+        return saleTransaction;
     }
 
-    public void setSaleTransactionId(Integer saleTransactionId) {
-        this.saleTransactionId = saleTransactionId;
+    public void setSaleTransaction(SaleTransaction saleTransaction) {
+        this.saleTransaction = saleTransaction;
     }
 
     public Map<ProductTypeImpl, Integer> getListOfProductsReturn() {
@@ -41,6 +49,22 @@ public class ReturnTransactionImpl {
         this.listOfProductsReturn = listOfProductsReturn;
     }
 
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public PaymentType getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(PaymentType paymentType) {
+        this.paymentType = paymentType;
+    }
+
     public Double getAmount() {
         return amount;
     }
@@ -49,19 +73,11 @@ public class ReturnTransactionImpl {
         this.amount = amount;
     }
 
-    public SaleTransactionImpl.PaymentType getPaymentType() {
-        return paymentType;
+    public BalanceOperation getBalanceOperation() {
+        return balanceOperation;
     }
 
-    public void setPaymentType(SaleTransactionImpl.PaymentType paymentType) {
-        this.paymentType = paymentType;
-    }
-
-    public Boolean getCommit() {
-        return commit;
-    }
-
-    public void setCommit(Boolean commit) {
-        this.commit = commit;
+    public void setBalanceOperation(BalanceOperation balanceOperation) {
+        this.balanceOperation = balanceOperation;
     }
 }
