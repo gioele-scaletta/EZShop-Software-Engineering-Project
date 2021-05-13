@@ -972,7 +972,7 @@ public class EZShop implements EZShopInterface {
 
 
     @Override
-    public Customer getCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
+    public CustomerImpl getCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
 
         // Exceptions
         if (id == null  || id <= 0){
@@ -987,7 +987,7 @@ public class EZShop implements EZShopInterface {
 
         try {
 
-            Customer c;
+            CustomerImpl c;
 
             Statement st = conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
