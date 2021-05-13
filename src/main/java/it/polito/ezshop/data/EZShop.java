@@ -1615,23 +1615,29 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
 
-        // Check if the transaction is not available
         SaleTransactionImpl saleTransaction = getSaleTransactionById(transactionId);
+        // Check if the transaction is not available
         if (saleTransaction == null) {
             return -1;
         }
+        // Check if the transaction has already been sold and payed
+        if (!saleTransaction.isPayed() && !saleTransaction.isClosed()) {
+            return -1;
+        }
 
-        // Get new ID
-        Integer newId = getNewReturnTransactionId();
-
-        // Insert a new ReturnTransaction row in DB
-        String query = "INSERT INTO RETURNTRANSACTIONS(returnId, saleTransactionId) VALUES(?, ?)";
+        // Insert a new ReturnTransaction
+        String query = "INSERT INTO RETURN_TRANSACTIONS(TransactionId, State) VALUES(?, ?)";
+        Integer newId = -1;
         try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
-            pstmt.setInt(1, newId);
-            pstmt.setInt(2, transactionId);
+            pstmt.setInt(1, transactionId);
+            pstmt.setString(2, "INPROGRESS");
             pstmt.executeUpdate();
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                newId = rs.getInt(1);
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
             return -1;
         }
 
@@ -2500,7 +2506,7 @@ public class EZShop implements EZShopInterface {
 
 
     private Integer getNewReturnTransactionId() {
-        String query = "SELECT MAX(returnId) FROM RETURNTRANSACTIONS";  // TODO Create DB table
+        String query = "SELECT MAX(ReturnId) FROM RETURN_TRANSACTIONS";  // TODO Create DB table
         int id;
         try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
             ResultSet rs = pstmt.executeQuery();

@@ -238,6 +238,14 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     }
 
+    public boolean isPayed() {
+        return (this.state == State.PAYED);
+    }
+
+    public boolean isClosed() {
+        return (this.state == State.CLOSED);
+    }
+
     /* OLD VERSION EGTTERS AND SETTERS
     public Integer getTransactionId() {
 		return transactionId;
