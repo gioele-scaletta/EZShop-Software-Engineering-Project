@@ -8,14 +8,14 @@ public class ReturnTransactionImpl {
     private enum PaymentType{CARD, CASH};
 
     private Integer returnId;
-    private SaleTransaction saleTransaction;
+    private SaleTransactionImpl saleTransaction;
     private Map<ProductTypeImpl, Integer> listOfProductsReturn;
     private State state;
     private PaymentType paymentType;
     private Double amount;
-    private BalanceOperation balanceOperation;
+    private BalanceOperationImpl balanceOperation;
 
-    public ReturnTransactionImpl(Integer returnId, SaleTransaction saleTransaction, Map<ProductTypeImpl, Integer> listOfProductsReturn, String state, String paymentType, Double amount, BalanceOperation balanceOperation) {
+    public ReturnTransactionImpl(Integer returnId, SaleTransactionImpl saleTransaction, Map<ProductTypeImpl, Integer> listOfProductsReturn, String state, String paymentType, Double amount, BalanceOperationImpl balanceOperation) {
         this.returnId = returnId;
         this.saleTransaction = saleTransaction;
         this.listOfProductsReturn = listOfProductsReturn;
@@ -33,11 +33,11 @@ public class ReturnTransactionImpl {
         this.returnId = returnId;
     }
 
-    public SaleTransaction getSaleTransaction() {
+    public SaleTransactionImpl getSaleTransaction() {
         return saleTransaction;
     }
 
-    public void setSaleTransaction(SaleTransaction saleTransaction) {
+    public void setSaleTransaction(SaleTransactionImpl saleTransaction) {
         this.saleTransaction = saleTransaction;
     }
 
@@ -73,11 +73,11 @@ public class ReturnTransactionImpl {
         this.amount = amount;
     }
 
-    public BalanceOperation getBalanceOperation() {
+    public BalanceOperationImpl getBalanceOperation() {
         return balanceOperation;
     }
 
-    public void setBalanceOperation(BalanceOperation balanceOperation) {
+    public void setBalanceOperation(BalanceOperationImpl balanceOperation) {
         this.balanceOperation = balanceOperation;
     }
 }

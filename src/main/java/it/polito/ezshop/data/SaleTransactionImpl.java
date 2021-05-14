@@ -166,7 +166,7 @@ public class SaleTransactionImpl implements SaleTransaction {
     }
 
     public boolean isProductInSale(ProductTypeImpl product){
-        return this.listOfProductsSale.containsKey(product);
+        return this.listOfProductsSale.containsKey(product);    // FIXME Compare IDs, not objects
     }
 
     public boolean ApplyDiscountToSaleProduct(Double disc, ProductTypeImpl product) {
@@ -244,6 +244,17 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     public boolean isClosed() {
         return (this.state == State.CLOSED);
+    }
+
+    public Integer getProductQuantity(ProductTypeImpl productType) {
+        Integer quantity = -1;
+        for (ProductTypeImpl pt : listOfProductsSale.keySet()) {
+            if (pt.getBarCode().equals(productType.getBarCode())) {
+                quantity = listOfProductsSale.get(pt);
+            }
+        }
+
+        return quantity;
     }
 
     /* OLD VERSION EGTTERS AND SETTERS
