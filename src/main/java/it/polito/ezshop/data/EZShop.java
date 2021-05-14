@@ -853,6 +853,11 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException("There is no logged user or this user has not the rights to modify a customer");
         }
 
+        catch (Exception e) {
+            System.out.println("Error with db connection");
+            e.printStackTrace();
+            return false;
+        }
 
         try {
 
@@ -970,6 +975,11 @@ public class EZShop implements EZShopInterface {
 
     }
 
+        catch (Exception e) {
+            System.out.println("Error with db connection");
+            e.printStackTrace();
+            return null;
+        }
 
     @Override
     public CustomerImpl getCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
@@ -979,6 +989,8 @@ public class EZShop implements EZShopInterface {
             throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
         }
 
+            return customerList;
+        }
 
         if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to get a customer");
@@ -1762,8 +1774,6 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
-        // TODO
-
         return true;
     }
 
@@ -2088,6 +2098,11 @@ public class EZShop implements EZShopInterface {
         return true;
     }
 
+        newBalanceUpdate(toBeAdded);
+
+        return true;
+    }
+
     /**
      * This method returns a list of all the balance operations (CREDIT,DEBIT,ORDER,SALE,RETURN) performed between two
      * given dates.
@@ -2204,7 +2219,8 @@ public class EZShop implements EZShopInterface {
 
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.err.println("getBalanceOperationById: " + e.getMessage());
+            return null;
         }
         return c;
     }
@@ -2215,6 +2231,10 @@ public class EZShop implements EZShopInterface {
         try (PreparedStatement pstmt  = conn.prepareStatement(query)) {
             pstmt.setInt(1, balanceOperationId);
             ResultSet rs = pstmt.executeQuery();
+
+            LocalDate date = LocalDate.parse(rs.getString("Date"));
+            double amount = rs.getDouble("Amount");
+            String type = rs.getString("Type");
 
             LocalDate date = LocalDate.parse(rs.getString("Date"));
             double amount = rs.getDouble("Amount");

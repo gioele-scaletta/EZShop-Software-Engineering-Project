@@ -12,7 +12,6 @@ Version:
 
 
 
-
 - [White Box Unit Tests](#white-box-unit-tests)
 
 
@@ -26,52 +25,156 @@ Version:
     to start tests
     >
 
- ### **Class *class_name* - method *name***
+# Class UserImpl 
+
+## Method isAllowedRole
 
 
 
-**Criteria for method *name*:**
-	
+**Criteria for method *isAllowedRole*:**
 
- - 
- - 
+- Validity of the String parameter
 
 
+**Predicates for method *isAllowedRole*:**
 
-
-
-**Predicates for method *name*:**
-
-| Criteria | Predicate |
-| -------- | --------- |
-|          |           |
-|          |           |
-|          |           |
-|          |           |
-
-
-
-
-
-**Boundaries**:
-
-| Criteria | Boundary values |
-| -------- | --------------- |
-|          |                 |
-|          |                 |
-
+| Criterion                        | Predicate |
+| -------------------------------- | --------- |
+| Validity of the String parameter | Valid     |
+|                                  | Invalid   |
+|                                  | NULL      |
+||Empty|
 
 
 **Combination of predicates**:
 
 
-| Criteria 1 | Criteria 2 | ... | Valid / Invalid | Description of the test case | JUnit test case |
-|-------|-------|-------|-------|-------|-------|
-|||||||
-|||||||
-|||||||
-|||||||
-|||||||
+|  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-------|-------|-------|-------|
+| Valid                            |  V                      | admin_role="Administrator"  <br />isAllowedRole(admin_role) <br /><br />-> true|                 |
+| Invalid                          |  I                | admin_role="administrator"  <br /> isAllowedRole(admin_role) <br /><br />-> false                 |
+| Empty                            |  I               |  admin_role=""  <br />isAllowedRole(admin_role) <br /><br />-> false                 |
+| NULL                             |  I                |  admin_role=null  <br /> isAllowedRole(admin_role) <br /><br />-> false                 |
+
+
+
+
+## Methods canManageUsers
+
+**Criteria for methods *CanManageUsers*:**
+
+- Value of field role
+
+
+**Predicates for methods *canManageUsers*:**
+
+| Criterion                        | Predicate |
+| -------------------------------- | --------- |
+|Value of field role               | Administrator |
+|                                  | Cashier   |
+|                                  | ShopManager  |
+
+**Combination of predicates**:
+
+
+|  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-------|-------|-------|-------|
+| Aministrator                          |  V                     |  user.setRole(admin_role)<br /> user.canManageUsers()<br /><br />-> true|     
+| Cashier                               |  V               |  user.setRole(cashier_role) <br /> user.canManageUsers()<br /><br />-> false|
+| ShopManager                           |  V               |  user.setRole(shop_manager_role) <br /> user.canManageUsers()<br /><br />-> false                 |
+
+
+## Methods canManageProductList, canManageInventory, canManageAccounting
+
+**Criteria for methods *canManageProductList, canManageInventory, canManageAccounting*:**
+
+- Value of field role
+
+**Predicates for methods *canMan,ageProductList, canManageInventory, canManageAccounting*:**
+
+| Criterion                        | Predicate |
+| -------------------------------- | --------- |
+|Value of field role               | Administrator |
+|                                  | Cashier   |
+|                                  | ShopManager  |
+
+**Combination of predicates**:
+
+|  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-------|-------|-------|-------|
+| Aministrator                          |  V                     |  user.setRole(admin_role)<br /><br /> user.canManageProductList()<br /> user.canManageInventory()<br />user.canManageAccounting()<br /><br />-> true|     
+| Cashier                               |  V               |  user.setRole(cashier_role) <br /><br /> user.canManageProductList()<br /> user.canManageInventory()<br />user.canManageAccounting()<br /><br />-> true|
+| ShopManager                           |  V               |  user.setRole(shop_manager_role) <br /><br /> user.canManageProductList()<br /> user.canManageInventory()<br />user.canManageAccounting()<br /><br />-> false                 |
+
+
+
+## Methods canManageCustomers, canManageSaleTransactions, canManagePayments
+
+**Criteria for methods *canManageCustomers, canManageSaleTransactions, canManagePayments*:**
+
+- Value of field role
+
+**Predicates for methods *canManageCustomers, canManageSaleTransactions, canManagePayments*:**
+
+| Criterion                        | Predicate |
+| -------------------------------- | --------- |
+| Value of field role              | Administrator |
+|                                  | Cashier   |
+|                                  | ShopManager  |
+
+**Combination of predicates**:
+
+|  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-------|-------|-------|-------|
+| Aministrator                          |  V                     |  user.setRole(admin_role)<br /><br /> user.canManageCustomers()<br /> user.canManageSaleTransactions()<br />user.canManagePayments()<br /><br />-> true|     
+| Cashier                               |  V               |  user.setRole(cashier_role) <br /><br /> user.canManageCustomers()<br /> user.canManageSaleTransactions()<br />user.canManagePayments()<br /><br />-> true| 
+| ShopManager                           |  V               |  user.setRole(shop_manager_role) <br /><br /> user.canManageCustomers()<br /> user.canManageSaleTransactions()<br />user.canManagePayments()<br /><br />-> true| 
+
+
+
+# Class ProductTypeImpl 
+
+## Method isValidCode
+
+**Criteria for method *isValidCode*:**
+
+- Validity of length String parameter productCode
+- Validity of digits type of String parameter productCode
+- Validity of digits sum String parameter productCode
+- Validity of String parameter
+
+
+**Predicates for method *isValidCode*:**
+
+| Criterion                        | Predicate |
+| -------------------------------- | --------- |
+| Validity of length               | >12 and <14 |
+|                                  | <12 or >14   |
+| Validity of digits type         | is parsable Long   |
+|                                  |nor parsable Long |
+|Validity of digits sum            | Closest higher tens to sum calculation (x1 and x3), minus sum is equal to 3 |
+|Validity of String parameter      | null|
+|                                  |Empty|
+
+**Combination of predicates**:
+
+
+|  Validity of the String parameter |  Validity of length| Validity of digits type | Validity of digits sum  | Valid / Invalid | Description of the test case | JUnit test case |
+|-------|-------|-------|-------|-------|-------|-------|
+| Valid    |   >12 and <14     | is  parsable   | Valid   |  V                      | isValidCode("5701234567899") <br /><br />-> true         
+| *  |   *      |  *        | Invalid |  I                | isValidCode("111111111111") <br /><br />-> false                 |
+| *  |   *       |  is not parsable        | Invalid |  I                | isValidCode("5701234a67899") <br /><br />-> false                 |
+| *  |   >12 and <14       |  *     | * |  I                | isValidCode("570167899") <br /><br />-> false 
+|Empty |   *      |  *       | * |  I                |isValidCode("")  <br /><br />-> false                 |                |
+|null |   *      |  *       | * |  I                | isValidCode(null)  <br /><br />-> false 
+
+
+## Method isValidLocation
+## Method updateProductQuantity
+
+
+
+
 
 
 
