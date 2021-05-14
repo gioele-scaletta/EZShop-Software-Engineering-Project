@@ -2238,10 +2238,9 @@ public class EZShop implements EZShopInterface {
     }
 
     SaleTransactionImpl getSaleTransactionById(Integer transactionId) {
-        /* FIXME With this check, it is not possible to call the method from the return procedure since the current sale is not linked with the return transaction
-        if (currentsale.getTicketNumber().equals(transactionId)){
+        if (currentsale != null && currentsale.getTicketNumber().equals(transactionId)){
             return currentsale;
-        }*/
+        }
 
         String query = "SELECT * FROM SALETRANSACTIONS WHERE transactionId = ?";
         SaleTransactionImpl sale = null;
@@ -2273,13 +2272,14 @@ public class EZShop implements EZShopInterface {
 
         //IF PRODUCT IS INVOLVED IN CURRENT SALE THE UP TO DATE INFORMATION ARE STORED ONLY IN RAM AT THE MOMENT
         List<ProductTypeImpl> prodl=null;
-        /* FIXME With this check, it is not possible to call the method from the return procedure since the current sale is not linked with the return transaction
-        prodl= currentsale.listOfProductsSale.keySet().stream().filter(e->e.getBarCode().equals(barCode)).collect(Collectors.toList());
+        if (currentsale != null) {
+            prodl= currentsale.listOfProductsSale.keySet().stream().filter(e->e.getBarCode().equals(barCode)).collect(Collectors.toList());
 
-        if (prodl.size()>0){
-           // System.out.println("ok");
-            return prodl.get(0);
-        }*/
+            if (prodl.size()>0){
+                // System.out.println("ok");
+                return prodl.get(0);
+            }
+        }
 
         //Retrieving product
         String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=? ";
