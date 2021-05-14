@@ -853,11 +853,6 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException("There is no logged user or this user has not the rights to modify a customer");
         }
 
-        catch (Exception e) {
-            System.out.println("Error with db connection");
-            e.printStackTrace();
-            return false;
-        }
 
         try {
 
@@ -975,11 +970,6 @@ public class EZShop implements EZShopInterface {
 
     }
 
-        catch (Exception e) {
-            System.out.println("Error with db connection");
-            e.printStackTrace();
-            return null;
-        }
 
     @Override
     public CustomerImpl getCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
@@ -989,8 +979,6 @@ public class EZShop implements EZShopInterface {
             throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
         }
 
-            return customerList;
-        }
 
         if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to get a customer");
@@ -1774,6 +1762,8 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
+        // TODO
+
         return true;
     }
 
@@ -2085,30 +2075,6 @@ public class EZShop implements EZShopInterface {
         return true;
     }
 
-<<<<<<< HEAD
-        newBalanceUpdate(toBeAdded);
-
-        return true;
-    }
-
-    /**
-     * This method returns a list of all the balance operations (CREDIT,DEBIT,ORDER,SALE,RETURN) performed between two
-     * given dates.
-     * This method should understand if a user exchanges the order of the dates and act consequently to correct
-     * them.
-     * Both <from> and <to> are included in the range of dates and might be null. This means the absence of one (or
-     * both) temporal constraints.
-     *
-     *
-     * @param from the start date : if null it means that there should be no constraint on the start date
-     * @param to the end date : if null it means that there should be no constraint on the end date
-     *
-     * @return All the operations on the balance whose date is <= to and >= from
-     *
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
-=======
->>>>>>> d08e1e22af8aa82e236191e8d44893ee5bf38f13
     @Override
     public List<BalanceOperation> getCreditsAndDebits(LocalDate from, LocalDate to) throws UnauthorizedException {
         System.out.println("Call getCreditsAndDebits(from = "+ from +", to = "+ to +")");
@@ -2202,8 +2168,7 @@ public class EZShop implements EZShopInterface {
 
             }
         } catch (SQLException e) {
-            System.err.println("getBalanceOperationById: " + e.getMessage());
-            return null;
+            System.out.println(e.getMessage());
         }
         return c;
     }
@@ -2214,10 +2179,6 @@ public class EZShop implements EZShopInterface {
         try (PreparedStatement pstmt  = conn.prepareStatement(query)) {
             pstmt.setInt(1, balanceOperationId);
             ResultSet rs = pstmt.executeQuery();
-
-            LocalDate date = LocalDate.parse(rs.getString("Date"));
-            double amount = rs.getDouble("Amount");
-            String type = rs.getString("Type");
 
             LocalDate date = LocalDate.parse(rs.getString("Date"));
             double amount = rs.getDouble("Amount");
