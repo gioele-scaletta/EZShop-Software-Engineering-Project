@@ -1615,9 +1615,9 @@ public class EZShop implements EZShopInterface {
             System.err.println("startReturnTransaction: The SaleTransaction is not available");
             return -1;
         }
-        // Check if the SaleTransaction has not already been sold or payed
-        if (!saleTransaction.isPayed() && !saleTransaction.isClosed()) {
-            System.err.println("startReturnTransaction: The SaleTransaction has not already been sold or payed");
+        // Check if the SaleTransaction has not already been sold and payed
+        if (!saleTransaction.isPayed()) {
+            System.err.println("startReturnTransaction: The SaleTransaction has not already been sold and payed");
             return -1;
         }
 
