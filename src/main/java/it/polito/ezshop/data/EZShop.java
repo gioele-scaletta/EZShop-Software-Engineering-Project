@@ -2062,19 +2062,6 @@ public class EZShop implements EZShopInterface {
         return 0;
     }
 
-    /**
-     * This method record a balance update. <toBeAdded> can be both positive and negative. If positive the balance entry
-     * should be recorded as CREDIT, if negative as DEBIT. The final balance after this operation should always be
-     * positive.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" is logged in.
-     *
-     * @param toBeAdded the amount of money (positive or negative) to be added to the current balance. If this value
-     *                  is >= 0 than it should be considered as a CREDIT, if it is < 0 as a DEBIT
-     *
-     * @return  true if the balance has been successfully updated
-     *          false if toBeAdded + currentBalance < 0.
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
     @Override
     public boolean recordBalanceUpdate(double toBeAdded) throws UnauthorizedException {
         System.out.println("Call recordBalanceUpdate(toBeAdded = "+ toBeAdded +")");
@@ -2086,7 +2073,7 @@ public class EZShop implements EZShopInterface {
         }
 
         // Get current balance
-        double currentBalance = currentBalance();
+        double currentBalance = getCurrentBalance();
         // Check if toBeAdded + currentBalance < 0
          if (toBeAdded + currentBalance < 0) {
              System.err.println("recordBalanceUpdate: toBeAdded + currentBalance < 0");
@@ -2098,6 +2085,7 @@ public class EZShop implements EZShopInterface {
         return true;
     }
 
+<<<<<<< HEAD
         newBalanceUpdate(toBeAdded);
 
         return true;
@@ -2119,6 +2107,8 @@ public class EZShop implements EZShopInterface {
      *
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
+=======
+>>>>>>> d08e1e22af8aa82e236191e8d44893ee5bf38f13
     @Override
     public List<BalanceOperation> getCreditsAndDebits(LocalDate from, LocalDate to) throws UnauthorizedException {
         System.out.println("Call getCreditsAndDebits(from = "+ from +", to = "+ to +")");
@@ -2176,13 +2166,6 @@ public class EZShop implements EZShopInterface {
         return balanceOperations;
     }
 
-    /**
-     * This method returns the actual balance of the system.
-     *
-     * @return the value of the current balance
-     *
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
     @Override
     public double computeBalance() throws UnauthorizedException {
         System.out.println("Call computeBalance()");
@@ -2193,7 +2176,7 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
 
-        return currentBalance();
+        return getCurrentBalance();
     }
 
 
@@ -2614,19 +2597,20 @@ public class EZShop implements EZShopInterface {
         return returnTransaction;
     }
 
-    private double currentBalance() {
-        System.out.println("Call currentBalance()");
+    private double getCurrentBalance() {
+        System.out.println("Call getCurrentBalance()");
 
-        String query = "SELECT amount FROM BALANCE_OPERATIONS";
+        String query = "SELECT SUM(Amount) AS CurrentBalance FROM BALANCE_OPERATIONS";
         double currentBalance = 0;
         try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
             ResultSet rs = pstmt.executeQuery();
-            while(rs.next()) {
-                currentBalance += rs.getDouble("amount");
+
+            if(rs.isBeforeFirst()) {
+                currentBalance = rs.getDouble("CurrentBalance");
+                System.out.println("getCurrentBalance: currentBalance = "+ currentBalance);
             }
-            System.out.println("currentBalance: currentBalance = "+ currentBalance);
         } catch (SQLException e) {
-            System.err.println("currentBalance: " + e.getMessage());
+            System.err.println("getCurrentBalance: " + e.getMessage());
             return 0;
         }
 
