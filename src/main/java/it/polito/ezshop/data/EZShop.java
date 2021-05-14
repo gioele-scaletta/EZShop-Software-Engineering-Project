@@ -2075,9 +2075,17 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
 
-        // TODO
+        // Get current balance
+        double currentBalance = currentBalance();
+        // Check if toBeAdded + currentBalance < 0
+         if (toBeAdded + currentBalance < 0) {
+             System.err.println("recordBalanceUpdate: toBeAdded + currentBalance < 0");
+             return false;
+         }
 
-        return false;
+        newBalanceUpdate(toBeAdded);
+
+        return true;
     }
 
     /**
@@ -2170,20 +2178,7 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
 
-        String query = "SELECT amount FROM BALANCEOPERATIONS";
-        double currentBalance = 0;
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
-            ResultSet rs = pstmt.executeQuery();
-            while(rs.next()) {
-                currentBalance += rs.getDouble("amount");
-            }
-            System.out.println("computeBalance: currentBalance = "+ currentBalance);
-        } catch (SQLException e) {
-            System.err.println("computeBalance: " + e.getMessage());
-            return 0;
-        }
-
-        return currentBalance;
+        return currentBalance();
     }
 
 
@@ -2452,7 +2447,7 @@ public class EZShop implements EZShopInterface {
         int  id=getNewBalanceOperationId();
 
         LocalDate now = LocalDate.now();
-        if(amount>0){
+        if(amount>=0){
             BalanceOperationImpl bal=new BalanceOperationImpl(id,now,amount,"CREDIT" );
             addBalanceToBalancesList(bal);
             return bal;
@@ -2604,5 +2599,24 @@ public class EZShop implements EZShopInterface {
         }
 
         return returnTransaction;
+    }
+
+    private double currentBalance() {
+        System.out.println("Call currentBalance()");
+
+        String query = "SELECT amount FROM BALANCEOPERATIONS";
+        double currentBalance = 0;
+        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()) {
+                currentBalance += rs.getDouble("amount");
+            }
+            System.out.println("currentBalance: currentBalance = "+ currentBalance);
+        } catch (SQLException e) {
+            System.err.println("currentBalance: " + e.getMessage());
+            return 0;
+        }
+
+        return currentBalance;
     }
 }
