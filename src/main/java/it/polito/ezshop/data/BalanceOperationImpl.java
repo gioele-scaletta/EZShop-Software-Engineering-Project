@@ -15,11 +15,6 @@ public class BalanceOperationImpl implements BalanceOperation {
         this.type = type;
     }
 
-    public BalanceOperationImpl() {
-
-    }
-
-
     @Override
     public int getBalanceId() {
         return this.balanceId;
@@ -58,9 +53,5 @@ public class BalanceOperationImpl implements BalanceOperation {
     @Override
     public void setType(String type) {
         this.type = type;
-    }
-
-    public Double getAmount() {
-        return this.money;
     }
 }

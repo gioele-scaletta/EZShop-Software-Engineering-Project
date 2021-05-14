@@ -2123,7 +2123,7 @@ public class EZShop implements EZShopInterface {
             }
         }
 
-        String query = "SELECT BalanceId, Date, amount, Type FROM BALANCEOPERATIONS";
+        String query = "SELECT BalanceId, Date, amount, Type FROM BALANCE_OPERATIONS";
         List<BalanceOperation> balanceOperations = new ArrayList<>();
         try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
             ResultSet rs = pstmt.executeQuery();
@@ -2209,32 +2209,25 @@ public class EZShop implements EZShopInterface {
         return c;
     }
 
-    private BalanceOperationImpl getBalanceById(int balanceOperation) {
-        // return (BalanceOperationImpl) balanceOperationsList.stream().filter(c->c.getBalanceId()==balanceOperation);
-        String getnewid = "SELECT * FROM BALANCEOPERATIONS WHERE BalanceId=?";
-        BalanceOperationImpl bal=null;
-        try (
-                PreparedStatement pstmt  = conn.prepareStatement(getnewid)){
+    private BalanceOperationImpl getBalanceOperationById(int balanceOperationId) {
+        String query = "SELECT * FROM BALANCE_OPERATIONS WHERE BalanceId = ?";
+        BalanceOperationImpl balanceOperation = null;
+        try (PreparedStatement pstmt  = conn.prepareStatement(query)) {
+            pstmt.setInt(1, balanceOperationId);
+            ResultSet rs = pstmt.executeQuery();
 
-            pstmt.setInt(1,balanceOperation);
-            ResultSet rs    = pstmt.executeQuery();
+            LocalDate date = LocalDate.parse(rs.getString("Date"));
+            double amount = rs.getDouble("Amount");
+            String type = rs.getString("Type");
 
             if(rs.isBeforeFirst()) {
-                bal = new BalanceOperationImpl(rs.getInt("BalanceId"), LocalDate.parse(rs.getString("Date")), rs.getDouble("amount"), rs.getString("Type"));
+                balanceOperation = new BalanceOperationImpl(balanceOperationId, date, amount, type);
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.err.println("getBalanceOperationById: " + e.getMessage());
+            return null;
         }
-        return bal;
-
-    }
-    private BalanceOperationImpl getBal(int b) {
-        BalanceOperationImpl ba=getBalanceById(b);
-        if(ba!=null){
-            return ba;
-        } else{
-            return new BalanceOperationImpl();
-        }
+        return balanceOperation;
     }
 
     SaleTransactionImpl getSaleTransactionById(Integer transactionId) {
@@ -2255,7 +2248,7 @@ public class EZShop implements EZShopInterface {
                 Double amount = rs.getDouble("Amount");
                 Double discountRate = rs.getDouble("discountRate");
                 CustomerImpl customer = getCustomerById(rs.getInt("transactionCardId"));
-                BalanceOperationImpl balanceOperation = getBal(rs.getInt("BalanceOperationId"));
+                BalanceOperationImpl balanceOperation = getBalanceOperationById(rs.getInt("BalanceOperationId"));
                 HashMap<ProductTypeImpl, Integer> listOfProductsSale = getProdListForSaleDB(transactionId);
                 sale = new SaleTransactionImpl(transactionId, state, paymentType, amount, discountRate, customer, balanceOperation, listOfProductsSale);
             }
@@ -2335,7 +2328,7 @@ public class EZShop implements EZShopInterface {
 
     private int getNewBalanceOperationId() {
         Integer tid=-1;
-        String getnewid = "SELECT COALESCE(MAX(BalanceId),'0') FROM BALANCEOPERATIONS";
+        String getnewid = "SELECT COALESCE(MAX(BalanceId),'0') FROM BALANCE_OPERATIONS";
 
         try (
                 Statement stmt  = conn.createStatement();
@@ -2465,13 +2458,13 @@ public class EZShop implements EZShopInterface {
     public void addBalanceToBalancesList(BalanceOperationImpl b){
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         //balanceOperationsList.add(b); NO MORE SINCE NO MORE LISTS
-        String sql = "INSERT INTO BALANCEOPERATIONS(BalanceId,Date, Amount, Type) VALUES(?,?,?,?)";
+        String sql = "INSERT INTO BALANCE_OPERATIONS(BalanceId,Date, Amount, Type) VALUES(?,?,?,?)";
 
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql);
             pstmt.setInt(1, b.getBalanceId());
             pstmt.setString(2, dtf.format(b.getDate()));
-            pstmt.setDouble(3, b.getAmount());
+            pstmt.setDouble(3, b.getMoney());
             pstmt.setString(4, b.getType());
 
             pstmt.executeUpdate();
@@ -2591,7 +2584,7 @@ public class EZShop implements EZShopInterface {
                 Double amount = rs.getDouble("Amount");
                 Integer balanceId = rs.getInt("BalanceId");
 
-                returnTransaction = new ReturnTransactionImpl(returnId, getSaleTransactionById(transactionId), listOfProductsReturn, state, paymentType, amount, getBalanceById(balanceId));
+                returnTransaction = new ReturnTransactionImpl(returnId, getSaleTransactionById(transactionId), listOfProductsReturn, state, paymentType, amount, getBalanceOperationById(balanceId));
             }
         } catch (SQLException e) {
             System.err.println("getReturnTransactionById: " + e.getMessage());
@@ -2604,7 +2597,7 @@ public class EZShop implements EZShopInterface {
     private double currentBalance() {
         System.out.println("Call currentBalance()");
 
-        String query = "SELECT amount FROM BALANCEOPERATIONS";
+        String query = "SELECT amount FROM BALANCE_OPERATIONS";
         double currentBalance = 0;
         try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
             ResultSet rs = pstmt.executeQuery();
