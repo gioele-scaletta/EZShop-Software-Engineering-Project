@@ -2094,7 +2094,7 @@ public class EZShop implements EZShopInterface {
             }
         }
 
-        String query = "SELECT BalanceId, Date, amount, Type FROM BALANCE_OPERATIONS";
+        String query = "SELECT BalanceId, Date, Amount, Type FROM BALANCE_OPERATIONS";
         List<BalanceOperation> balanceOperations = new ArrayList<>();
         try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
             ResultSet rs = pstmt.executeQuery();
@@ -2102,7 +2102,7 @@ public class EZShop implements EZShopInterface {
             while(rs.next()) {
                 int balanceId = rs.getInt("BalanceId");
                 LocalDate date = LocalDate.parse(rs.getString("Date"));
-                double amount = rs.getDouble("amount");
+                double amount = rs.getDouble("Amount");
                 String type = rs.getString("Type");
 
                 if ((from != null) && (to != null)) {
