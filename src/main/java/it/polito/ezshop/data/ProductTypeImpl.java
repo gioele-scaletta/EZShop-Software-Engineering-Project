@@ -68,14 +68,14 @@ public class ProductTypeImpl implements ProductType{
         int[] digits = productCode.chars().map(c -> c-'0').toArray();
         //Multiplying elements of array x3 and x1 in an alternate way
         boolean alt = true;
-        for(int i = digits.length - 1; i >= 0; i--) {
+        for(int i = digits.length - 2; i >= 0; i--) {
             digits[i] = alt ? digits[i]*3 : digits[i];
             alt = !alt;
         }
         //Summing elements of array
-        Integer sum = Arrays.stream(digits).sum();
+        Integer sum = Arrays.stream(digits).sum() - digits[digits.length - 1];
         //Checking if the closest higher tens to sum, minus sum is equal to 3
-        if((sum+(10-(sum%10)))-sum==3)
+        if((sum+(10-(sum%10)))-sum==digits[digits.length - 1])
             return true;
         else
             return false;
