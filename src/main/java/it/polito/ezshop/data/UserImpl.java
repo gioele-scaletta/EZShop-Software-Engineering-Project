@@ -93,8 +93,8 @@ public class UserImpl implements User{
         boolean permission;
         switch (role) {
             case Administrator: permission = true; break;
-            case Cashier: permission = true; break;
-            case ShopManager: permission = false; break;
+            case Cashier: permission = false; break;
+            case ShopManager: permission = true; break;
             default: permission = false;
         }
         return permission;
@@ -117,8 +117,8 @@ public class UserImpl implements User{
         boolean permission;
         switch (role) {
             case Administrator: permission = true; break;
-            case Cashier: permission = true; break;
-            case ShopManager: permission = false; break;
+            case Cashier: permission = false; break;
+            case ShopManager: permission = true; break;
             default: permission = false;
         }
         return permission;
@@ -165,8 +165,8 @@ public class UserImpl implements User{
         boolean permission;
         switch (role) {
             case Administrator: permission = true; break;
-            case Cashier: permission = true; break;
-            case ShopManager: permission = false; break;
+            case Cashier: permission = false; break;
+            case ShopManager: permission = true; break;
             default: permission = false;
         }
         return permission;

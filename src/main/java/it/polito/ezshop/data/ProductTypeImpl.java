@@ -50,10 +50,8 @@ public class ProductTypeImpl implements ProductType{
     }
 
     public static boolean isValidCode(String productCode) {
-
-
         Long p;
-        //Checking if lenght is correct
+        //Checking if length is correct
         if(productCode.length()<12 || productCode.length()>14)
             return false;
 
@@ -79,11 +77,11 @@ public class ProductTypeImpl implements ProductType{
             return true;
         else
             return false;
-
-
     }
 
     public static boolean isValidLocation(String location) {
+        if(location.equals(""))
+            return true;
         return Pattern.compile("^[a-zA-Z0-9]+[-][0-9]+[-][a-zA-Z0-9]+$").matcher(location).matches();
     }
 
@@ -116,7 +114,7 @@ public class ProductTypeImpl implements ProductType{
 
     @Override
     public String getLocation() {
-        if(aisleId==0 && rackId.equals("") && levelId==0)
+        if(aisleId==0 && rackId.equals("empty") && levelId==0)
             return "";
         return this.aisleId+"-"+this.rackId+"-"+this.levelId;
     }
@@ -174,8 +172,9 @@ public class ProductTypeImpl implements ProductType{
     public double getSellPrice(){
         return this.sellPrice;
     }
-    public void updateProductQuantity(Integer changequantity) {
-        this.quantity=this.quantity+changequantity;
+
+    public void updateProductQuantity(Integer changeQuantity) {
+        this.quantity=this.quantity+changeQuantity;
     }
 
 }
