@@ -72,8 +72,8 @@ public class ProductTypeImpl implements ProductType{
         }
         //Summing elements of array
         Integer sum = Arrays.stream(digits).sum() - digits[digits.length - 1];
-        //Checking if the closest higher tens to sum, minus sum is equal to 3
-        if((sum+(10-(sum%10)))-sum==digits[digits.length - 1])
+        //Checking if the closest higher tens to sum, minus sum is equal to the last digit
+        if((sum+(((10-(sum%10)))%10))-sum==digits[digits.length - 1])
             return true;
         else
             return false;
