@@ -15,43 +15,18 @@ import java.util.stream.Collectors;
 
 public class EZShop implements EZShopInterface {
 
-    /* NO MORE NEEDED SINCE WE USE DB
-    private List<Customer> customers;
-    private List<OrderImpl> orders;
-    private List<SaleTransactionImpl> salesList;
-    private List<ReturnTransactionImpl> returnsList;
-    private List<BalanceOperationImpl> balanceOperationsList;
-    private List<UserImpl> usersList;
-    private List<ProductTypeImpl> productsList;
-    private List<LoyaltyCardImpl> cardsList;*/
-
-
-
     private UserImpl loggedIn;
-    private Integer latestUserID;
-    private Integer latestProductTypeID;
-    private Integer flag =0;
-    SaleTransactionImpl currentsale;
+    SaleTransactionImpl currentSale;
     Connection conn;
 
     public EZShop() {
-       /* NO MORE NEEDED SINCE WE USE DB
-        this.customers = new ArrayList<>();
-        this.orders = new ArrayList<>();
-        this.customers = new ArrayList<>();
-        this.returnsList = new ArrayList<>();
-        this.balanceOperationsList = new ArrayList<>();
-        this.usersList = new ArrayList<>();
-        this.productsList = new ArrayList<>(); */
-        this.loggedIn = null;
-        this.latestUserID = 1;
-        this.latestProductTypeID = 1;
 
+        this.loggedIn = null;
         try {
             this.conn = DriverManager.getConnection("jdbc:sqlite:Database.sqlite");
-        } catch (SQLException throwables) {
+        } catch (SQLException e) {
             System.err.println("Error with db connection");
-            throw new RuntimeException(throwables);
+            throw new RuntimeException(e);
         }
         System.out.println("Connection with db ok");
 
@@ -60,13 +35,10 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public void reset() {
-
         try {
-
             Statement st = conn.createStatement();
             String deleteAllCustomers = "DELETE FROM CUSTOMERS WHERE CustomerId > 0";
             st.executeUpdate(deleteAllCustomers);
-
         }
         catch (Exception e) {
             System.out.println("Error with db connection");
@@ -402,7 +374,7 @@ public class EZShop implements EZShopInterface {
         }
 
         //Inserting product
-        String sql3 = "INSERT INTO PRODUCTTYPES(productId,BarCode,Description,SellPrice,Quantity,prodDiscountRate,notes) VALUES(?,?,?,?,0,0,?)";
+        String sql3 = "INSERT INTO PRODUCTTYPES(productId,BarCode,Description,SellPrice,Quantity,prodDiscountRate,notes,aisleId,rackID,levelID) VALUES(?,?,?,?,0,0,?,0,'empty',0)";
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql3);
             pstmt.setInt(1,id);
@@ -529,6 +501,7 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
 
+        //Retrieving products and adding them to a list
         String sql = "SELECT * FROM PRODUCTTYPES";
         List<ProductType> products = new ArrayList<>();
         try {
@@ -690,9 +663,20 @@ public class EZShop implements EZShopInterface {
             throw new InvalidLocationException();
         }
 
-        Integer aisleId = ProductTypeImpl.extractAisleId(newPos);
-        String rackId = ProductTypeImpl.extractRackId(newPos);
-        Integer levelId = ProductTypeImpl.extractLevelId(newPos);
+        Integer aisleId;
+        String rackId;
+        Integer levelId;
+
+        if(newPos.equals(""))
+        {
+            aisleId = 0;
+            rackId = "empty";
+            levelId = 0;
+        } else {
+            aisleId = ProductTypeImpl.extractAisleId(newPos);
+            rackId = ProductTypeImpl.extractRackId(newPos);
+            levelId = ProductTypeImpl.extractLevelId(newPos);
+        }
 
         //Checking if location is already occupied
         String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.aisleID=? AND P.rackID=? AND P.levelID=?";
@@ -736,27 +720,345 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public Integer issueOrder(String productCode, int quantity, double pricePerUnit) throws InvalidProductCodeException, InvalidQuantityException, InvalidPricePerUnitException, UnauthorizedException {
-        return null;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageInventory()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Checking if barcode is null or empty and if it is valid
+        if(productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
+            System.out.println("Invalid product code");
+            throw new InvalidProductCodeException();
+        }
+
+        //Checking if quantity is valid
+        if(quantity<=0) {
+            System.out.println("Quantity not set correctly");
+            throw new InvalidQuantityException();
+        }
+
+        //Checking if quantity is valid
+        if(pricePerUnit<=0) {
+            System.out.println("Price per unit not set correctly");
+            throw new InvalidPricePerUnitException();
+        }
+
+        //Checking if product barcode is already present
+        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setString(1, productCode);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() != false) {
+                System.out.println("Product with barcode " + productCode + " is already present");
+                return -1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+
+        //Calculating new ID
+        Integer id;
+        String sql2 = "SELECT MAX(orderId) FROM ORDERS";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() == false)
+                id = 1;
+            else
+                id = rs.getInt(1) + 1;
+
+        } catch (SQLException e) {
+            System.err.println("Error with db connection");
+            e.printStackTrace();
+            return -1;
+        }
+
+        //Inserting order
+        String sql3 = "INSERT INTO ORDERS(orderId,productCode,pricePerUnit,quantity,status) VALUES(?,?,?,?,'ISSUED')";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql3);
+            pstmt.setInt(1,id);
+            pstmt.setString(2, productCode);
+            pstmt.setDouble(3, pricePerUnit);
+            pstmt.setInt(4, quantity);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error with db connection");
+            e.printStackTrace();
+            return -1;
+        }
+        System.out.println("Order " + id + "for product" + productCode + " issued for a price of " + pricePerUnit*quantity);
+        return id;
     }
 
     @Override
     public Integer payOrderFor(String productCode, int quantity, double pricePerUnit) throws InvalidProductCodeException, InvalidQuantityException, InvalidPricePerUnitException, UnauthorizedException {
-        return null;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageInventory()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Checking if barcode is null or empty and if it is valid
+        if(productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
+            System.out.println("Invalid product code");
+            throw new InvalidProductCodeException();
+        }
+
+        //Checking if quantity is valid
+        if(quantity<=0) {
+            System.out.println("Quantity not set correctly");
+            throw new InvalidQuantityException();
+        }
+
+        //Checking if quantity is valid
+        if(pricePerUnit<=0) {
+            System.out.println("Price per unit not set correctly");
+            throw new InvalidPricePerUnitException();
+        }
+
+        //Checking if product barcode is already present
+        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setString(1, productCode);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() != false) {
+                System.out.println("Product with barcode " + productCode + " is already present");
+                return -1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+
+
+        if(getCurrentBalance() - (quantity*pricePerUnit) < 0) {
+            System.out.println("Balance is not enough to pay the order");
+            return -1;
+        }
+
+        BalanceOperationImpl boi = newBalanceUpdate(-(quantity*pricePerUnit));
+        Integer balanceId = boi.getBalanceId();
+
+        //Calculating new ID
+        Integer id;
+        String sql2 = "SELECT MAX(orderId) FROM ORDERS";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() == false)
+                id = 1;
+            else
+                id = rs.getInt(1) + 1;
+
+        } catch (SQLException e) {
+            System.err.println("Error with db connection");
+            throw new RuntimeException(e);
+        }
+
+        //Inserting order
+        String sql3 = "INSERT INTO ORDERS(orderId,productCode,pricePerUnit,quantity,status,balanceId) VALUES(?,?,?,?,'PAYED',?)";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql3);
+            pstmt.setInt(1,id);
+            pstmt.setString(2, productCode);
+            pstmt.setDouble(3, pricePerUnit);
+            pstmt.setInt(4, quantity);
+            pstmt.setInt(5,balanceId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error with db connection");
+            e.printStackTrace();
+            return -1;
+        }
+        System.out.println("Order " + id + "for product" + productCode + " is ordered and has been payed " + pricePerUnit*quantity);
+        return id;
     }
 
     @Override
     public boolean payOrder(Integer orderId) throws InvalidOrderIdException, UnauthorizedException {
-        return false;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageInventory()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Checking if orderId is valid
+        if(orderId == null || orderId<=0) {
+            System.out.println("Order id not valid");
+            throw new InvalidOrderIdException();
+        }
+
+        //Searching for orderId and doing preliminary controls
+        String sql = "SELECT * FROM ORDERS WHERE orderId=?";
+        String actualState;
+        Integer quantity;
+        double pricePerUnit;
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery();
+            if(!rs.isBeforeFirst()) {
+                System.out.println("There's no order with orderId " + orderId);
+                return false;
+            }
+            actualState = rs.getString("status");
+            quantity = rs.getInt("quantity");
+            pricePerUnit = rs.getDouble("pricePerUnit");
+        } catch (SQLException e) {
+            System.err.println("Error with the db connection");
+            e.printStackTrace();
+            return false;
+        }
+
+        //Checking if order has been payed
+        if(actualState.equals("PAYED")) {
+            System.out.println("Order is already PAYED");
+            return false;
+        }
+        //Checking if order has been completed
+        if(actualState.equals("COMPLETED")) {
+            System.out.println("Order is already COMPLETED");
+        }
+
+        if(getCurrentBalance() - (quantity*pricePerUnit) < 0) {
+            System.out.println("Balance is not enough to pay the order");
+            return false;
+        }
+
+        BalanceOperationImpl boi = newBalanceUpdate(-(quantity*pricePerUnit));
+        Integer balanceId = boi.getBalanceId();
+
+        //Updating order
+        String sql2 = "UPDATE ORDERS SET status='PAYED', balanceId=? WHERE orderId=?";
+        int numUpdated;
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+            pstmt.setInt(1, orderId);
+            pstmt.setInt(2,balanceId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     public boolean recordOrderArrival(Integer orderId) throws InvalidOrderIdException, UnauthorizedException, InvalidLocationException {
-        return false;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageInventory()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Checking if orderId is valid
+        if(orderId == null || orderId<=0) {
+            System.out.println("Order id not valid");
+            throw new InvalidOrderIdException();
+        }
+
+        //Searching for orderId and doing preliminary controls
+        String sql = "SELECT * FROM ORDERS WHERE orderId=?";
+        String actualState;
+        String productCode;
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery();
+            if(!rs.isBeforeFirst()) {
+                System.out.println("There's no order with orderId " + orderId);
+                return false;
+            }
+            actualState = rs.getString("status");
+            productCode = rs.getString("productCode");
+        } catch (SQLException e) {
+            System.err.println("Error with the db connection");
+            e.printStackTrace();
+            return false;
+        }
+
+        //Checking if order has been payed
+        if(!actualState.equals("COMPLETED") && !actualState.equals("PAYED")){
+            System.out.println("Order is not payed nor completed");
+            return false;
+        }
+
+        //Checking if location for product is set;
+        Integer aisleId=null;
+        String rackId=null;
+        Integer levelId=null;
+        String sql2 = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+            pstmt.setString(1, productCode);
+            ResultSet rs = pstmt.executeQuery();
+            if(!rs.isBeforeFirst()) {
+                System.err.println("ERROR: It's impossible to record a product arrival since it's not present anymore");
+                return false;
+            }
+            rs.getInt("aisleID");
+            rs.getString("rackID");
+            rs.getInt("levelID");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        if(rackId == null)
+            rackId="";
+
+        if(aisleId == 0 && rackId.equals("empty") && levelId == 0) {
+            System.out.println("Location for product is not set. Set location first");
+            throw new InvalidLocationException();
+        }
+
+        //Searching for orderId and doing preliminary controls
+        String sql3 = "UPDATE ORDERS SET status='COMPLETED' WHERE orderId=?";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setInt(1,orderId);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Error with the db connection");
+            e.printStackTrace();
+            return false;
+        }
+        System.out.println("Order " + orderId + " has been completed");
+        return true;
     }
 
     @Override
     public List<Order> getAllOrders() throws UnauthorizedException {
-        return null;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageInventory()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Retrieving orders and adding them to a list
+        String sql = "SELECT * FROM ORDERS";
+        List<Order> orders = new ArrayList<>();
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()) {
+                Integer orderId = rs.getInt("orderId");
+                String productCode = rs.getString("productCode");
+                Double pricePerUnit = rs.getDouble("pricePerUnit");
+                Integer quantity = rs.getInt("quantity");
+                String status = rs.getString("status");
+                Integer balanceId = rs.getInt("balanceId");
+                orders.add(new OrderImpl(balanceId,productCode,pricePerUnit,quantity,status,orderId));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return orders;
     }
 
     @Override
@@ -1230,9 +1532,9 @@ public class EZShop implements EZShopInterface {
 
 
         Integer newtransactionId=getNewSaleTransactionId();
-        currentsale = new SaleTransactionImpl(newtransactionId);
+        currentSale = new SaleTransactionImpl(newtransactionId);
         //addSaleToSalesList(sale); NO MROE SICNE WE USE DB
-        System.out.println(currentsale.getTicketNumber());
+        System.out.println(currentSale.getTicketNumber());
         return newtransactionId;
        // return -1;
     }
@@ -1338,7 +1640,7 @@ public class EZShop implements EZShopInterface {
             throw new InvalidProductCodeException();
         }
 
-        if ((currentsale.listOfProductsSale.get(product)<amount )|| (amount <0)){
+        if ((currentSale.listOfProductsSale.get(product)<amount )|| (amount <0)){
             throw new InvalidQuantityException();
         }
 
@@ -1555,7 +1857,7 @@ public class EZShop implements EZShopInterface {
 
         sale.AbortSaleUpdateProductQuantity();
         //RemoveSaleFromSalesList(sale);
-        currentsale=null;
+        currentSale =null;
         return true;
     }
 
@@ -2190,8 +2492,8 @@ public class EZShop implements EZShopInterface {
     }
 
     SaleTransactionImpl getSaleTransactionById(Integer transactionId) {
-        if (currentsale != null && currentsale.getTicketNumber().equals(transactionId)){
-            return currentsale;
+        if (currentSale != null && currentSale.getTicketNumber().equals(transactionId)){
+            return currentSale;
         }
 
         String query = "SELECT * FROM SALETRANSACTIONS WHERE transactionId = ?";
@@ -2224,8 +2526,8 @@ public class EZShop implements EZShopInterface {
 
         //IF PRODUCT IS INVOLVED IN CURRENT SALE THE UP TO DATE INFORMATION ARE STORED ONLY IN RAM AT THE MOMENT
         List<ProductTypeImpl> prodl=null;
-        if (currentsale != null) {
-            prodl= currentsale.listOfProductsSale.keySet().stream().filter(e->e.getBarCode().equals(barCode)).collect(Collectors.toList());
+        if (currentSale != null) {
+            prodl= currentSale.listOfProductsSale.keySet().stream().filter(e->e.getBarCode().equals(barCode)).collect(Collectors.toList());
 
             if (prodl.size()>0){
                 // System.out.println("ok");
