@@ -1,11 +1,10 @@
 package it.polito.ezshop.data;
 
 import java.util.Map;
-import java.util.HashMap;
 
 public class ReturnTransactionImpl {
-    private enum State{INPROGRESS, UNDONE, COMMIT, DELETED};
-    private enum PaymentType{CARD, CASH};
+    private enum State{INPROGRESS, CLOSED, DELETED}
+    private enum PaymentType{CARD, CASH}
 
     private Integer returnId;
     private SaleTransactionImpl saleTransaction;
@@ -19,8 +18,8 @@ public class ReturnTransactionImpl {
         this.returnId = returnId;
         this.saleTransaction = saleTransaction;
         this.listOfProductsReturn = listOfProductsReturn;
-        this.state = State.valueOf(state);
-        this.paymentType = PaymentType.valueOf(paymentType);
+        this.state = (state != null) ? State.valueOf(state) : null;
+        this.paymentType = (paymentType != null) ? PaymentType.valueOf(paymentType) : null;
         this.amount = amount;
         this.balanceOperation = balanceOperation;
     }
@@ -49,20 +48,20 @@ public class ReturnTransactionImpl {
         this.listOfProductsReturn = listOfProductsReturn;
     }
 
-    public State getState() {
-        return state;
+    public String getState() {
+        return (state != null) ? state.toString() : null;
     }
 
-    public void setState(State state) {
-        this.state = state;
+    public void setState(String state) {
+        this.state = State.valueOf(state);
     }
 
-    public PaymentType getPaymentType() {
-        return paymentType;
+    public String getPaymentType() {
+        return (paymentType != null) ? paymentType.toString() : null;
     }
 
-    public void setPaymentType(PaymentType paymentType) {
-        this.paymentType = paymentType;
+    public void setPaymentType(String paymentType) {
+        this.paymentType = PaymentType.valueOf(paymentType);
     }
 
     public Double getAmount() {
@@ -79,5 +78,22 @@ public class ReturnTransactionImpl {
 
     public void setBalanceOperation(BalanceOperationImpl balanceOperation) {
         this.balanceOperation = balanceOperation;
+    }
+
+    public boolean isInProgress() {
+        return (this.state == State.INPROGRESS);
+    }
+
+    public boolean isClosed() {
+        return (this.state == State.CLOSED);
+    }
+
+    public boolean isDeleted() {
+        return (this.state == State.DELETED);
+    }
+
+    public void addProduct(ProductTypeImpl productType, Integer quantity) {
+        this.listOfProductsReturn.put(productType, quantity);
+        // TODO update amount
     }
 }

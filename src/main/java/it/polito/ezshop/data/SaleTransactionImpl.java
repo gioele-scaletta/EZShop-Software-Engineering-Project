@@ -166,7 +166,7 @@ public class SaleTransactionImpl implements SaleTransaction {
     }
 
     public boolean isProductInSale(ProductTypeImpl product){
-        return this.listOfProductsSale.containsKey(product);    // FIXME Compare IDs, not objects
+        return this.listOfProductsSale.keySet().stream().anyMatch(e -> e.getBarCode().equals(product.getBarCode()));
     }
 
     public boolean ApplyDiscountToSaleProduct(Double disc, ProductTypeImpl product) {
