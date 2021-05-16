@@ -2476,15 +2476,14 @@ public class EZShop implements EZShopInterface {
     private BalanceOperationImpl getBalanceOperationById(int balanceOperationId) {
         String query = "SELECT * FROM BALANCE_OPERATIONS WHERE BalanceId = ?";
         BalanceOperationImpl balanceOperation = null;
-        try (PreparedStatement pstmt  = conn.prepareStatement(query)) {
+        try (PreparedStatement pstmt  = this.conn.prepareStatement(query)) {
             pstmt.setInt(1, balanceOperationId);
             ResultSet rs = pstmt.executeQuery();
 
-            LocalDate date = LocalDate.parse(rs.getString("Date"));
-            double amount = rs.getDouble("Amount");
-            String type = rs.getString("Type");
-
             if(rs.isBeforeFirst()) {
+                LocalDate date = LocalDate.parse(rs.getString("Date"));
+                double amount = rs.getDouble("Amount");
+                String type = rs.getString("Type");
                 balanceOperation = new BalanceOperationImpl(balanceOperationId, date, amount, type);
             }
         } catch (SQLException e) {
