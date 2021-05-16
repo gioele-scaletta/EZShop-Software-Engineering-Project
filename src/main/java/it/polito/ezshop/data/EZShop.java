@@ -1594,17 +1594,18 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public Integer startReturnTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
-        System.out.println("Call startReturnTransaction(transactionId = "+ transactionId +")");
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(transactionId = "+ transactionId +")");
 
         // Check if the transactionId is null or it is less than or equal to 0
         if (transactionId == null || transactionId <= 0) {
-            System.err.println("startReturnTransaction: The transactionId is null or it is less than or equal to 0");
+            System.err.println(methodName + ": The transactionId is null or it is less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
         // Check if there is no logged user or if it has not the rights to perform the operation
         if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
-            System.err.println("startReturnTransaction: There is no logged user or if it has not the rights to perform the operation");
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
             throw new UnauthorizedException();
         }
 
@@ -1612,60 +1613,48 @@ public class EZShop implements EZShopInterface {
         SaleTransactionImpl saleTransaction = getSaleTransactionById(transactionId);
         // Check if the SaleTransaction is not available
         if (saleTransaction == null) {
-            System.err.println("startReturnTransaction: The SaleTransaction is not available");
+            System.err.println(methodName + ": The SaleTransaction is not available");
             return -1;
         }
         // Check if the SaleTransaction has not already been sold and payed
         if (!saleTransaction.isPayed()) {
-            System.err.println("startReturnTransaction: The SaleTransaction has not already been sold and payed");
+            System.err.println(methodName + ": The SaleTransaction has not already been sold and payed");
             return -1;
         }
 
-        // Insert a new ReturnTransaction
-        String query = "INSERT INTO RETURN_TRANSACTIONS(TransactionId, State) VALUES(?, ?)";
-        Integer newId = -1;
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
-            pstmt.setInt(1, transactionId);
-            pstmt.setString(2, "INPROGRESS");
-            pstmt.executeUpdate();
-            ResultSet rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                newId = rs.getInt(1);
-            }
-            System.out.println("startReturnTransaction: Created a new ReturnTransaction with id = "+ newId);
-        } catch (SQLException e) {
-            System.err.println("startReturnTransaction: " + e.getMessage());
-            return -1;
-        }
+        // Create new ReturnTransaction
+        ReturnTransactionImpl returnTransaction = new ReturnTransactionImpl(null, saleTransaction, null, "INPROGRESS", null, null, null);
 
-        return newId;
+        // Write ReturnTransaction in persistence
+        return insertPersistenceReturnTransaction(returnTransaction);
     }
 
     @Override
     public boolean returnProduct(Integer returnId, String productCode, int amount) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException {
-        System.out.println("Call returnProduct(returnId = "+ returnId +", productCode = "+ productCode +", amount = "+ amount +")");
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(returnId = "+ returnId +", productCode = "+ productCode +", amount = "+ amount +")");
 
         // Check if the returnId is null or less than or equal to 0
         if (returnId == null || returnId <= 0) {
-            System.err.println("returnProduct: The returnId is null or less than or equal to 0");
+            System.err.println(methodName + ": The returnId is null or less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
         // Check if the productCode is null, empty or invalid
-        if (productCode == null || productCode.isEmpty() || ProductTypeImpl.isValidCode(productCode)) {
-            System.err.println("returnProduct: The productCode is null, empty or invalid");
+        if (productCode == null || productCode.isEmpty() || !ProductTypeImpl.isValidCode(productCode)) {
+            System.err.println(methodName + ": The productCode is null, empty or invalid");
             throw new InvalidProductCodeException();
         }
 
         // Check if the quantity is less than or equal to 0
         if (amount <= 0) {
-            System.err.println("returnProduct: The quantity is less than or equal to 0");
+            System.err.println(methodName + ": The quantity is less than or equal to 0");
             throw new InvalidQuantityException();
         }
 
         // Check if there is no logged user or if it has not the rights to perform the operation
         if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
-            System.err.println("returnProduct: There is no logged user or if it has not the rights to perform the operation");
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
             throw new UnauthorizedException();
         }
 
@@ -1673,7 +1662,7 @@ public class EZShop implements EZShopInterface {
         ReturnTransactionImpl returnTransaction = getReturnTransactionById(returnId);
         // Check if the ReturnTransaction does not exist
         if (returnTransaction == null) {
-            System.err.println("returnProduct: The ReturnTransaction does not exist");
+            System.err.println(methodName + ": The ReturnTransaction does not exist");
             return false;
         }
 
@@ -1681,7 +1670,7 @@ public class EZShop implements EZShopInterface {
         SaleTransactionImpl saleTransaction = returnTransaction.getSaleTransaction();
         // Check if the SaleTransaction is not available
         if (saleTransaction == null) {
-            System.err.println("returnProduct: The SaleTransaction is not available");
+            System.err.println(methodName + ": The SaleTransaction is not available");
             return false;
         }
 
@@ -1689,34 +1678,25 @@ public class EZShop implements EZShopInterface {
         ProductTypeImpl productType = getProductTypeByCode(productCode);
         // Check if the product to be returned does not exists
         if (productType == null) {
-            System.err.println("returnProduct: The product to be returned does not exists");
+            System.err.println(methodName + ": The product to be returned does not exists");
             return false;
         }
         // Check if the product was not in the transaction
         if (!saleTransaction.isProductInSale(productType)) {
-            System.err.println("returnProduct: The product was not in the transaction");
+            System.err.println(methodName + ": The product was not in the transaction");
             return false;
         }
         // Check if the amount is higher than the one in the sale transaction
         if (amount > saleTransaction.getProductQuantity(productType)) {
-            System.err.println("returnProduct: The amount is higher than the one in the sale transaction");
+            System.err.println(methodName + ": The amount is higher than the one in the sale transaction");
             return false;
         }
 
-        // Insert the product to the ReturnTransaction
-        String query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
-            pstmt.setInt(1, returnId);
-            pstmt.setString(2, productType.getBarCode());
-            pstmt.setInt(3, amount);
-            pstmt.executeUpdate();
-            System.out.println("returnProduct: Inserted the product (barcode = "+ productType.getBarCode() +", quantity = "+ amount +") in the ReturnTransaction (id = "+ returnId +")");
-        } catch (SQLException e) {
-            System.err.println("returnProduct: " + e.getMessage());
-            return false;
-        }
+        // Add product to ReturnTransaction
+        returnTransaction.addProduct(productType, amount);
 
-        return true;
+        // Write ReturnTransaction in persistence
+        return updatePersistenceReturnTransaction(returnTransaction);
     }
 
     /**
@@ -1740,17 +1720,18 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean endReturnTransaction(Integer returnId, boolean commit) throws InvalidTransactionIdException, UnauthorizedException {
-        System.out.println("Call endReturnTransaction(returnId = "+ returnId +", commit = "+ commit +")");
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(returnId = "+ returnId +", commit = "+ commit +")");
 
         // Check if the returnId is null or less than or equal to 0
         if (returnId == null || returnId <= 0) {
-            System.err.println("endReturnTransaction: The returnId is null or less than or equal to 0");
+            System.err.println(methodName + ": The returnId is null or less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
         // Check if there is no logged user or if it has not the rights to perform the operation
         if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
-            System.err.println("endReturnTransaction: There is no logged user or if it has not the rights to perform the operation");
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
             throw new UnauthorizedException();
         }
 
@@ -1758,7 +1739,7 @@ public class EZShop implements EZShopInterface {
         ReturnTransactionImpl returnTransaction = getReturnTransactionById(returnId);
         // Check if the ReturnTransaction does not exist
         if (returnTransaction == null) {
-            System.err.println("endReturnTransaction: The ReturnTransaction does not exist");
+            System.err.println(methodName + ": The ReturnTransaction does not exist");
             return false;
         }
 
@@ -1784,17 +1765,18 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean deleteReturnTransaction(Integer returnId) throws InvalidTransactionIdException, UnauthorizedException {
-        System.out.println("Call deleteReturnTransaction(returnId = "+ returnId +")");
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(returnId = "+ returnId +")");
 
         // Check if the returnId is null or less than or equal to 0
         if (returnId == null || returnId <= 0) {
-            System.err.println("deleteReturnTransaction: The returnId is null or less than or equal to 0");
+            System.err.println(methodName + ": The returnId is null or less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
         // Check if there is no logged user or if it has not the rights to perform the operation
         if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
-            System.err.println("deleteReturnTransaction: There is no logged user or if it has not the rights to perform the operation");
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
             throw new UnauthorizedException();
         }
 
@@ -1802,7 +1784,7 @@ public class EZShop implements EZShopInterface {
         ReturnTransactionImpl returnTransaction = getReturnTransactionById(returnId);
         // Check if the ReturnTransaction does not exist
         if (returnTransaction == null) {
-            System.err.println("deleteReturnTransaction: The ReturnTransaction does not exist");
+            System.err.println(methodName + ": The ReturnTransaction does not exist");
             return false;
         }
 
@@ -1950,36 +1932,20 @@ public class EZShop implements EZShopInterface {
 
         }
 
-
-    /**
-     * This method record the payment of a closed return transaction with given id. The return value of this method is the
-     * amount of money to be returned.
-     * This method affects the balance of the application.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @param returnId the id of the return transaction
-     *
-     * @return  the money returned to the customer
-     *          -1  if the return transaction is not ended,
-     *              if it does not exist,
-     *              if there is a problem with the db
-     *
-     * @throws InvalidTransactionIdException if the return id is less than or equal to 0
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
     @Override
     public double returnCashPayment(Integer returnId) throws InvalidTransactionIdException, UnauthorizedException {
-        System.out.println("Call returnCashPayment(returnId = "+ returnId +")");
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(returnId = "+ returnId +")");
 
         // Check if the returnId is null or less than or equal to 0
         if (returnId == null || returnId <= 0) {
-            System.err.println("returnCashPayment: The returnId is null or less than or equal to 0");
+            System.err.println(methodName + ": The returnId is null or less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
         // Check if there is no logged user or if it has not the rights to perform the operation
         if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
-            System.err.println("returnCashPayment: There is no logged user or if it has not the rights to perform the operation");
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
             throw new UnauthorizedException();
         }
 
@@ -1987,55 +1953,57 @@ public class EZShop implements EZShopInterface {
         ReturnTransactionImpl returnTransaction = getReturnTransactionById(returnId);
         // Check if the ReturnTransaction does not exist
         if (returnTransaction == null) {
-            System.out.println("returnCashPayment: The ReturnTransaction does not exist");
+            System.out.println(methodName + ": The ReturnTransaction does not exist");
+            return -1;
+        }
+        // Check if the ReturnTransaction is not closed
+        if (!returnTransaction.isClosed()) {
+            System.err.println(methodName + ": The ReturnTransaction is not closed");
             return -1;
         }
 
-        // TODO
+        // Get the amount of money to be returned
+        Double amount = returnTransaction.getAmount();
 
-        return 0;
+        // Create new BalanceOperation
+        BalanceOperationImpl balanceOperation = newBalanceUpdate(-amount);
+        if (balanceOperation == null) {
+            return -1;
+        }
+        // Set BalanceOperation in ReturnTransaction
+        returnTransaction.setBalanceOperation(balanceOperation);
+
+        // Set payment type in ReturnTransaction
+        returnTransaction.setPaymentType("CASH");
+
+        // Write ReturnTransaction to persistence
+        if (!updatePersistenceReturnTransaction(returnTransaction)) {
+            return -1;
+        }
+
+        return amount;
     }
 
-    /**
-     * This method record the payment of a return transaction to a credit card.
-     * The credit card number validity should be checked. It should follow the luhn algorithm.
-     * The credit card should be registered and its balance will be affected.
-     * This method affects the balance of the system.
-     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
-     *
-     * @param returnId the id of the return transaction
-     * @param creditCard the credit card number of the customer
-     *
-     * @return  the money returned to the customer
-     *          -1  if the return transaction is not ended,
-     *              if it does not exist,
-     *              if the card is not registered,
-     *              if there is a problem with the db
-     *
-     * @throws InvalidTransactionIdException if the return id is less than or equal to 0
-     * @throws InvalidCreditCardException if the credit card number is empty, null or if luhn algorithm does not
-     *                                      validate the credit card
-     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
-     */
     @Override
     public double returnCreditCardPayment(Integer returnId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException {
-        System.out.println("Call returnCreditCardPayment(returnId = "+ returnId +", creditCard = "+ creditCard +")");
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(returnId = "+ returnId +", creditCard = "+ creditCard +")");
 
         // Check if the returnId is null or less than or equal to 0
         if (returnId == null || returnId <= 0) {
-            System.err.println("returnCreditCardPayment: The returnId is null or less than or equal to 0");
+            System.err.println(methodName + ": The returnId is null or less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
         // Check if the creditCard is null, empty or invalid
-        if (creditCard == null || creditCard.isEmpty() || isValidCreditCard(creditCard)) {
-            System.err.println("returnCreditCardPayment: The creditCard is null, empty or invalid");
+        if (creditCard == null || creditCard.isEmpty() || !isValidCreditCard(creditCard)) {
+            System.err.println(methodName + ": The creditCard is null, empty or invalid");
             throw new InvalidCreditCardException();
         }
 
         // Check if there is no logged user or if it has not the rights to perform the operation
         if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
-            System.err.println("returnCreditCardPayment: There is no logged user or if it has not the rights to perform the operation");
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
             throw new UnauthorizedException();
         }
 
@@ -2043,13 +2011,41 @@ public class EZShop implements EZShopInterface {
         ReturnTransactionImpl returnTransaction = getReturnTransactionById(returnId);
         // Check if the ReturnTransaction does not exist
         if (returnTransaction == null) {
-            System.err.println("returnCreditCardPayment: The ReturnTransaction does not exist");
+            System.err.println(methodName + ": The ReturnTransaction does not exist");
+            return -1;
+        }
+        // Check if the ReturnTransaction is not closed
+        if (!returnTransaction.isClosed()) {
+            System.err.println(methodName + ": The ReturnTransaction is not closed");
             return -1;
         }
 
+        // Get the amount of money to be returned
+        Double amount = returnTransaction.getAmount();
+
+        // Check if the creditCard is not registered
         // TODO
 
-        return 0;
+        // Update the creditCard balance
+        // TODO
+
+        // Create new BalanceOperation
+        BalanceOperationImpl balanceOperation = newBalanceUpdate(-amount);
+        if (balanceOperation == null) {
+            return -1;
+        }
+        // Set BalanceOperation in ReturnTransaction
+        returnTransaction.setBalanceOperation(balanceOperation);
+
+        // Set payment type in ReturnTransaction
+        returnTransaction.setPaymentType("CARD");
+
+        // Write ReturnTransaction to persistence
+        if (!updatePersistenceReturnTransaction(returnTransaction)) {
+            return -1;
+        }
+
+        return amount;
     }
 
     @Override
@@ -2517,21 +2513,24 @@ public class EZShop implements EZShopInterface {
     }
 
     private ReturnTransactionImpl getReturnTransactionById(Integer returnId) {
-        System.out.println("Call getReturnTransactionById(returnId = "+ returnId +")");
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(returnId = "+ returnId +")");
 
-        String query = "SELECT BarCode, Quantity FROM RETURN_PRODUCTS WHERE ReturnId = ?";
+        String query;
+
+        query = "SELECT BarCode, Quantity FROM RETURN_PRODUCTS WHERE ReturnId = ?";
         Map<ProductTypeImpl, Integer> listOfProductsReturn = new HashMap<>();
         try (PreparedStatement pstmt  = this.conn.prepareStatement(query)) {
             pstmt.setInt(1, returnId);
-            ResultSet rs = pstmt.executeQuery();
 
+            ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 String barCode = rs.getString("BarCode");
                 Integer quantity = rs.getInt("Quantity");
                 listOfProductsReturn.put(getProductTypeByCode(barCode), quantity);
             }
         } catch (SQLException e) {
-            System.err.println("getReturnTransactionById: " + e.getMessage());
+            System.err.println(methodName + ": " + e.getMessage());
             return null;
         }
 
@@ -2539,23 +2538,171 @@ public class EZShop implements EZShopInterface {
         ReturnTransactionImpl returnTransaction = null;
         try (PreparedStatement pstmt  = this.conn.prepareStatement(query)) {
             pstmt.setInt(1, returnId);
+
             ResultSet rs = pstmt.executeQuery();
 
             if(rs.isBeforeFirst()) {
-                Integer transactionId = rs.getInt("TransactionId");
+                SaleTransactionImpl saleTransaction = getSaleTransactionById(rs.getInt("TransactionId"));
                 String state = rs.getString("State");
                 String paymentType = rs.getString("PaymentType");
                 Double amount = rs.getDouble("Amount");
-                Integer balanceId = rs.getInt("BalanceId");
-
-                returnTransaction = new ReturnTransactionImpl(returnId, getSaleTransactionById(transactionId), listOfProductsReturn, state, paymentType, amount, getBalanceOperationById(balanceId));
+                BalanceOperationImpl balanceOperation = getBalanceOperationById(rs.getInt("BalanceId"));
+                returnTransaction = new ReturnTransactionImpl(returnId, saleTransaction, listOfProductsReturn, state, paymentType, amount, balanceOperation);
             }
         } catch (SQLException e) {
-            System.err.println("getReturnTransactionById: " + e.getMessage());
+            System.err.println(methodName + ": " + e.getMessage());
             return null;
         }
 
         return returnTransaction;
+    }
+
+    private Integer insertPersistenceReturnTransaction(ReturnTransactionImpl returnTransaction) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(ReturnTransactionImpl = "+ returnTransaction +")");
+
+        String query;
+        int rowCount;
+
+        query = "INSERT INTO RETURN_TRANSACTIONS(TransactionId, State, PaymentType, Amount, BalanceId) VALUES(?, ?, ?, ?, ?)";
+        Integer newId = -1;
+        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+            pstmt.setInt(1, returnTransaction.getSaleTransaction().getTicketNumber());
+            pstmt.setString(2, returnTransaction.getState());
+            if (returnTransaction.getPaymentType() != null) {
+                pstmt.setString(3, returnTransaction.getPaymentType());
+            }
+            if (returnTransaction.getAmount() != null) {
+                pstmt.setDouble(4, returnTransaction.getAmount());
+            }
+            if (returnTransaction.getBalanceOperation() != null) {
+                pstmt.setInt(5, returnTransaction.getBalanceOperation().getBalanceId());
+            }
+
+            rowCount = pstmt.executeUpdate();
+
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                newId = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return -1;
+        }
+        System.out.println(methodName + ": "+ rowCount +" rows with ReturnId = "+ newId +" inserted in RETURN_TRANSACTIONS");
+
+        if (returnTransaction.getListOfProductsReturn() != null) {
+            rowCount = 0;
+            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getListOfProductsReturn().entrySet()) {
+                query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
+                try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+                    pstmt.setInt(1, newId);
+                    pstmt.setString(2, entry.getKey().getBarCode());
+                    pstmt.setInt(3, entry.getValue());
+
+                    rowCount = pstmt.executeUpdate();
+                } catch (SQLException e) {
+                    System.err.println(methodName + ": " + e.getMessage());
+                    return -1;
+                }
+            }
+            System.out.println(methodName + ": "+ rowCount +" rows with ReturnId = "+ newId +" inserted in RETURN_PRODUCTS");
+        }
+
+        return newId;
+    }
+
+    private boolean updatePersistenceReturnTransaction(ReturnTransactionImpl returnTransaction) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(ReturnTransactionImpl = "+ returnTransaction +")");
+
+        String query;
+        int rowCount;
+
+        query = "UPDATE RETURN_TRANSACTIONS SET TransactionId = ?, State = ?, PaymentType = ?, Amount = ?, BalanceId = ? WHERE ReturnId = ?";
+        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+            pstmt.setInt(1, returnTransaction.getSaleTransaction().getTicketNumber());
+            pstmt.setString(2, returnTransaction.getState());
+            if (returnTransaction.getPaymentType() != null) {
+                pstmt.setString(3, returnTransaction.getPaymentType());
+            }
+            if (returnTransaction.getAmount() != null) {
+                pstmt.setDouble(4, returnTransaction.getAmount());
+            }
+            if (returnTransaction.getBalanceOperation() != null) {
+                pstmt.setInt(5, returnTransaction.getBalanceOperation().getBalanceId());
+            }
+            pstmt.setInt(6, returnTransaction.getReturnId());
+
+            rowCount = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return false;
+        }
+        System.out.println(methodName + ": "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" updated in RETURN_TRANSACTIONS table");
+
+        query = "DELETE FROM RETURN_PRODUCTS WHERE ReturnId = ?";
+        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+            pstmt.setInt(1, returnTransaction.getReturnId());
+
+            rowCount = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return false;
+        }
+        System.out.println(methodName + ": "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" deleted in RETURN_PRODUCTS table");
+
+        if (returnTransaction.getListOfProductsReturn() != null) {
+            rowCount = 0;
+            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getListOfProductsReturn().entrySet()) {
+                query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
+                try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+                    pstmt.setInt(1, returnTransaction.getReturnId());
+                    pstmt.setString(2, entry.getKey().getBarCode());
+                    pstmt.setInt(3, entry.getValue());
+
+                    rowCount = pstmt.executeUpdate();
+                } catch (SQLException e) {
+                    System.err.println(methodName + ": " + e.getMessage());
+                    return false;
+                }
+            }
+            System.out.println(methodName + ": "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" inserted in RETURN_PRODUCTS");
+        }
+
+        return true;
+    }
+
+    private boolean deletePersistenceReturnTransaction(ReturnTransactionImpl returnTransaction) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(ReturnTransactionImpl = "+ returnTransaction +")");
+
+        String query;
+        int rowCount;
+
+        query = "DELETE FROM RETURN_PRODUCTS WHERE ReturnId = ?";
+        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+            pstmt.setInt(1, returnTransaction.getReturnId());
+
+            rowCount = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return false;
+        }
+        System.out.println(methodName + ": "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" deleted in RETURN_PRODUCTS table");
+
+        query = "DELETE FROM RETURN_TRANSACTIONS WHERE ReturnId = ?";
+        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+            pstmt.setInt(1, returnTransaction.getReturnId());
+
+            rowCount = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return false;
+        }
+        System.out.println(methodName + ": "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" deleted in RETURN_TRANSACTIONS table");
+
+        return true;
     }
 
     private double getCurrentBalance() {
@@ -2565,7 +2712,6 @@ public class EZShop implements EZShopInterface {
         double currentBalance = 0;
         try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
             ResultSet rs = pstmt.executeQuery();
-
             if(rs.isBeforeFirst()) {
                 currentBalance = rs.getDouble("CurrentBalance");
                 System.out.println("getCurrentBalance: currentBalance = "+ currentBalance);
