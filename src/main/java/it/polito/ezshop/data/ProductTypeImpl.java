@@ -23,7 +23,7 @@ public class ProductTypeImpl implements ProductType{
     private Integer levelId;
 
 
-    public ProductTypeImpl(Integer productID, String barcode, String description, Double sellPrice, Integer quantity, Double productDiscountRate, String notes, Integer aisleID, String rackID, Integer levelID) {
+    public ProductTypeImpl(Integer productID, String barcode, String description, Double sellPrice, Integer quantity, Double productDiscountRate, String notes, Integer aisleID, String rackId, Integer levelId) {
         this.productID = productID;
         this.barcode = barcode;
         this.description = description;
@@ -82,7 +82,7 @@ public class ProductTypeImpl implements ProductType{
     public static boolean isValidLocation(String location) {
         if(location.equals(""))
             return true;
-        return Pattern.compile("^[a-zA-Z0-9]+[-][0-9]+[-][a-zA-Z0-9]+$").matcher(location).matches();
+        return Pattern.compile("^[0-9]+[-][a-zA-Z0-9]+[-][0-9]+$").matcher(location).matches();
     }
 
     public static Integer extractAisleId(String location) {
@@ -114,7 +114,7 @@ public class ProductTypeImpl implements ProductType{
 
     @Override
     public String getLocation() {
-        if(aisleId==0 && rackId.equals("empty") && levelId==0)
+        if(this.aisleId==0 && this.rackId.equals("empty") && this.levelId==0)
             return "";
         return this.aisleId+"-"+this.rackId+"-"+this.levelId;
     }

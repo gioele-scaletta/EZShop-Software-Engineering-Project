@@ -623,7 +623,7 @@ public class EZShop implements EZShopInterface {
         }
 
         //Checking if location is set
-        if(p.getLocation().equals("")) {
+        if(p.getLocation().equals("empty")) {
             System.out.println("Cannot set quantity if location is not set first");
             return false;
         }
@@ -750,8 +750,8 @@ public class EZShop implements EZShopInterface {
             PreparedStatement pstmt = this.conn.prepareStatement(sql);
             pstmt.setString(1, productCode);
             ResultSet rs = pstmt.executeQuery();
-            if(rs.isBeforeFirst() != false) {
-                System.out.println("Product with barcode " + productCode + " is already present");
+            if(!rs.isBeforeFirst()) {
+                System.out.println("Product with barcode " + productCode + " is not present");
                 return -1;
             }
         } catch (SQLException e) {
@@ -790,7 +790,7 @@ public class EZShop implements EZShopInterface {
             e.printStackTrace();
             return -1;
         }
-        System.out.println("Order " + id + "for product" + productCode + " issued for a price of " + pricePerUnit*quantity);
+        System.out.println("Order " + id + " for product " + productCode + " issued for a price of " + pricePerUnit*quantity);
         return id;
     }
 
@@ -900,6 +900,7 @@ public class EZShop implements EZShopInterface {
         double pricePerUnit;
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setInt(1,orderId);
             ResultSet rs = pstmt.executeQuery();
             if(!rs.isBeforeFirst()) {
                 System.out.println("There's no order with orderId " + orderId);
@@ -934,11 +935,11 @@ public class EZShop implements EZShopInterface {
 
         //Updating order
         String sql2 = "UPDATE ORDERS SET status='PAYED', balanceId=? WHERE orderId=?";
-        int numUpdated;
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql2);
-            pstmt.setInt(1, orderId);
-            pstmt.setInt(2,balanceId);
+            pstmt.setInt(1, balanceId);
+            pstmt.setInt(2, orderId);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -967,6 +968,7 @@ public class EZShop implements EZShopInterface {
         String productCode;
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setInt(1,orderId);
             ResultSet rs = pstmt.executeQuery();
             if(!rs.isBeforeFirst()) {
                 System.out.println("There's no order with orderId " + orderId);
@@ -999,16 +1001,16 @@ public class EZShop implements EZShopInterface {
                 System.err.println("ERROR: It's impossible to record a product arrival since it's not present anymore");
                 return false;
             }
-            rs.getInt("aisleID");
-            rs.getString("rackID");
-            rs.getInt("levelID");
+            aisleId = rs.getInt("aisleID");
+            rackId = rs.getString("rackID");
+            levelId = rs.getInt("levelID");
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
 
         if(rackId == null)
-            rackId="";
+            rackId="empty";
 
         if(aisleId == 0 && rackId.equals("empty") && levelId == 0) {
             System.out.println("Location for product is not set. Set location first");
@@ -1018,7 +1020,7 @@ public class EZShop implements EZShopInterface {
         //Searching for orderId and doing preliminary controls
         String sql3 = "UPDATE ORDERS SET status='COMPLETED' WHERE orderId=?";
         try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            PreparedStatement pstmt = this.conn.prepareStatement(sql3);
             pstmt.setInt(1,orderId);
             pstmt.executeUpdate();
 
