@@ -2,7 +2,6 @@ package it.polito.ezshop.data;
 
 import it.polito.ezshop.exceptions.*;
 
-//import javax.persistence.criteria.CriteriaBuilder;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
@@ -2194,47 +2193,20 @@ public class EZShop implements EZShopInterface {
         if (sale==null) return false;
         if(!isValidCreditCard(creditCard)) return false;
 
-        //CHECK ENOUGH MONEY ON CARD MISSING
-        File file = new File("CARDS.txt");
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(file));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Double amount = getCreditCardBalance(creditCard);
+        if(amount==null){
+            return false;
+        } else{
+            if(sale.PaySaleAndReturnChange(amount, false)>=0){
+                SaleConfirmedEnsurePersistence(sale,newBalanceUpdate(sale.getPrice()));
 
-
-        String st;
-        String[] s;
-        Double amount=-1.0;
-        try {
-        while ((st = br.readLine()) != null) {
-
-                    s = st.split(",");
-                    if (s[0].equals(creditCard)) {
-                        amount = Double.parseDouble(s[1]);
-                        break;
-                    }
-
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            if(amount==-1){
-                return false;
+                return true;
             } else{
-                if(sale.PaySaleAndReturnChange(amount, false)>=0){
-                    SaleConfirmedEnsurePersistence(sale,newBalanceUpdate(sale.getPrice()));
-
-                    return true;
-                } else{
-                    return false;
-                    //BE CAREFUL CHECK I ASSUME THAT THEN LATER DELETESALETRANSACTION WILL BE CALLED
-                }
+                return false;
+                //BE CAREFUL CHECK I ASSUME THAT THEN LATER DELETESALETRANSACTION WILL BE CALLED
             }
-
         }
+    }
 
     @Override
     public double returnCashPayment(Integer returnId) throws InvalidTransactionIdException, UnauthorizedException {
@@ -2327,11 +2299,16 @@ public class EZShop implements EZShopInterface {
         // Get the amount of money to be returned
         Double amount = returnTransaction.getAmount();
 
+        // Get creditCard balance
+        Double creditCardBalance = getCreditCardBalance(creditCard);
         // Check if the creditCard is not registered
-        // TODO
-
+        if (creditCardBalance == null) {
+            return -1;
+        }
         // Update the creditCard balance
-        // TODO
+        if (!updateCreditCardBalance(creditCard, creditCardBalance + amount)) {
+            return -1;
+        }
 
         // Create new BalanceOperation
         BalanceOperationImpl balanceOperation = newBalanceUpdate(-amount);
@@ -3025,5 +3002,66 @@ public class EZShop implements EZShopInterface {
         }
 
         return currentBalance;
+    }
+
+    private Double getCreditCardBalance(String creditCard) {
+        System.out.println("Call getCreditCardBalance(creditCard = "+ creditCard +")");
+
+        Double balance = null;
+        try (BufferedReader br = new BufferedReader(new FileReader("CreditCards.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                String[] s = line.split(";");
+                if (s[0].equals(creditCard)) {
+                    balance = Double.parseDouble(s[1]);
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("getCreditCardBalance: " + e.getMessage());
+            return null;
+        }
+
+        return balance;
+    }
+
+    private boolean updateCreditCardBalance(String creditCard, Double balance) {
+        System.out.println("Call updateCreditCardBalance(creditCard = "+ creditCard +", balance = "+ balance +")");
+
+        boolean find = false;
+        String newContent = "";
+        try (BufferedReader br = new BufferedReader(new FileReader("CreditCards.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith("#")) {
+                    newContent = newContent.concat(line + "\n");
+                    continue;
+                }
+                String[] s = line.split(";");
+                if (s[0].equals(creditCard)) {
+                    newContent = newContent.concat(s[0] + ";" + balance + "\n");
+                    find  = true;
+                } else {
+                    newContent = newContent.concat(line + "\n");
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("updateCreditCardBalance: " + e.getMessage());
+            return false;
+        }
+
+        if (find) {
+            try (FileWriter fw = new FileWriter("CreditCards.txt")) {
+                fw.write(newContent);
+            } catch (IOException e) {
+                System.err.println("updateCreditCardBalance: " + e.getMessage());
+                return false;
+            }
+        }
+
+        return find;
     }
 }
