@@ -8,19 +8,19 @@ public class ReturnTransactionImpl {
 
     private Integer returnId;
     private SaleTransactionImpl saleTransaction;
-    private Map<ProductTypeImpl, Integer> listOfProductsReturn;
+    private Map<ProductTypeImpl, Integer> returnProducts;
     private State state;
-    private PaymentType paymentType;
     private Double amount;
+    private PaymentType paymentType;
     private BalanceOperationImpl balanceOperation;
 
-    public ReturnTransactionImpl(Integer returnId, SaleTransactionImpl saleTransaction, Map<ProductTypeImpl, Integer> listOfProductsReturn, String state, String paymentType, Double amount, BalanceOperationImpl balanceOperation) {
+    public ReturnTransactionImpl(Integer returnId, SaleTransactionImpl saleTransaction, Map<ProductTypeImpl, Integer> returnProducts, String state, Double amount, String paymentType, BalanceOperationImpl balanceOperation) {
         this.returnId = returnId;
         this.saleTransaction = saleTransaction;
-        this.listOfProductsReturn = listOfProductsReturn;
+        this.returnProducts = returnProducts;
         this.state = (state != null) ? State.valueOf(state) : null;
-        this.paymentType = (paymentType != null) ? PaymentType.valueOf(paymentType) : null;
         this.amount = amount;
+        this.paymentType = (paymentType != null) ? PaymentType.valueOf(paymentType) : null;
         this.balanceOperation = balanceOperation;
     }
 
@@ -40,12 +40,12 @@ public class ReturnTransactionImpl {
         this.saleTransaction = saleTransaction;
     }
 
-    public Map<ProductTypeImpl, Integer> getListOfProductsReturn() {
-        return listOfProductsReturn;
+    public Map<ProductTypeImpl, Integer> getReturnProducts() {
+        return returnProducts;
     }
 
-    public void setListOfProductsReturn(Map<ProductTypeImpl, Integer> listOfProductsReturn) {
-        this.listOfProductsReturn = listOfProductsReturn;
+    public void setReturnProducts(Map<ProductTypeImpl, Integer> returnProducts) {
+        this.returnProducts = returnProducts;
     }
 
     public String getState() {
@@ -56,20 +56,20 @@ public class ReturnTransactionImpl {
         this.state = State.valueOf(state);
     }
 
-    public String getPaymentType() {
-        return (paymentType != null) ? paymentType.toString() : null;
-    }
-
-    public void setPaymentType(String paymentType) {
-        this.paymentType = PaymentType.valueOf(paymentType);
-    }
-
     public Double getAmount() {
         return amount;
     }
 
     public void setAmount(Double amount) {
         this.amount = amount;
+    }
+
+    public String getPaymentType() {
+        return (paymentType != null) ? paymentType.toString() : null;
+    }
+
+    public void setPaymentType(String paymentType) {
+        this.paymentType = PaymentType.valueOf(paymentType);
     }
 
     public BalanceOperationImpl getBalanceOperation() {
@@ -93,7 +93,9 @@ public class ReturnTransactionImpl {
     }
 
     public void addProduct(ProductTypeImpl productType, Integer quantity) {
-        this.listOfProductsReturn.put(productType, quantity);
-        // TODO update amount
+        // Add product to the returnProducts
+        this.returnProducts.put(productType, quantity);
+        // Update amount applying the product discount and the sale discount, if any
+        this.amount += quantity * productType.getSellPrice() * (1 - productType.getProductDiscountRate()) * (1 - this.saleTransaction.getDiscountRate());
     }
 }

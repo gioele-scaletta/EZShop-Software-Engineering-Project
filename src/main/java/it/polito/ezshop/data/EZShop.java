@@ -1926,7 +1926,7 @@ public class EZShop implements EZShopInterface {
         }
 
         // Create new ReturnTransaction
-        ReturnTransactionImpl returnTransaction = new ReturnTransactionImpl(null, saleTransaction, null, "INPROGRESS", null, null, null);
+        ReturnTransactionImpl returnTransaction = new ReturnTransactionImpl(null, saleTransaction, null, "INPROGRESS", 0.0, null, null);
 
         // Write ReturnTransaction in persistence
         return insertPersistenceReturnTransaction(returnTransaction);
@@ -2799,7 +2799,7 @@ public class EZShop implements EZShopInterface {
         String query;
 
         query = "SELECT BarCode, Quantity FROM RETURN_PRODUCTS WHERE ReturnId = ?";
-        Map<ProductTypeImpl, Integer> listOfProductsReturn = new HashMap<>();
+        Map<ProductTypeImpl, Integer> returnProducts = new HashMap<>();
         try (PreparedStatement pstmt  = this.conn.prepareStatement(query)) {
             pstmt.setInt(1, returnId);
 
@@ -2807,7 +2807,7 @@ public class EZShop implements EZShopInterface {
             while (rs.next()) {
                 String barCode = rs.getString("BarCode");
                 Integer quantity = rs.getInt("Quantity");
-                listOfProductsReturn.put(getProductTypeByCode(barCode), quantity);
+                returnProducts.put(getProductTypeByCode(barCode), quantity);
             }
         } catch (SQLException e) {
             System.err.println(methodName + ": " + e.getMessage());
@@ -2824,10 +2824,10 @@ public class EZShop implements EZShopInterface {
             if(rs.isBeforeFirst()) {
                 SaleTransactionImpl saleTransaction = getSaleTransactionById(rs.getInt("TransactionId"));
                 String state = rs.getString("State");
-                String paymentType = rs.getString("PaymentType");
                 Double amount = rs.getDouble("Amount");
+                String paymentType = rs.getString("PaymentType");
                 BalanceOperationImpl balanceOperation = getBalanceOperationById(rs.getInt("BalanceId"));
-                returnTransaction = new ReturnTransactionImpl(returnId, saleTransaction, listOfProductsReturn, state, paymentType, amount, balanceOperation);
+                returnTransaction = new ReturnTransactionImpl(returnId, saleTransaction, returnProducts, state, amount, paymentType, balanceOperation);
             }
         } catch (SQLException e) {
             System.err.println(methodName + ": " + e.getMessage());
@@ -2844,16 +2844,14 @@ public class EZShop implements EZShopInterface {
         String query;
         int rowCount;
 
-        query = "INSERT INTO RETURN_TRANSACTIONS(TransactionId, State, PaymentType, Amount, BalanceId) VALUES(?, ?, ?, ?, ?)";
+        query = "INSERT INTO RETURN_TRANSACTIONS(TransactionId, State, Amount, PaymentType, BalanceId) VALUES(?, ?, ?, ?, ?)";
         Integer newId = -1;
         try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
             pstmt.setInt(1, returnTransaction.getSaleTransaction().getTicketNumber());
             pstmt.setString(2, returnTransaction.getState());
+            pstmt.setDouble(3, returnTransaction.getAmount());
             if (returnTransaction.getPaymentType() != null) {
-                pstmt.setString(3, returnTransaction.getPaymentType());
-            }
-            if (returnTransaction.getAmount() != null) {
-                pstmt.setDouble(4, returnTransaction.getAmount());
+                pstmt.setString(4, returnTransaction.getPaymentType());
             }
             if (returnTransaction.getBalanceOperation() != null) {
                 pstmt.setInt(5, returnTransaction.getBalanceOperation().getBalanceId());
@@ -2871,9 +2869,9 @@ public class EZShop implements EZShopInterface {
         }
         System.out.println(methodName + ": "+ rowCount +" rows with ReturnId = "+ newId +" inserted in RETURN_TRANSACTIONS");
 
-        if (returnTransaction.getListOfProductsReturn() != null) {
+        if (returnTransaction.getReturnProducts() != null) {
             rowCount = 0;
-            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getListOfProductsReturn().entrySet()) {
+            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
                 query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
                 try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
                     pstmt.setInt(1, newId);
@@ -2899,15 +2897,13 @@ public class EZShop implements EZShopInterface {
         String query;
         int rowCount;
 
-        query = "UPDATE RETURN_TRANSACTIONS SET TransactionId = ?, State = ?, PaymentType = ?, Amount = ?, BalanceId = ? WHERE ReturnId = ?";
+        query = "UPDATE RETURN_TRANSACTIONS SET TransactionId = ?, State = ?, Amount = ?, PaymentType = ?, BalanceId = ? WHERE ReturnId = ?";
         try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
             pstmt.setInt(1, returnTransaction.getSaleTransaction().getTicketNumber());
             pstmt.setString(2, returnTransaction.getState());
+            pstmt.setDouble(3, returnTransaction.getAmount());
             if (returnTransaction.getPaymentType() != null) {
-                pstmt.setString(3, returnTransaction.getPaymentType());
-            }
-            if (returnTransaction.getAmount() != null) {
-                pstmt.setDouble(4, returnTransaction.getAmount());
+                pstmt.setString(4, returnTransaction.getPaymentType());
             }
             if (returnTransaction.getBalanceOperation() != null) {
                 pstmt.setInt(5, returnTransaction.getBalanceOperation().getBalanceId());
@@ -2932,9 +2928,9 @@ public class EZShop implements EZShopInterface {
         }
         System.out.println(methodName + ": "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" deleted in RETURN_PRODUCTS table");
 
-        if (returnTransaction.getListOfProductsReturn() != null) {
+        if (returnTransaction.getReturnProducts() != null) {
             rowCount = 0;
-            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getListOfProductsReturn().entrySet()) {
+            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
                 query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
                 try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
                     pstmt.setInt(1, returnTransaction.getReturnId());
