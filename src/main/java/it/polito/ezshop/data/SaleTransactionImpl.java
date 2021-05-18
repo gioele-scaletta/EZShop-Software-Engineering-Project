@@ -1,14 +1,10 @@
 package it.polito.ezshop.data;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class SaleTransactionImpl implements SaleTransaction {
-
 
     Integer transactionId;
     Double amount;
@@ -70,7 +66,9 @@ public class SaleTransactionImpl implements SaleTransaction {
     public CustomerImpl getTransactionCard() {
         return transactionCard;
     }
-    public BalanceOperation getSaleOperationRecord() {return saleOperationRecord; }
+    public BalanceOperation getSaleOperationRecord() {
+        return saleOperationRecord;
+    }
 
     @Override
     public Integer getTicketNumber() {
@@ -115,7 +113,7 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     @Override
     public void setDiscountRate(double discountRate) {
-    this.discountRate=discountRate;
+        this.discountRate=discountRate;
     }
 
     @Override
@@ -126,13 +124,7 @@ public class SaleTransactionImpl implements SaleTransaction {
     @Override
     public void setPrice(double price) {
         this.amount=price;
-
     }
-
-    public Double getCurrentAmount() {
-        return this.amount;
-    }
-
 
 
     public boolean EditProductInSale(ProductTypeImpl product, Integer quantity ){
@@ -277,42 +269,4 @@ public class SaleTransactionImpl implements SaleTransaction {
         }
         this.calculateCurrentAmount();
     }
-
-    /* OLD VERSION EGTTERS AND SETTERS
-    public Integer getTransactionId() {
-		return transactionId;
-	}
-	public void setTransactionId(Integer transactionId) {
-		this.transactionId = transactionId;
-	}
-	public Double getCurrentAmount() {
-		return currentamount;
-	}
-	public void setCurrentAmount(Double currrentamount) {
-		this.currentamount = currrentamount;
-	}
-	public Double getSalediscountRate() {
-		return salediscountRate;
-	}
-	public void setSalediscountRate(Double salediscountRate) {
-		this.salediscountRate = salediscountRate;
-	}
-	public HashMap<ProductType, Integer> getListOfProductsSale() {
-		return listOfProductsSale;
-	}
-	public void setListOfProductsSale(HashMap<ProductType, Integer> listOfProductsSale) {
-		this.listOfProductsSale = listOfProductsSale;
-	}
-	public LoyaltyCard getTransactionCard() {
-		return transactionCard;
-	}
-	public void setTransactionCard(LoyaltyCard transactionCard) {
-		this.transactionCard = transactionCard;
-	}
-	public BalanceOperation getSaleOperationRecord() {
-		return saleOperationRecord;
-	}
-	public void setSaleOperationRecord(BalanceOperation saleOperationRecord) {
-		this.saleOperationRecord = saleOperationRecord;
-	}*/
 }

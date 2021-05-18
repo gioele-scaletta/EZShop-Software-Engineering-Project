@@ -3177,7 +3177,7 @@ public class EZShop implements EZShopInterface {
 
         query = "UPDATE SALETRANSACTIONS SET Amount = ? WHERE transactionId = ?";
         try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
-            pstmt.setDouble(1, saleTransaction.getCurrentAmount());
+            pstmt.setDouble(1, saleTransaction.getPrice());
             pstmt.setInt(2, saleTransaction.getTicketNumber());
 
             rowCount = pstmt.executeUpdate();
