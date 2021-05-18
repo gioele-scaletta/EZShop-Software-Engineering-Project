@@ -23,28 +23,40 @@ public class TestSaleTransactionImpl {
 
     @Test
     public void testIsInProgress() {
-        SaleTransactionImpl saleTransaction = new SaleTransactionImpl(1, "INPROGRESS", null, 0.0, 0.0, null, null, null);
+        SaleTransactionImpl saleTransaction1 = new SaleTransactionImpl(1, "INPROGRESS", null, 0.0, 0.0, null, null, null);
+        SaleTransactionImpl saleTransaction2 = new SaleTransactionImpl(1, "PAYED", null, 0.0, 0.0, null, null, null);
+        SaleTransactionImpl saleTransaction3 = new SaleTransactionImpl(1, "CLOSED", null, 0.0, 0.0, null, null, null);
 
-        assertTrue(saleTransaction.isInProgress());
-        assertFalse(saleTransaction.isPayed());
-        assertFalse(saleTransaction.isClosed());
+        assertTrue(saleTransaction1.isInProgress());
+
+        assertFalse(saleTransaction2.isInProgress());
+
+        assertFalse(saleTransaction3.isInProgress());
     }
 
     @Test
     public void testIsPayed() {
-        SaleTransactionImpl saleTransaction = new SaleTransactionImpl(1, "PAYED", null, 0.0, 0.0, null, null, null);
+        SaleTransactionImpl saleTransaction1 = new SaleTransactionImpl(1, "INPROGRESS", null, 0.0, 0.0, null, null, null);
+        SaleTransactionImpl saleTransaction2 = new SaleTransactionImpl(1, "PAYED", null, 0.0, 0.0, null, null, null);
+        SaleTransactionImpl saleTransaction3 = new SaleTransactionImpl(1, "CLOSED", null, 0.0, 0.0, null, null, null);
 
-        assertFalse(saleTransaction.isInProgress());
-        assertTrue(saleTransaction.isPayed());
-        assertFalse(saleTransaction.isClosed());
+        assertFalse(saleTransaction1.isPayed());
+
+        assertTrue(saleTransaction2.isPayed());
+
+        assertFalse(saleTransaction3.isPayed());
     }
 
     @Test
     public void testIsClosed() {
-        SaleTransactionImpl saleTransaction = new SaleTransactionImpl(1, "CLOSED", null, 0.0, 0.0, null, null, null);
+        SaleTransactionImpl saleTransaction1 = new SaleTransactionImpl(1, "INPROGRESS", null, 0.0, 0.0, null, null, null);
+        SaleTransactionImpl saleTransaction2 = new SaleTransactionImpl(1, "PAYED", null, 0.0, 0.0, null, null, null);
+        SaleTransactionImpl saleTransaction3 = new SaleTransactionImpl(1, "CLOSED", null, 0.0, 0.0, null, null, null);
 
-        assertFalse(saleTransaction.isInProgress());
-        assertFalse(saleTransaction.isPayed());
-        assertTrue(saleTransaction.isClosed());
+        assertFalse(saleTransaction1.isClosed());
+
+        assertFalse(saleTransaction2.isClosed());
+
+        assertTrue(saleTransaction3.isClosed());
     }
 }
