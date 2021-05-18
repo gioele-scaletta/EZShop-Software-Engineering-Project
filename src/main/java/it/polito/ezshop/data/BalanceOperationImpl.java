@@ -3,16 +3,18 @@ package it.polito.ezshop.data;
 import java.time.LocalDate;
 
 public class BalanceOperationImpl implements BalanceOperation {
+    private enum Type{DEBIT, CREDIT}
+
     private int balanceId;
     private LocalDate date;
     private double money;
-    private String type;
+    private Type type;
 
     public BalanceOperationImpl(int balanceId, LocalDate date, double money, String type) {
         this.balanceId = balanceId;
         this.date = date;
         this.money = money;
-        this.type = type;
+        this.type = Type.valueOf(type);
     }
 
     @Override
@@ -47,11 +49,11 @@ public class BalanceOperationImpl implements BalanceOperation {
 
     @Override
     public String getType() {
-        return this.type;
+        return this.type.toString();
     }
 
     @Override
     public void setType(String type) {
-        this.type = type;
+        this.type = Type.valueOf(type);
     }
 }
