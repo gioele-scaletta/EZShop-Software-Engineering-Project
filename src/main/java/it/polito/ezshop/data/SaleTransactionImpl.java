@@ -55,8 +55,6 @@ public class SaleTransactionImpl implements SaleTransaction {
 
 		this.transactionCard = transactionCardId;
 		this.saleOperationRecord = balanceOperationId;
-
-
     }
 
     public HashMap<ProductTypeImpl, Integer> getListOfProductsSale() {
@@ -216,7 +214,7 @@ public class SaleTransactionImpl implements SaleTransaction {
 
 
     public int PointsForSale() {
-        Integer tmp=(int) ((this.amount-5)/10);
+        Integer tmp=(int) (this.amount/10);
         //this.transactionCard.updatePoints(tmp);
         return tmp;
     }
