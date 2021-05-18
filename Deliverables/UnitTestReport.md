@@ -416,7 +416,7 @@ Version:
 |Unit name | Loop rows | Number of iterations | JUnit test case |
 |---|---|---|---|
 | ProductTypeImpl | 74-77 | 0 | testProductImpl/testisValidCode() |
-| ProdcutTypeImpl | 74-77 | 1+ | testProductImpl/testisValidCode() |
+| |  | 1+ | testProductImpl/testisValidCode() |
 
 
 
