@@ -27,7 +27,6 @@ public class TestCustomerImpl {
         c.setId(2);
         assertTrue (c.getId() == 2);
 
-
         // Customer points
         c.setPoints(10);
         assertTrue (c.getPoints() == 10);
