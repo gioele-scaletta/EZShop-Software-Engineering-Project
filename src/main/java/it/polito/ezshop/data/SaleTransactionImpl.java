@@ -240,6 +240,10 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     }
 
+    public boolean isInProgress() {
+        return (this.state == State.INPROGRESS);
+    }
+
     public boolean isPayed() {
         return (this.state == State.PAYED);
     }
