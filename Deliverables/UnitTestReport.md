@@ -92,7 +92,7 @@ Version:
 
 - Value of field role
 
-**Predicates for methods *canMan,ageProductList, canManageInventory, canManageAccounting*:**
+**Predicates for methods *canManageProductList, canManageInventory, canManageAccounting*:**
 
 | Criterion                        | Predicate |
 | -------------------------------- | --------- |
@@ -199,13 +199,192 @@ Version:
 |null  |  -     |  V              | isValidLocation(null)  <br /><br />-> true (location reset values)    |testisValidLocation ()|
 
 
+# Class ReturnTransactionImpl
+
+## Method setReturnId
+**Criteria for method *setReturnId*:**
+
+- returnId parameter is a valid Integer object or null
+
+**Predicates for method *setReturnId*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | -----------|
+|Validity of Integer parameter     | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
 
 
+|  Validity of the Integer parameter| Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |setReturnId(100)<br/>getReturnId( ).equals(100)<br/>->true||
+|NULL                               |V                |setReturnId(null)<br/>getReturnId( ).equals(null)<br/>->true||
 
 
+## Method setState
+
+**Criteria for method *setState*:**
+
+- state parameter is a valid String object or null
+- value of the String object is INPROGRESS, CLOSED or PAYED
+
+**Predicates for method *setState*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of String parameter                   | Valid      |
+|                                               | NULL       |
+|Value of String parameter                      | Empty      |
+|                                               | INPROGRESS |
+|                                               | CLOSED     |
+|                                               | PAYED      |
+|                                               | Other value|
+
+**Combination of predicates**:
 
 
+|  Validity of the String parameter |Value of String Parameter| Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-------------------------|-----------------|------------------------------|-----------------|
+|NULL                               |*                        |V                |setState(null)<br/>getState( ).equals(null)<br/>->true||
+|Valid                              |Empty                    |I                |setState("")<br/>->error||
+|"                                 |INPROGRESS               |V                |setState("INPROGRESS")<br/>getState( ).equals("INPROGRESS)<br/>->true||
+|"                                  |CLOSED                   |V                |setState("CLOSED")<br/>getState( ).equals("CLOSED")<br/>->true||
+|"                                  |PAYED                    |V                |setState("PAYED")<br/>getState( ).equals("PAYED")<br/>->true||
+|"                                  |Other Value              |I                |setState("rAnDoM VaLuE")<br/>->error||
 
+
+## Method setAmount
+
+**Criteria for method *setAmount*:**
+
+- amount parameter is a valid Double object or null
+
+**Predicates for method *setAmount*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of Double parameter                   | Valid      |
+|                                               | NULL       |
+
+**Combination of predicates**:
+
+
+|  Validity of the Double parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |setAmount(17.50)<br/>getAmount( ).equals(17.50)<br/>->true||
+|NULL                               |V                |setAmount(null)<br/>getAmount( ).equals(null)<br/>->true||
+
+## Method setPaymentType
+
+**Criteria for method *setPaymentType*:**
+
+- paymentType parameter is a valid String object or null
+- value of the String object is CARD or CASH
+
+**Predicates for method *setPaymentType*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of String parameter                   | Valid      |
+|                                               | NULL       |
+|Value of String parameter                      | Empty      |
+|                                               | CARD       |
+|                                               | CASH       |
+|                                               | Other value|
+
+**Combination of predicates**:
+
+
+|  Validity of the String parameter |Value of String Parameter| Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-------------------------|-----------------|------------------------------|-----------------|
+|NULL                               |*                        |V                |setPaymentType(null)<br/>getPaymentType( ).equals(null)<br/>->true||
+|Valid                              |Empty                    |I                |setPaymentType("")<br/>->error||
+|"                                  |CARD                     |V                |setPaymentType("CARD")<br/>getPaymentType( ).equals(null)<br/>->true||
+|"                                  |CASH                     |V                |setPaymentType("CASH")<br/>getPaymentType( ).equals(null)<br/>->true||
+|"                                  |Other Value              |I                |setPaymentType("sOmE sTuFF")<br/>->error||
+
+
+# Class BalanceOperationImpl
+
+## Method setBalanceId
+**Criteria for method *setBalanceId*:**
+
+- balanceId parameter is a valid int base type
+
+**Predicates for method *setBalanceId*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of int parameter                      | Valid      |
+
+**Combination of predicates**:
+
+
+|  Validity of the int parameter    | Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |setBalanceId(27)<br/>getBalanceId( ).equals(27)<br/>->true||
+
+## Method setDate
+
+**Criteria for method *setDate*:**
+
+- date parameter is a valid LocalDate object or null
+
+**Predicates for method *setDate*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of LocalDate parameter                | Valid      |
+|                                               | NULL       |
+
+**Combination of predicates**:
+
+
+|Validity of the LocalDate parameter| Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |LocalDate l = LocalDate.now( )<br/>setLocalDate(l)<br/>getLocalDate( ).equals(l)<br/>->true||
+|NULL                               |V                |setLocalDate(null)<br/>getLocalDate( ).equals(null)<br/>->true||
+
+## Method setMoney
+
+**Criteria for method *setMoney*:**
+
+- money parameter is a valid double base type
+
+**Predicates for method *setMoney*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of double parameter                   | Valid      |
+
+**Combination of predicates**:
+
+
+|  Validity of the double parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                | setMoney(23.50)<br/>getMoney( ).equals(23.50)<br/>->true||
+
+## Method setType
+
+**Criteria for method *setType*:**
+
+- type parameter is a valid String object or null
+
+**Predicates for method *setType*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of String parameter                   | Valid      |
+|                                               | NULL       |
+
+**Combination of predicates**:
+
+
+|  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |setType("CREDIT")<br/>getType( ).equals("CREDIT")<br/>->true||
+|NULL                               |V                |setType(null)<br/>getType( ).equals(null)<br/>->true||
 
 
 # White Box Unit Tests
