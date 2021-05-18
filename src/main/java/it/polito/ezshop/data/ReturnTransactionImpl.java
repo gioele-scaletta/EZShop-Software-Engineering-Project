@@ -3,7 +3,7 @@ package it.polito.ezshop.data;
 import java.util.Map;
 
 public class ReturnTransactionImpl {
-    private enum State{INPROGRESS, CLOSED, DELETED}
+    private enum State{INPROGRESS, CLOSED, PAYED}
     private enum PaymentType{CARD, CASH}
 
     private Integer returnId;
@@ -88,8 +88,8 @@ public class ReturnTransactionImpl {
         return (this.state == State.CLOSED);
     }
 
-    public boolean isDeleted() {
-        return (this.state == State.DELETED);
+    public boolean isPayed() {
+        return (this.state == State.PAYED);
     }
 
     public void addProduct(ProductTypeImpl productType, Integer quantity) {

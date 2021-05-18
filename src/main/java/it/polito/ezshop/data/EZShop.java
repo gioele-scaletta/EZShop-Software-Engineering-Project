@@ -2045,10 +2045,39 @@ public class EZShop implements EZShopInterface {
             System.err.println(methodName + ": The ReturnTransaction does not exist");
             return false;
         }
+        // Check if the ReturnTransaction is not in progress
+        if (!returnTransaction.isInProgress()) {
+            System.err.println(methodName + ": The ReturnTransaction is not in progress");
+            return false;
+        }
 
-        // TODO
+        if (commit) {
+            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
+                ProductTypeImpl productType = entry.getKey();
 
-        return true;
+                // Increase the product quantity available on the shelves
+                productType.updateProductQuantity(entry.getValue());
+                if (!updatePersistenceProductTypeQuantity(productType)) {
+                    return false;
+                }
+
+                // Update the transaction status (decreasing the number of units sold by the number of returned one and decreasing the final price)
+                SaleTransactionImpl saleTransaction = returnTransaction.getSaleTransaction();
+                saleTransaction.updateProductQuantity(productType, -entry.getValue());
+                if (!updatePersistenceSaleTransactionQuantity(saleTransaction)) {
+                    return false;
+                }
+            }
+
+            // Set state in ReturnTransaction
+            returnTransaction.setState("CLOSED");
+
+            // Write ReturnTransaction to persistence
+            return updatePersistenceReturnTransaction(returnTransaction);
+        } else {
+            // Delete the ReturnTransaction
+            return deletePersistenceReturnTransaction(returnTransaction);
+        }
     }
 
     /**
@@ -2090,10 +2119,35 @@ public class EZShop implements EZShopInterface {
             System.err.println(methodName + ": The ReturnTransaction does not exist");
             return false;
         }
+        // Check if the ReturnTransaction has been payed
+        if (returnTransaction.isPayed()) {
+            System.err.println(methodName + ": The ReturnTransaction has been payed");
+            return false;
+        }
+        // Check if the ReturnTransaction is not closed
+        if (!returnTransaction.isClosed()) {
+            System.err.println(methodName + ": The ReturnTransaction is not closed");
+            return false;
+        }
 
-        // TODO
+        for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
+            // Decrease the product quantity available on the shelves
+            ProductTypeImpl productType = entry.getKey();
+            productType.updateProductQuantity(-entry.getValue());
+            if (!updatePersistenceProductTypeQuantity(productType)) {
+                return false;
+            }
 
-        return true;
+            // Update the transaction status (increasing the number of units sold by the number of returned one and increasing the final price)
+            SaleTransactionImpl saleTransaction = returnTransaction.getSaleTransaction();
+            saleTransaction.updateProductQuantity(productType, entry.getValue());
+            if (!updatePersistenceSaleTransactionQuantity(saleTransaction)) {
+                return false;
+            }
+        }
+
+        // Delete the ReturnTransaction
+        return deletePersistenceReturnTransaction(returnTransaction);
     }
 
 
@@ -2252,6 +2306,9 @@ public class EZShop implements EZShopInterface {
         // Set payment type in ReturnTransaction
         returnTransaction.setPaymentType("CASH");
 
+        // Set state in ReturnTransaction
+        returnTransaction.setState("PAYED");
+
         // Write ReturnTransaction to persistence
         if (!updatePersistenceReturnTransaction(returnTransaction)) {
             return -1;
@@ -2320,6 +2377,9 @@ public class EZShop implements EZShopInterface {
 
         // Set payment type in ReturnTransaction
         returnTransaction.setPaymentType("CARD");
+
+        // Set state in ReturnTransaction
+        returnTransaction.setState("PAYED");
 
         // Write ReturnTransaction to persistence
         if (!updatePersistenceReturnTransaction(returnTransaction)) {
@@ -2977,6 +3037,79 @@ public class EZShop implements EZShopInterface {
             return false;
         }
         System.out.println(methodName + ": "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" deleted in RETURN_TRANSACTIONS table");
+
+        return true;
+    }
+
+    private boolean updatePersistenceProductTypeQuantity(ProductTypeImpl productType) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(ProductTypeImpl = "+ productType +")");
+
+        String query;
+        int rowCount;
+
+        query = "UPDATE PRODUCTTYPES SET Quantity = ? WHERE productId = ?";
+        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+            pstmt.setInt(1, productType.getQuantity());
+            pstmt.setInt(2, productType.getId());
+
+            rowCount = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return false;
+        }
+        System.out.println(methodName + ": "+ rowCount +" rows with productId = "+ productType.getId() +" updated in PRODUCTTYPES table");
+
+        return true;
+    }
+
+    private boolean updatePersistenceSaleTransactionQuantity(SaleTransactionImpl saleTransaction) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(SaleTransactionImpl = "+ saleTransaction +")");
+
+        String query;
+        int rowCount;
+
+        query = "UPDATE SALETRANSACTIONS SET Amount = ? WHERE transactionId = ?";
+        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+            pstmt.setDouble(1, saleTransaction.getCurrentAmount());
+            pstmt.setInt(2, saleTransaction.getTicketNumber());
+
+            rowCount = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return false;
+        }
+        System.out.println(methodName + ": "+ rowCount +" rows with transactionId = "+ saleTransaction.getTicketNumber() +" updated in SALETRANSACTIONS table");
+
+        query = "DELETE FROM SALESANDPRODUCTS WHERE transactionId = ?";
+        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+            pstmt.setInt(1, saleTransaction.getTicketNumber());
+
+            rowCount = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return false;
+        }
+        System.out.println(methodName + ": "+ rowCount +" rows with transactionId = "+ saleTransaction.getTicketNumber() +" deleted in SALESANDPRODUCTS table");
+
+        if (saleTransaction.getListOfProductsSale() != null) {
+            rowCount = 0;
+            for (Map.Entry<ProductTypeImpl, Integer> entry : saleTransaction.getListOfProductsSale().entrySet()) {
+                query = "INSERT INTO SALESANDPRODUCTS(transactionId, BarCode, Quantity) VALUES(?, ?, ?)";
+                try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+                    pstmt.setInt(1, saleTransaction.getTicketNumber());
+                    pstmt.setString(2, entry.getKey().getBarCode());
+                    pstmt.setInt(3, entry.getValue());
+
+                    rowCount = pstmt.executeUpdate();
+                } catch (SQLException e) {
+                    System.err.println(methodName + ": " + e.getMessage());
+                    return false;
+                }
+            }
+            System.out.println(methodName + ": "+ rowCount +" rows with transactionId = "+ saleTransaction.getTicketNumber() +" inserted in SALESANDPRODUCTS");
+        }
 
         return true;
     }

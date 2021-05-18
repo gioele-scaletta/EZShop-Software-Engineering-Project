@@ -248,13 +248,24 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     public Integer getProductQuantity(ProductTypeImpl productType) {
         Integer quantity = -1;
-        for (ProductTypeImpl pt : listOfProductsSale.keySet()) {
+        for (ProductTypeImpl pt : this.listOfProductsSale.keySet()) {
             if (pt.getBarCode().equals(productType.getBarCode())) {
-                quantity = listOfProductsSale.get(pt);
+                quantity = this.listOfProductsSale.get(pt);
+                break;
             }
         }
 
         return quantity;
+    }
+
+    public void updateProductQuantity(ProductTypeImpl productType, Integer quantity) {
+        for (HashMap.Entry<ProductTypeImpl, Integer> entry : this.listOfProductsSale.entrySet()) {
+            if (entry.getKey().getBarCode().equals(productType.getBarCode())) {
+                this.listOfProductsSale.put(entry.getKey(), entry.getValue() + quantity);
+                break;
+            }
+        }
+        this.calculateCurrentAmount();
     }
 
     /* OLD VERSION EGTTERS AND SETTERS
