@@ -1525,6 +1525,11 @@ public class EZShop implements EZShopInterface {
     @Override
     public Integer startSaleTransaction() throws UnauthorizedException {
 
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName );
+
+
+
         if( loggedIn == null || !loggedIn.canManageSaleTransactions()) {
             System.out.println("User " + loggedIn.getUsername() + " User not authorized");
             throw new UnauthorizedException();
@@ -1560,39 +1565,52 @@ public class EZShop implements EZShopInterface {
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation*/
     @Override
     public boolean addProductToSale(Integer transactionId, String productCode, int amount) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(transactionId = "+ transactionId + "productCode ="+ productCode+")");
 
-        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {
-            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            throw new UnauthorizedException();
-            //return false;
-        }
-
-
-        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        if (sale==null){
+        // Check if the transactionId is null or it is less than or equal to 0
+        if (transactionId == null || transactionId <= 0) {
+            System.err.println(methodName + ": The transactionId is null or it is less than or equal to 0");
             throw new InvalidTransactionIdException();
-
         }
 
-
-        ProductTypeImpl product= getProductTypeByCode(productCode);
-       // System.out.println("ok2");
-
-        if (product==null){
+        // Check if the productCode is null, empty or invalid
+        if (productCode == null || productCode.isEmpty() || !ProductTypeImpl.isValidCode(productCode)) {
+            System.err.println(methodName + ": The productCode is null, empty or invalid");
             throw new InvalidProductCodeException();
         }
-        if (product==null) return false;
 
-        System.out.println(product.getQuantity());
-        if ((product.getQuantity() < amount)||(amount <0)){
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
+            throw new UnauthorizedException();
+        }
+
+        // Check if the quantity is less than or equal to 0
+        if (amount <= 0) {
+            System.err.println(methodName + ": The quantity is less than or equal to 0");
             throw new InvalidQuantityException();
         }
 
-        //AMOUNT AND PROD LIST UPDATED ONLY AT THE END IN DB
-        if(!loggedIn.canManageSaleTransactions())return false;
-        if (sale==null) return false;
-        if (product==null) return false;
-        if ((product.getQuantity()< amount)||(amount <0)) return false;
+        // Get SaleTransaction
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        // Check if the SaleTransaction is not available
+        if (sale == null) {
+            System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
+
+        //Get prod
+        ProductTypeImpl product= getProductTypeByCode(productCode);
+
+        if (product == null) {
+            System.err.println(methodName + ": The Product does not exist");
+            return false;
+        }
+
+        if ((product.getQuantity() < amount)){
+            return false;
+        }
 
         if(sale.EditProductInSale(product, amount)) {
             return true;
@@ -1600,7 +1618,6 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
-        //return false;
     }
 
     /**
@@ -1624,33 +1641,54 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean deleteProductFromSale(Integer transactionId, String productCode, int amount) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidQuantityException, UnauthorizedException {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(transactionId = "+ transactionId + "productCode ="+ productCode+")");
 
-        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {
-            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            throw new UnauthorizedException();
-            //return false;
-        }
-
-        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        if (sale==null){
+        // Check if the transactionId is null or it is less than or equal to 0
+        if (transactionId == null || transactionId <= 0) {
+            System.err.println(methodName + ": The transactionId is null or it is less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
-        ProductTypeImpl product= getProductTypeByCode(productCode);
-        if (product==null){
+        // Check if the productCode is null, empty or invalid
+        if (productCode == null || productCode.isEmpty() || !ProductTypeImpl.isValidCode(productCode)) {
+            System.err.println(methodName + ": The productCode is null, empty or invalid");
             throw new InvalidProductCodeException();
         }
 
-        if ((currentSale.listOfProductsSale.get(product)<amount )|| (amount <0)){
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
+            throw new UnauthorizedException();
+        }
+
+        // Check if the quantity is less than or equal to 0
+        if (amount <= 0) {
+            System.err.println(methodName + ": The quantity is less than or equal to 0");
             throw new InvalidQuantityException();
+        }
+
+        // Get SaleTransaction
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        // Check if the SaleTransaction is not available
+        if (sale == null) {
+            System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
+
+        //Get prod
+        ProductTypeImpl product= getProductTypeByCode(productCode);
+        if (product == null) {
+            System.err.println(methodName + ": The Product does not exist");
+            return false;
+        }
+
+        if ((currentSale.listOfProductsSale.get(product)<amount )){
+           return false;
         }
 
         //AMOUNT IN DB UPDATED ONLY AT THE END
 
-        if(!loggedIn.canManageSaleTransactions())return false;
-        if (sale==null) return false;
-        if (product==null) return false;
-        if ((product.getQuantity() < amount)||(amount <0)) return false;
 
         if(sale.EditProductInSale(product, -amount)) {
 
@@ -1684,33 +1722,50 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate) throws InvalidTransactionIdException, InvalidProductCodeException, InvalidDiscountRateException, UnauthorizedException {
-        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {
-            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            throw new UnauthorizedException();
-            //return false;
-        }
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(transactionId = "+ transactionId + "productCode ="+ productCode+")");
 
-        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        if (sale==null){
+        // Check if the transactionId is null or it is less than or equal to 0
+        if (transactionId == null || transactionId <= 0) {
+            System.err.println(methodName + ": The transactionId is null or it is less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
-        ProductTypeImpl product= getProductTypeByCode(productCode);
-        if (product==null){
+        // Check if the productCode is null, empty or invalid
+        if (productCode == null || productCode.isEmpty() || !ProductTypeImpl.isValidCode(productCode)) {
+            System.err.println(methodName + ": The productCode is null, empty or invalid");
             throw new InvalidProductCodeException();
         }
 
-        //System.out.println(discountRate);
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
+            throw new UnauthorizedException();
+        }
 
-        if ((discountRate <=0)||(discountRate >= 1)){
+        // Check if the quantity is less than or equal to 0
+        if ((discountRate <=0)||(discountRate >= 1)) {
+            System.err.println(methodName + ": Invalid discoountRate");
             throw new InvalidDiscountRateException();
         }
-        if(!loggedIn.canManageSaleTransactions())return false;
-        if (sale==null) return false;
-        if (product==null) return false;
-        if ((discountRate <0)||(discountRate >= 1)) return false;
 
-        return sale.ApplyDiscountToSaleProduct(discountRate, getProductTypeByCode(productCode));
+        // Get SaleTransaction
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        // Check if the SaleTransaction is not available
+        if (sale == null) {
+            System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
+
+        //Get prod
+        ProductTypeImpl product= getProductTypeByCode(productCode);
+
+        if (product == null) {
+            System.err.println(methodName + ": The Product does not exist");
+            return false;
+        }
+
+        return sale.ApplyDiscountToSaleProduct(discountRate, product);
 
     }
 
@@ -1731,24 +1786,35 @@ public class EZShop implements EZShopInterface {
      * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
      */
     public boolean applyDiscountRateToSale(Integer transactionId, double discountRate) throws InvalidTransactionIdException, InvalidDiscountRateException, UnauthorizedException {
-        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {
-            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            throw new UnauthorizedException();
-            //return false;
-        }
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(transactionId = "+ transactionId +")");
 
-        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        if (sale==null){
+        // Check if the transactionId is null or it is less than or equal to 0
+        if (transactionId == null || transactionId <= 0) {
+            System.err.println(methodName + ": The transactionId is null or it is less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
-        if ((discountRate <=0)||(discountRate >= 1)){
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
+            throw new UnauthorizedException();
+        }
+
+        // Check if the quantity is less than or equal to 0
+        if ((discountRate <=0)||(discountRate >= 1)) {
+            System.err.println(methodName + ": Invalid discoountRate");
             throw new InvalidDiscountRateException();
         }
 
-        if(!loggedIn.canManageSaleTransactions())return false;
-        if (sale==null) return false;
-        if ((discountRate <=0)||(discountRate >= 1)) return false;
+        // Get SaleTransaction
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        // Check if the SaleTransaction is not available
+        if (sale == null) {
+            System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
+
 
         return sale.ApplyDiscountToSaleAll(discountRate);
 
@@ -1770,19 +1836,28 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public int computePointsForSale(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
-        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
-            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            throw new UnauthorizedException();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(transactionId = "+ transactionId +")");
 
-        }
-
-        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        if (sale==null){
+        // Check if the transactionId is null or it is less than or equal to 0
+        if (transactionId == null || transactionId <= 0) {
+            System.err.println(methodName + ": The transactionId is null or it is less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
-        if (sale==null) return -1;
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
+            throw new UnauthorizedException();
+        }
 
+        // Get SaleTransaction
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        // Check if the SaleTransaction is not available
+        if (sale == null) {
+            System.err.println(methodName + ": The SaleTransaction is not available");
+            return -1;
+        }
 
         return sale.PointsForSale();
     }
@@ -1804,21 +1879,33 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean endSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
-        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
-            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            throw new UnauthorizedException();
-           // return false;
-        }
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(transactionId = "+ transactionId +")");
 
-
-        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        if (sale==null){
+        // Check if the transactionId is null or it is less than or equal to 0
+        if (transactionId == null || transactionId <= 0) {
+            System.err.println(methodName + ": The transactionId is null or it is less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
-        if(loggedIn == null || !loggedIn.canManageSaleTransactions())return false;
-        if (sale==null) return false;
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
+            throw new UnauthorizedException();
+        }
 
+        // Get SaleTransaction
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        // Check if the SaleTransaction is not available
+        if (sale == null) {
+            System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
+
+        if(sale.getState().equals(SaleTransactionImpl.State.CLOSED) ){
+            System.err.println(methodName + ": The SaleTransaction is already closed");
+            return false;
+        }
 
         return sale.EndSaleUpdateProductQuantity();
     }
@@ -1840,21 +1927,33 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public boolean deleteSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
-        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
-            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            throw new UnauthorizedException();
-            //return false;
-        }
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(transactionId = "+ transactionId +")");
 
-        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        if (sale==null){
+        // Check if the transactionId is null or it is less than or equal to 0
+        if (transactionId == null || transactionId <= 0) {
+            System.err.println(methodName + ": The transactionId is null or it is less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
-        if(!loggedIn.canManageSaleTransactions())return false;
-        if (sale==null) return false;
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
+            throw new UnauthorizedException();
+        }
 
-        //DB??? io metto dopo
+        // Get SaleTransaction
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        // Check if the SaleTransaction is not available
+        if (sale == null) {
+            System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
+
+        if(sale.getState().equals(SaleTransactionImpl.State.PAYED)){
+            System.err.println(methodName + ": The SaleTransaction is already payed");
+            return false;
+        }
 
         sale.AbortSaleUpdateProductQuantity();
         //RemoveSaleFromSalesList(sale);
@@ -1876,20 +1975,32 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public SaleTransaction getSaleTransaction(Integer transactionId) throws InvalidTransactionIdException, UnauthorizedException {
-        if(loggedIn == null || !loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
-            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            throw new UnauthorizedException();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(transactionId = "+ transactionId +")");
 
-        }
-
-        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        if (sale==null){
+        // Check if the transactionId is null or it is less than or equal to 0
+        if (transactionId == null || transactionId <= 0) {
+            System.err.println(methodName + ": The transactionId is null or it is less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
-        if(!loggedIn.canManageSaleTransactions())return null;
-        if (sale==null) return null;
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
+            throw new UnauthorizedException();
+        }
 
+        // Get SaleTransaction
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+
+        if (sale ==null){
+            return null;
+        }
+
+        if (!sale.getState().equals(SaleTransactionImpl.State.CLOSED)) {
+            System.err.println(methodName + ": The SaleTransaction is not closed yet");
+            return null;
+        }
 
         return sale;
 
@@ -2141,22 +2252,33 @@ public class EZShop implements EZShopInterface {
      * @throws InvalidPaymentException if the cash is less than or equal to 0*/
     @Override
     public double receiveCashPayment(Integer transactionId, double cash) throws InvalidTransactionIdException, InvalidPaymentException, UnauthorizedException {
-        if(!loggedIn.canManageSaleTransactions()) {  //need to check SALE authorization part is just an idea
-            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(returnId = "+ transactionId +")");
+
+        // Check if the returnId is null or less than or equal to 0
+        if (transactionId == null || transactionId <= 0) {
+            System.err.println(methodName + ": The returnId is null or less than or equal to 0");
+            throw new InvalidTransactionIdException();
+        }
+
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
             throw new UnauthorizedException();
         }
 
+        // Get SaleTransaction
         SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        if (sale==null){
-            throw new InvalidTransactionIdException();
+        // Check if the SaleTransaction is not available
+        if (sale == null) {
+            System.err.println(methodName + ": The SaleTransaction is not available");
+            return -1;
         }
 
         if(cash<=0){
             throw new InvalidPaymentException();
         }
 
-        if (sale==null) return -1;
-        if(cash<=0) return -1;
 
         Double change=sale.PaySaleAndReturnChange(cash, true);
         if(change!=-1) {
@@ -2196,28 +2318,45 @@ public class EZShop implements EZShopInterface {
      */
     @Override
     public boolean receiveCreditCardPayment(Integer transactionId, String creditCard) throws InvalidTransactionIdException, InvalidCreditCardException, UnauthorizedException{
-        if(!loggedIn.canManageSaleTransactions()) {
-            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
-            throw new UnauthorizedException();
-        }
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(returnId = "+ transactionId +", creditCard = "+ creditCard +")");
 
-        if(!isValidCreditCard(creditCard)) {
-            throw new InvalidCreditCardException();
-        }
-
-        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
-        if (sale==null){
+        // Check if the transactionId is null or less than or equal to 0
+        if (transactionId == null || transactionId <= 0) {
+            System.err.println(methodName + ": The returnId is null or less than or equal to 0");
             throw new InvalidTransactionIdException();
         }
 
-        if (sale==null) return false;
-        if(!isValidCreditCard(creditCard)) return false;
+        // Check if the creditCard is null, empty or invalid
+        if (creditCard == null || creditCard.isEmpty() || !isValidCreditCard(creditCard)) {
+            System.err.println(methodName + ": The creditCard is null, empty or invalid");
+            throw new InvalidCreditCardException();
+        }
+
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
+            throw new UnauthorizedException();
+        }
+
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        // Check if the SaleTransaction is not available
+        if (sale == null) {
+            System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
 
         Double amount = getCreditCardBalance(creditCard);
         if(amount==null){
             return false;
         } else{
-            if(sale.PaySaleAndReturnChange(amount, false)>=0){
+            Double newbal=sale.PaySaleAndReturnChange(amount, false);
+            if(newbal>=0){
+                // Update the creditCard balance
+                if (!updateCreditCardBalance(creditCard, newbal)) {
+                    return false;
+                }
+
                 SaleConfirmedEnsurePersistence(sale,newBalanceUpdate(sale.getPrice()));
 
                 return true;

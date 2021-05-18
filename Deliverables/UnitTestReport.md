@@ -25,6 +25,8 @@ Version:
     to start tests
     >
 
+    <We used a bottom-up testing strategy>
+
 # Class UserImpl 
 
 ## Method isAllowedRole
@@ -51,10 +53,10 @@ Version:
 
 |  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-------|-------|-------|-------|
-| Valid                            |  V                      | admin_role="Administrator"  <br />isAllowedRole(admin_role) <br /><br />-> true|                 |
-| Invalid                          |  I                | admin_role="administrator"  <br /> isAllowedRole(admin_role) <br /><br />-> false                 |
-| Empty                            |  I               |  admin_role=""  <br />isAllowedRole(admin_role) <br /><br />-> false                 |
-| NULL                             |  I                |  admin_role=null  <br /> isAllowedRole(admin_role) <br /><br />-> false                 |
+| Valid                            |  V                      | admin_role="Administrator"  <br />isAllowedRole(admin_role) <br /><br />-> true|     testisAllowedRole()            |
+| Invalid                          |  I                | admin_role="administrator"  <br /> isAllowedRole(admin_role) <br /><br />-> false                 |  testisAllowedRole()  |
+| Empty                            |  I               |  admin_role=""  <br />isAllowedRole(admin_role) <br /><br />-> false                 |  testisAllowedRole()  |
+| NULL                             |  I                |  admin_role=null  <br /> isAllowedRole(admin_role) <br /><br />-> false                 |   testisAllowedRole()|
 
 
 
@@ -79,9 +81,9 @@ Version:
 
 |  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-------|-------|-------|-------|
-| Aministrator                          |  V                     |  user.setRole(admin_role)<br /> user.canManageUsers()<br /><br />-> true|     
-| Cashier                               |  V               |  user.setRole(cashier_role) <br /> user.canManageUsers()<br /><br />-> false|
-| ShopManager                           |  V               |  user.setRole(shop_manager_role) <br /> user.canManageUsers()<br /><br />-> false                 |
+| Aministrator                          |  V                     |  user.setRole(admin_role)<br /> user.canManageUsers()<br /><br />-> true|     testcanManageUsers()|
+| Cashier                               |  I               |  user.setRole(cashier_role) <br /> user.canManageUsers()<br /><br />-> false| testcanManageUsers() |
+| ShopManager                           |  I               |  user.setRole(shop_manager_role) <br /> user.canManageUsers()<br /><br />-> false | testcanManageUsers() |
 
 
 ## Methods canManageProductList, canManageInventory, canManageAccounting
@@ -102,9 +104,9 @@ Version:
 
 |  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-------|-------|-------|-------|
-| Aministrator                          |  V                     |  user.setRole(admin_role)<br /><br /> user.canManageProductList()<br /> user.canManageInventory()<br />user.canManageAccounting()<br /><br />-> true|     
-| Cashier                               |  V               |  user.setRole(cashier_role) <br /><br /> user.canManageProductList()<br /> user.canManageInventory()<br />user.canManageAccounting()<br /><br />-> true|
-| ShopManager                           |  V               |  user.setRole(shop_manager_role) <br /><br /> user.canManageProductList()<br /> user.canManageInventory()<br />user.canManageAccounting()<br /><br />-> false                 |
+| Aministrator                          |  V                     |  user.setRole(admin_role)<br /><br /> user.canManageProductList()<br /> user.canManageInventory()<br />user.canManageAccounting()<br /><br />-> true|   testcanManageProductList()<br/>testcanManageInventory()<br/>testcanManageAccounting()  |
+| Cashier                               |  V               |  user.setRole(cashier_role) <br /><br /> user.canManageProductList()<br /> user.canManageInventory()<br />user.canManageAccounting()<br /><br />-> true|   testcanManageProductList()<br/>testcanManageInventory()<br/>testcanManageAccounting() |
+| ShopManager                           |  I               |  user.setRole(shop_manager_role) <br /><br /> user.canManageProductList()<br /> user.canManageInventory()<br />user.canManageAccounting()<br /><br />-> false| testcanManageProductList()<br/>testcanManageInventory()<br/>testcanManageAccounting()  |
 
 
 
@@ -126,9 +128,9 @@ Version:
 
 |  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-------|-------|-------|-------|
-| Aministrator                          |  V                     |  user.setRole(admin_role)<br /><br /> user.canManageCustomers()<br /> user.canManageSaleTransactions()<br />user.canManagePayments()<br /><br />-> true|     
-| Cashier                               |  V               |  user.setRole(cashier_role) <br /><br /> user.canManageCustomers()<br /> user.canManageSaleTransactions()<br />user.canManagePayments()<br /><br />-> true| 
-| ShopManager                           |  V               |  user.setRole(shop_manager_role) <br /><br /> user.canManageCustomers()<br /> user.canManageSaleTransactions()<br />user.canManagePayments()<br /><br />-> true| 
+| Aministrator                          |  V                     |  user.setRole(admin_role)<br /><br /> user.canManageCustomers()<br /> user.canManageSaleTransactions()<br />user.canManagePayments()<br /><br />-> true|     testcanManageCustomers()<br />testcanManageSaleTransactions()<br />testcanManagePayments()|
+| Cashier                               |  V               |  user.setRole(cashier_role) <br /><br /> user.canManageCustomers()<br /> user.canManageSaleTransactions()<br />user.canManagePayments()<br /><br />-> true|  testcanManageCustomers()<br />testcanManageSaleTransactions()<br />testcanManagePayments()|
+| ShopManager                           |  V               |  user.setRole(shop_manager_role) <br /><br /> user.canManageCustomers()<br /> user.canManageSaleTransactions()<br />user.canManagePayments()<br /><br />-> true|  testcanManageCustomers()<br />testcanManageSaleTransactions()<br />testcanManagePayments()|
 
 
 
@@ -148,7 +150,7 @@ Version:
 
 | Criterion                        | Predicate |
 | -------------------------------- | --------- |
-| Validity of length               | >12 and <14 |
+| Validity of length               | >=12 and <=14 |
 |                                  | <12 or >14   |
 | Validity of digits type         | is parsable Long   |
 |                                  |nor parsable Long |
@@ -161,16 +163,43 @@ Version:
 
 |  Validity of the String parameter |  Validity of length| Validity of digits type | Validity of digits sum  | Valid / Invalid | Description of the test case | JUnit test case |
 |-------|-------|-------|-------|-------|-------|-------|
-| Valid    |   >12 and <14     | is  parsable   | Valid   |  V                      | isValidCode("5701234567899") <br /><br />-> true         
-| *  |   *      |  *        | Invalid |  I                | isValidCode("111111111111") <br /><br />-> false                 |
-| *  |   *       |  is not parsable        | Invalid |  I                | isValidCode("5701234a67899") <br /><br />-> false                 |
-| *  |   >12 and <14       |  *     | * |  I                | isValidCode("570167899") <br /><br />-> false 
-|Empty |   *      |  *       | * |  I                |isValidCode("")  <br /><br />-> false                 |                |
-|null |   *      |  *       | * |  I                | isValidCode(null)  <br /><br />-> false 
+| Valid    |   >12 and <14     | is  parsable   | Valid   |  V                      | isValidCode("5701234567899") <br /><br />-> true   | testisValidCode ()|       
+| *  |   *      |  *        | Invalid |  I                | isValidCode("111111111111") <br /><br />-> false                 |  testisValidCode () |
+| *  |   *       |  is not parsable        | * |  I                | isValidCode("5701234a67899") <br /><br />-> false                 | testisValidCode ()|
+| *  |   >12 and <14       |  *     | * |  I                | isValidCode("570167899") <br /><br />-> false | testisValidCode ()|
+|Empty |   *      |  *       | * |  I                |isValidCode("")  <br /><br />-> false                 |   testisValidCode ()              |
+|null |   *      |  *       | * |  I                | isValidCode(null)  <br /><br />-> false |   testisValidCode ()    |
 
 
 ## Method isValidLocation
-## Method updateProductQuantity
+
+**Criteria for method *isValidLocation*:**
+
+- Validity of format ("number-character-number") String parameter location
+- Validity of String parameter
+
+
+**Predicates for method *isValidLocation*:**
+
+| Criterion                        | Predicate |
+| -------------------------------- | --------- |
+| Validity of format               | format is "number-string-number" |
+|                                  | wrong - usage or wrong element format (number/string)  |
+|Validity of String parameter      | null|
+|                                  |Empty|
+
+**Combination of predicates**:
+
+
+|  Validity of the String parameter |  Validity of format| Valid / Invalid | Description of the test case | JUnit test case |
+|-------|-------|-------|-------|-------|
+|Valid  | Valid format |  V | isValidLocation("3-a-2")  <br /><br />-> true | testisValidLocation ()|
+|Valid  | Invalid format| I | isValidLocation("a-2-1") <br /> isValidLocation("1b-3") <br /><br />-> false  | testisValidLocation ()|
+|Empty |   -    |  V              | isValidLocation("")  <br /><br />-> true  (location reset values)             |  testisValidLocation ()              |
+|null  |  -     |  V              | isValidLocation(null)  <br /><br />-> true (location reset values)    |testisValidLocation ()|
+
+
+
 
 
 
@@ -189,15 +218,15 @@ Version:
 
 
 | Unit name | JUnit test case |
-|--|--|
-|||
-|||
-||||
+|---------|-------|
+| UserImpl | testUserImpl/testUserConstructorGetters() |
+| ProductTypeImpl | testProductTypeImpl/testProductConstructorGetters() |
+
 
 ### Code coverage report
 
-    <Add here the screenshot report of the statement and branch coverage obtained using
-    the Eclemma tool. >
+![UserImpl](./coverage_images/UserImpl_coverage.jpg)
+![ProductTypeImpl](./coverage_images/ProductTypeimpl_coverage.jpg)
 
 
 ### Loop coverage analysis
@@ -207,9 +236,9 @@ Version:
 
 |Unit name | Loop rows | Number of iterations | JUnit test case |
 |---|---|---|---|
-|||||
-|||||
-||||||
+| ProductTypeImpl | 74-77 | 0 | testProductImpl/testisValidCode() |
+| ProdcutTypeImpl | 74-77 | 1+ | testProductImpl/testisValidCode() |
+
 
 
 

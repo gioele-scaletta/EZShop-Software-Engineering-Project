@@ -96,6 +96,6 @@ public class ReturnTransactionImpl {
         // Add product to the returnProducts
         this.returnProducts.put(productType, quantity);
         // Update amount applying the product discount and the sale discount, if any
-        this.amount += quantity * productType.getSellPrice() * (1 - productType.getProductDiscountRate()) * (1 - this.saleTransaction.getDiscountRate());
+        this.amount += quantity * productType.getPricePerUnit() * (1 - productType.getProductDiscountRate()) * (1 - this.saleTransaction.getDiscountRate());
     }
 }

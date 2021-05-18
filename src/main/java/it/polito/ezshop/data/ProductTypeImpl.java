@@ -36,7 +36,7 @@ public class ProductTypeImpl implements ProductType{
         this.levelId = levelId;
     }
 
-    public ProductTypeImpl (Integer productID, String barcode, String description, Double sellPrice, String notes) {
+    /*public ProductTypeImpl (Integer productID, String barcode, String description, Double sellPrice, String notes) {
         this.productID = productID;
         this.barcode = barcode;
         this.description = description;
@@ -47,10 +47,15 @@ public class ProductTypeImpl implements ProductType{
         this.aisleId = aisleId;
         this.rackId = rackId;
         this.levelId= levelId;
-    }
+    }*/
 
     public static boolean isValidCode(String productCode) {
         Long p;
+
+        if (productCode==null){
+            System.out.println("Parameter productCode is NULL!!!");
+            return false;
+        }
         //Checking if length is correct
         if(productCode.length()<12 || productCode.length()>14)
             return false;
@@ -80,6 +85,9 @@ public class ProductTypeImpl implements ProductType{
     }
 
     public static boolean isValidLocation(String location) {
+        if(location == null){
+            return true;
+        }
         if(location.equals(""))
             return true;
         return Pattern.compile("^[0-9]+[-][a-zA-Z0-9]+[-][0-9]+$").matcher(location).matches();
@@ -150,7 +158,7 @@ public class ProductTypeImpl implements ProductType{
 
     @Override
     public void setBarCode(String barCode) {
-    this.barcode=barcode;
+    this.barcode=barCode;
     }
 
     @Override
@@ -169,9 +177,7 @@ public class ProductTypeImpl implements ProductType{
     @Override
     public void setId(Integer id) { this.productID = id; }
 
-    public double getSellPrice(){
-        return this.sellPrice;
-    }
+
 
     public void updateProductQuantity(Integer changeQuantity) {
         this.quantity=this.quantity+changeQuantity;

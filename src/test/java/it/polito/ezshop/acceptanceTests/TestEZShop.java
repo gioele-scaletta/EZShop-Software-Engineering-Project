@@ -14,7 +14,7 @@ public class TestEZShop {
 
     private static EZShop ezshop;
 
-
+/*
     @BeforeAll
     static void setUpBeforeClass() throws Exception {
         ezshop = new EZShop();
@@ -557,5 +557,5 @@ public class TestEZShop {
             e.printStackTrace();
         }
     }
-    
+    */
 }

@@ -12,6 +12,11 @@ public class SaleTransactionImpl implements SaleTransaction {
     Integer transactionId;
     Double amount;
     enum State{PAYED, CLOSED, INPROGRESS};
+
+    public State getState() {
+        return state;
+    }
+
     State state;
     enum PaymentType{CARD, CASH};
     PaymentType pay;
@@ -85,7 +90,7 @@ public class SaleTransactionImpl implements SaleTransaction {
         this.listOfProductsSale.entrySet().stream().forEach((e)->{
             System.out.println(e.getKey().getBarCode());
             System.out.println(e.getValue());
-            TicketEntryImpl t=  new TicketEntryImpl(e.getKey().getBarCode(), e.getKey().getProductDescription(), e.getValue(), e.getKey().getSellPrice(), e.getKey().getProductDiscountRate());
+            TicketEntryImpl t=  new TicketEntryImpl(e.getKey().getBarCode(), e.getKey().getProductDescription(), e.getValue(), e.getKey().getPricePerUnit(), e.getKey().getProductDiscountRate());
 
             listOfProductsEntries.add(t);
         });
@@ -201,7 +206,7 @@ public class SaleTransactionImpl implements SaleTransaction {
     private Double calculateCurrentAmount() {
         //1. map each product to a double=price*quantity*(1-proddiscount)
         //2. sum all doubles
-        this.amount = this.listOfProductsSale.entrySet().stream().mapToDouble(p->{return p.getValue()*p.getKey().getSellPrice()*(1-p.getKey().getProductDiscountRate());}).reduce(0,(a,b)->{return a+b;});
+        this.amount = this.listOfProductsSale.entrySet().stream().mapToDouble(p->{return p.getValue()*p.getKey().getPricePerUnit()*(1-p.getKey().getProductDiscountRate());}).reduce(0,(a,b)->{return a+b;});
         //apply sale discount
         if(this.discountRate>0 && this.discountRate<=1)
         this.amount=this.amount*(1-this.discountRate);

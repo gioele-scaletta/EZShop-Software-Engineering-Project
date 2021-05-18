@@ -35,7 +35,7 @@ public class testUserImpl {
     }
 
     @Test
-    public void testConstructorGetters(){
+    public void testUserConstructorGetters(){
         userad =new UserImpl(1, "gioela", "scaletti",shop_manager_role );
         usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
         userc =new UserImpl(3, "stefano", "rossi", cashier_role);
@@ -46,20 +46,40 @@ public class testUserImpl {
         assertTrue(userad.getPassword().equals("scaletta"));
         userad.setRole(admin_role);
         userad.getRole().equals(admin_role);
+        userad.setId(1);
+        assertTrue(userad.getId().equals(1));
+
+        assertTrue(userad.toString().equals("UserImpl{" +
+                "id=" + 1 +
+                ", username='" + "gioele" + '\'' +
+                ", password='" +"scaletta" + '\'' +
+                ", role=" + admin_role +
+                '}'));
+
 
     }
 
     @Test
     public void testcanManageUsers() {
 
+        userad =new UserImpl(1, "gioela", "scaletti",admin_role );
+        usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
+        userc =new UserImpl(3, "stefano", "rossi", cashier_role);
+
         assertTrue(userad.canManageUsers());
         assertFalse(usersm.canManageUsers());
         assertFalse(userc.canManageUsers());
+
 
     }
 
     @Test
     public void testcanManageProductList() {
+
+
+        userad =new UserImpl(1, "gioela", "scaletti",admin_role );
+        usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
+        userc =new UserImpl(3, "stefano", "rossi", cashier_role);
 
         assertTrue(userad.canManageProductList());
         assertTrue(usersm.canManageProductList());
@@ -70,6 +90,11 @@ public class testUserImpl {
     @Test
     public void testcanManageInventory() {
 
+        userad =new UserImpl(1, "gioela", "scaletti",admin_role );
+        usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
+        userc =new UserImpl(3, "stefano", "rossi", cashier_role);
+
+
         assertTrue(userad.canManageInventory());
         assertTrue(usersm.canManageInventory());
         assertFalse(userc.canManageInventory());
@@ -78,6 +103,10 @@ public class testUserImpl {
 
     @Test
     public void testcanManageAccounting() {
+
+        userad =new UserImpl(1, "gioela", "scaletti",admin_role );
+        usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
+        userc =new UserImpl(3, "stefano", "rossi", cashier_role);
 
         assertTrue(userad.canManageAccounting());
         assertTrue(usersm.canManageAccounting());
@@ -88,6 +117,10 @@ public class testUserImpl {
     @Test
     public void testcanManageCustomers() {
 
+        userad =new UserImpl(1, "gioela", "scaletti",admin_role );
+        usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
+        userc =new UserImpl(3, "stefano", "rossi", cashier_role);
+
         assertTrue(userad.canManageCustomers());
         assertTrue(usersm.canManageCustomers());
         assertTrue(userc.canManageCustomers());
@@ -96,6 +129,10 @@ public class testUserImpl {
 
     @Test
     public void testcanManageSaleTransactions() {
+
+        userad =new UserImpl(1, "gioela", "scaletti",admin_role );
+        usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
+        userc =new UserImpl(3, "stefano", "rossi", cashier_role);
 
         assertTrue(userad.canManageSaleTransactions());
         assertTrue(usersm.canManageSaleTransactions());
@@ -107,9 +144,28 @@ public class testUserImpl {
     @Test
     public void testcanManagePayments() {
 
+        userad =new UserImpl(1, "gioela", "scaletti",admin_role );
+        usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
+        userc =new UserImpl(3, "stefano", "rossi", cashier_role);
+
         assertTrue(userad.canManagePayments());
         assertTrue(usersm.canManagePayments());
         assertTrue(userc.canManagePayments());
+
+    }
+
+    @Test
+    public void testcanListProducts() {
+
+        userad =new UserImpl(1, "gioela", "scaletti",admin_role );
+        usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
+        userc =new UserImpl(3, "stefano", "rossi", cashier_role);
+
+        assertTrue(userad.canListProducts());
+        assertTrue(usersm.canListProducts());
+        assertTrue(userc.canListProducts());
+
+
 
     }
 
