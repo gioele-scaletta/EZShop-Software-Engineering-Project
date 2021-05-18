@@ -4,6 +4,7 @@ package it.polito.ezshop.data;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SaleTransactionImpl implements SaleTransaction {
@@ -97,8 +98,14 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     @Override
     public void setEntries(List<TicketEntry> entries) {
-      //this.listOfProductsEntries= entries;
+      this.listOfProductsSale= new HashMap<>();
 
+      entries.stream().forEach(t->{
+          ProductTypeImpl p= new ProductTypeImpl( t.getBarCode(),t.getProductDescription(), t.getPricePerUnit(), t.getDiscountRate());
+
+         this.listOfProductsSale.put(p, t.getAmount());
+
+      });
     }
 
     @Override

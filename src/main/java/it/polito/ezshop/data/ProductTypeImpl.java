@@ -36,18 +36,21 @@ public class ProductTypeImpl implements ProductType{
         this.levelId = levelId;
     }
 
-    /*public ProductTypeImpl (Integer productID, String barcode, String description, Double sellPrice, String notes) {
-        this.productID = productID;
-        this.barcode = barcode;
-        this.description = description;
-        this.sellPrice = sellPrice;
-        this.quantity=0;
-        this.notes = notes;
-        this.productDiscountRate = 0.0;
-        this.aisleId = aisleId;
-        this.rackId = rackId;
-        this.levelId= levelId;
-    }*/
+    public ProductTypeImpl (String barCode, String productDescription, double pricePerUnit, double discountRate) {
+        this.productID = -1;
+        this.barcode = barCode;
+        this.description = productDescription;
+        this.sellPrice = pricePerUnit;
+        this.quantity=-1;
+        this.notes = "";
+        this.productDiscountRate = discountRate;
+        this.aisleId = -1;
+        this.rackId = "";
+        this.levelId= -1;
+    }
+
+
+
 
     public static boolean isValidCode(String productCode) {
         Long p;
