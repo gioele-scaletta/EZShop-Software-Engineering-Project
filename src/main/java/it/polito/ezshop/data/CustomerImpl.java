@@ -11,7 +11,7 @@ public class CustomerImpl implements Customer{
         // Customer name
         this.customerName = customerName;
 
-        // A fidelity card has not been attached to the client
+        // Customer card
         this.customerCard = customerCard;
 
         // Customer id
