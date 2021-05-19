@@ -104,7 +104,7 @@ public class ReturnTransactionImpl {
         this.balanceOperation = balanceOperation;
     }
 
-    //MARCO: Not tested since they've not parameters
+
     public boolean isInProgress() {
         return (this.state == State.INPROGRESS);
     }

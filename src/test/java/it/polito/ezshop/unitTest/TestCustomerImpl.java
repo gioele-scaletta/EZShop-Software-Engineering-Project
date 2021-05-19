@@ -1,4 +1,4 @@
-package it.polito.ezshop.acceptanceTests;
+package it.polito.ezshop.unitTest;
 
 import it.polito.ezshop.data.CustomerImpl;
 import org.junit.Before;

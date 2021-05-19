@@ -1,4 +1,4 @@
-package it.polito.ezshop.acceptanceTests;
+package it.polito.ezshop.unitTest;
 
 import java.time.LocalDate;
 import it.polito.ezshop.data.BalanceOperationImpl;

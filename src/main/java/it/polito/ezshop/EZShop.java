@@ -12,9 +12,7 @@ public class EZShop {
 
     public static void main(String[] args) {
         EZShopInterface ezShop = new it.polito.ezshop.data.EZShop();
-        //EZShopGUI gui = new EZShopGUI(ezShop);
-        BalanceOperationImpl b = new BalanceOperationImpl(1, LocalDate.of(2020,1,12),21.50,"CREDIT");
-        b.setType("something");
+        EZShopGUI gui = new EZShopGUI(ezShop);
     }
 
 }
