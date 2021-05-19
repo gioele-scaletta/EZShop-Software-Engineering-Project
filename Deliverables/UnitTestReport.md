@@ -47,7 +47,7 @@ Version: 1.0
 | Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
 | --------------------------------- | --------------- | ---------------------------- | --------------- |
 | Valid                             | V               | setUsername("gioele")<br/>getUsername().equals("gioele")<br/><br/>-> true | TestUserImpl.testSetUsername() |
-| NULL                              | I               | setUsername("gioele")<br/>setUsername(null)<br/>getUsername().equals(10)<br/><br/>-> true (not modified) | TestUserImpl.testSetUsername() |
+| NULL                              | I               | setUsername("gioele")<br/>setUsername(null)<br/>getUsername().equals("gioele")<br/><br/>-> true (not modified) | TestUserImpl.testSetUsername() |
 
 
 ## Method setPassword
