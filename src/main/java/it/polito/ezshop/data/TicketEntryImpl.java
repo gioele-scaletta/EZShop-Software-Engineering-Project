@@ -2,11 +2,11 @@ package it.polito.ezshop.data;
 
 public class TicketEntryImpl implements TicketEntry{
 
-    private String barCode = "";
-    private String productDescription = "";
-    private int amount = -1;
-    private double pricePerUnit = -1.0D;
-    private double discountRate = -1.0D;
+    private String barCode;
+    private String productDescription;
+    private int amount;
+    private double pricePerUnit;
+    private double discountRate;
 
 
     public TicketEntryImpl(String barCode, String productDescription, int amount, double pricePerUnit, double discountRate) {
@@ -22,6 +22,9 @@ public class TicketEntryImpl implements TicketEntry{
     }
 
     public void setBarCode(String barCode) {
+        if (barCode == null) {
+            return;
+        }
         this.barCode = barCode;
     }
 
@@ -30,6 +33,9 @@ public class TicketEntryImpl implements TicketEntry{
     }
 
     public void setProductDescription(String productDescription) {
+        if (productDescription == null) {
+            return;
+        }
         this.productDescription = productDescription;
     }
 
