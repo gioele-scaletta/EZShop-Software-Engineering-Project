@@ -841,6 +841,10 @@ public class EZShop implements EZShopInterface {
         }
 
         BalanceOperationImpl boi = newBalanceUpdate(-(quantity*pricePerUnit));
+        if (boi == null) {
+            System.out.println("There are some problems with the DB");
+            return -1;
+        }
         Integer balanceId = boi.getBalanceId();
 
         //Calculating new ID
@@ -930,6 +934,10 @@ public class EZShop implements EZShopInterface {
         }
 
         BalanceOperationImpl boi = newBalanceUpdate(-(quantity*pricePerUnit));
+        if (boi == null) {
+            System.out.println("There are some problems with the DB");
+            return false;
+        }
         Integer balanceId = boi.getBalanceId();
 
         //Updating order
@@ -2282,8 +2290,12 @@ public class EZShop implements EZShopInterface {
 
         Double change=sale.PaySaleAndReturnChange(cash, true);
         if(change!=-1) {
-
-            SaleConfirmedEnsurePersistence(sale,  newBalanceUpdate(sale.getPrice()));
+            BalanceOperationImpl balanceOperation = newBalanceUpdate(sale.getPrice());
+            if (balanceOperation == null) {
+                System.err.println(methodName + ": There are some problems with the DB");
+                return -1;
+            }
+            SaleConfirmedEnsurePersistence(sale, balanceOperation);
 
 
             return change;
@@ -2356,8 +2368,12 @@ public class EZShop implements EZShopInterface {
                 if (!updateCreditCardBalance(creditCard, newbal)) {
                     return false;
                 }
-
-                SaleConfirmedEnsurePersistence(sale,newBalanceUpdate(sale.getPrice()));
+                BalanceOperationImpl balanceOperation = newBalanceUpdate(sale.getPrice());
+                if (balanceOperation == null) {
+                    System.err.println(methodName + ": There are some problems with the DB");
+                    return false;
+                }
+                SaleConfirmedEnsurePersistence(sale, balanceOperation);
 
                 return true;
             } else{
@@ -2403,6 +2419,7 @@ public class EZShop implements EZShopInterface {
         // Create new BalanceOperation
         BalanceOperationImpl balanceOperation = newBalanceUpdate(-amount);
         if (balanceOperation == null) {
+            System.err.println(methodName + ": There are some problems with the DB");
             return -1;
         }
         // Set BalanceOperation in ReturnTransaction
@@ -2475,6 +2492,7 @@ public class EZShop implements EZShopInterface {
         // Create new BalanceOperation
         BalanceOperationImpl balanceOperation = newBalanceUpdate(-amount);
         if (balanceOperation == null) {
+            System.err.println(methodName + ": There are some problems with the DB");
             return -1;
         }
         // Set BalanceOperation in ReturnTransaction
@@ -2507,12 +2525,16 @@ public class EZShop implements EZShopInterface {
         // Get current balance
         double currentBalance = getCurrentBalance();
         // Check if toBeAdded + currentBalance < 0
-         if (toBeAdded + currentBalance < 0) {
-             System.err.println("recordBalanceUpdate: toBeAdded + currentBalance < 0");
-             return false;
-         }
+        if (toBeAdded + currentBalance < 0) {
+            System.err.println("recordBalanceUpdate: toBeAdded + currentBalance < 0");
+            return false;
+        }
 
-        newBalanceUpdate(toBeAdded);
+        BalanceOperationImpl balanceOperation = newBalanceUpdate(toBeAdded);
+        if (balanceOperation == null) {
+            System.err.println("recordBalanceUpdate: There are some problems with the DB");
+            return false;
+        }
 
         return true;
     }
@@ -2731,24 +2753,6 @@ public class EZShop implements EZShopInterface {
         return tid+1;
     }
 
-    private int getNewBalanceOperationId() {
-        Integer tid=-1;
-        String getnewid = "SELECT COALESCE(MAX(BalanceId),'0') FROM BALANCE_OPERATIONS";
-
-        try (
-                Statement stmt  = conn.createStatement();
-                ResultSet rs    = stmt.executeQuery(getnewid)){
-
-            tid=rs.getInt(1);
-
-
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-
-        return tid+1;
-    }
-
     //PERSISTENCE WHEN SALE FINISHES
 
     private void SaleConfirmedEnsurePersistence(SaleTransactionImpl sale, BalanceOperationImpl b){
@@ -2841,41 +2845,45 @@ public class EZShop implements EZShopInterface {
           sale=null;
     }
 
-    public BalanceOperationImpl newBalanceUpdate(Double amount){
-        int  id=getNewBalanceOperationId();
-
+    private BalanceOperationImpl newBalanceUpdate(Double amount) {
         LocalDate now = LocalDate.now();
-        if(amount>=0){
-            BalanceOperationImpl bal=new BalanceOperationImpl(id,now,amount,"CREDIT" );
-            addBalanceToBalancesList(bal);
-            return bal;
-        } else{
-            BalanceOperationImpl bala=new BalanceOperationImpl(id,now,amount,"DEBIT" );
-            addBalanceToBalancesList(bala);
-            return bala;
+        BalanceOperationImpl balanceOperation = new BalanceOperationImpl(-1, now, amount, (amount >= 0) ? "CREDIT" : "DEBIT");
+        Integer newId = addBalanceToBalancesList(balanceOperation);
+        if (newId != null) {
+            balanceOperation.setBalanceId(newId);
+        } else {
+            return null;
         }
 
+        return balanceOperation;
     }
 
+    private Integer addBalanceToBalancesList(BalanceOperationImpl balanceOperation){
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(BalanceOperationImpl = "+ balanceOperation +")");
 
-
-
-    public void addBalanceToBalancesList(BalanceOperationImpl b){
+        String query = "INSERT INTO BALANCE_OPERATIONS(Date, Amount, Type) VALUES(?, ?, ?)";
+        int rowCount;
+        Integer newId = null;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        //balanceOperationsList.add(b); NO MORE SINCE NO MORE LISTS
-        String sql = "INSERT INTO BALANCE_OPERATIONS(BalanceId,Date, Amount, Type) VALUES(?,?,?,?)";
+        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+            pstmt.setString(1, dtf.format(balanceOperation.getDate()));
+            pstmt.setDouble(2, balanceOperation.getMoney());
+            pstmt.setString(3, balanceOperation.getType());
 
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
-            pstmt.setInt(1, b.getBalanceId());
-            pstmt.setString(2, dtf.format(b.getDate()));
-            pstmt.setDouble(3, b.getMoney());
-            pstmt.setString(4, b.getType());
+            rowCount = pstmt.executeUpdate();
 
-            pstmt.executeUpdate();
-        } catch (SQLException var6) {
-            System.out.println(var6.getMessage());
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                newId = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return null;
         }
+        System.out.println(methodName + ": inserted "+ rowCount +" rows with BalanceId = "+ newId +" in BALANCE_OPERATIONS");
+
+        return newId;
     }
 
 
