@@ -28,6 +28,7 @@ public class CustomerImpl implements Customer{
 
     @Override
     public void setCustomerName(String customerName) {
+        if (customerName == null) {return;}
         this.customerName = customerName;
     }
 
@@ -38,6 +39,7 @@ public class CustomerImpl implements Customer{
 
     @Override
     public void setCustomerCard(String customerCard) {
+        if (customerCard == null) {return;}
         this.customerCard = customerCard;
     }
 
@@ -48,6 +50,7 @@ public class CustomerImpl implements Customer{
 
     @Override
     public void setId(Integer id) {
+        if (id == null) {return;}
         this.id = id;
     }
 
@@ -58,6 +61,7 @@ public class CustomerImpl implements Customer{
 
     @Override
     public void setPoints(Integer points) {
+        if (points == null) {return;}
         this.points = points;
     }
 
