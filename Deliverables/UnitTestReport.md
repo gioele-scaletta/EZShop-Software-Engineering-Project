@@ -933,19 +933,23 @@ Version: 1.0
 
 | Unit name | JUnit test case |
 |---------|-------|
-| UserImpl | testUserImpl/testCanManageUsers() |
-| UserImpl | testUserImpl/testCanManageInventory()|
-| UserImpl | testUserImpl/testCanManageAccounting() |
-| UserImpl | testUserImpl/testCanManageCustomers() |
-| UserImpl | testUserImpl/testManageSaleTransactions() |
-| UserImpl | testUserImpl/testCanManagePayments() |
-| UserImpl | testUserImpl/testCanListProducts() |
+| UserImpl | testUserImpl.testCanManageUsers() |
+|" | testUserImpl.testCanManageInventory()|
+| " | testUserImpl.testCanManageAccounting() |
+| " | testUserImpl.testCanManageCustomers() |
+| " | testUserImpl.testManageSaleTransactions() |
+| " | testUserImpl.testCanManagePayments() |
+| " | testUserImpl.testCanListProducts() |
+| ReturnTransactionImpl | testReturnTransactionImpl.testIsClosed() |
+| " | testReturnTransactionImpl.testIsPayed() |
+| " | testReturnTransactionImpl.testIsInProgress() |
+| SaleTransactionImpl | testSaleTransactionImpl.testIsClosed() |
+| " | testSaleTransactionImpl.testIsPayed() |
+| " | testSaleTransactionImpl.testIsInProgress() |
 
 ### Code coverage report
 
-![UserImpl](./coverage_images/UserImpl_coverage.jpg)
-![ProductTypeImpl](./coverage_images/ProductTypeimpl_coverage.jpg)
-
+![Coverage](./coverage_images/coverage.png)
 
 ### Loop coverage analysis
 
@@ -954,8 +958,8 @@ Version: 1.0
 
 |Unit name | Loop rows | Number of iterations | JUnit test case |
 |---|---|---|---|
-| ProductTypeImpl | 74-77 | 0 | testProductImpl/testisValidCode() |
-| |  | 1+ | testProductImpl/testisValidCode() |
+| ProductTypeImpl | 74-77 | 0 | testProductImpl.testisValidCode() |
+| |  | 1+ | testProductImpl.testisValidCode() |
 
 
 
