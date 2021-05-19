@@ -2641,18 +2641,15 @@ public class EZShop implements EZShopInterface {
     //GET OBJECT FROM ID AND DB
 
     private CustomerImpl getCustomerById(int transactionCardId) {
-        //return (CustomerImpl) customers.stream().filter(c->c.getId()==transactionCardId);
 
         String getnewid = "SELECT * FROM CUSTOMERS WHERE CustomerId=?";
         CustomerImpl c=null;
-        try (
-                PreparedStatement pstmt  = conn.prepareStatement(getnewid)){
+        try (PreparedStatement pstmt  = conn.prepareStatement(getnewid)){
 
             pstmt.setInt(1, transactionCardId);
             ResultSet rs    = pstmt.executeQuery();
             if(rs.isBeforeFirst()) {
                 c = new CustomerImpl( rs.getString("CustomerName"), rs.getString("CustomerCard"), rs.getInt("CustomerId"), rs.getInt("Points") );
-
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -2788,6 +2785,7 @@ public class EZShop implements EZShopInterface {
             return null;
         }
         System.out.println("Data for product with barcode " + barCode + " has been retrieved with success");
+        System.out.println(p);
         return p;
 
     }

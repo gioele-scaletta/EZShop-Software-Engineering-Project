@@ -11,11 +11,6 @@ public class ProductTypeImpl implements ProductType{
     private String description;
     private Double sellPrice;
     private Integer quantity;
-
-    public void setProductDiscountRate(Double productDiscountRate) {
-        this.productDiscountRate = productDiscountRate;
-    }
-
     private Double productDiscountRate;
     private String notes;
     private Integer aisleId;
@@ -36,6 +31,19 @@ public class ProductTypeImpl implements ProductType{
         this.levelId = levelId;
     }
 
+    public ProductTypeImpl (Integer productID, String barcode, String description, Double sellPrice, String notes) {
+        this.productID = productID;
+        this.barcode = barcode;
+        this.description = description;
+        this.sellPrice = sellPrice;
+        this.quantity=0;
+        this.notes = notes;
+        this.productDiscountRate = 0.0;
+        this.aisleId = 0;
+        this.rackId = "empty";
+        this.levelId= 0;
+    }
+
     public ProductTypeImpl (String barCode, String productDescription, double pricePerUnit, double discountRate) {
         this.productID = -1;
         this.barcode = barCode;
@@ -45,20 +53,12 @@ public class ProductTypeImpl implements ProductType{
         this.notes = "";
         this.productDiscountRate = discountRate;
         this.aisleId = -1;
-        this.rackId = "";
+        this.rackId = "empty";
         this.levelId= -1;
     }
 
-
-
-
     public static boolean isValidCode(String productCode) {
         Long p;
-
-        if (productCode==null){
-            System.out.println("Parameter productCode is NULL!!!");
-            return false;
-        }
         //Checking if length is correct
         if(productCode.length()<12 || productCode.length()>14)
             return false;
@@ -87,11 +87,9 @@ public class ProductTypeImpl implements ProductType{
             return false;
     }
 
+    //Having a null parameter it's ok since it means reset of the location
     public static boolean isValidLocation(String location) {
-        if(location == null){
-            return true;
-        }
-        if(location.equals(""))
+        if(location.equals("")||location == null)
             return true;
         return Pattern.compile("^[0-9]+[-][a-zA-Z0-9]+[-][0-9]+$").matcher(location).matches();
     }
@@ -111,6 +109,12 @@ public class ProductTypeImpl implements ProductType{
         return Integer.parseInt(parts[2]);
     }
 
+    public void setProductDiscountRate(Double productDiscountRate) {
+        if(productDiscountRate == null)
+            return;
+        this.productDiscountRate = productDiscountRate;
+    }
+
     public Double getProductDiscountRate() {
         return productDiscountRate;
     }
@@ -121,7 +125,11 @@ public class ProductTypeImpl implements ProductType{
     }
 
     @Override
-    public void setQuantity(Integer quantity) { this.quantity=quantity; }
+    public void setQuantity(Integer quantity) {
+        if(quantity == null)
+            return;
+        this.quantity=quantity;
+    }
 
     @Override
     public String getLocation() {
@@ -130,12 +138,20 @@ public class ProductTypeImpl implements ProductType{
         return this.aisleId+"-"+this.rackId+"-"+this.levelId;
     }
 
+    //Having a null parameter it's ok since it means reset of the location
     @Override
     public void setLocation(String location) {
-        String[] parts = location.split("-");
-        this.aisleId = Integer.parseInt(parts[0]);
-        this.rackId = parts[1];
-        this.levelId = Integer.parseInt(parts[2]);
+        if(location.equals("")||location == null) {
+            this.aisleId = 0;
+            this.rackId = "";
+            this.levelId = 0;
+        }
+        else {
+            String[] parts = location.split("-");
+            this.aisleId = Integer.parseInt(parts[0]);
+            this.rackId = parts[1];
+            this.levelId = Integer.parseInt(parts[2]);
+        }
     }
 
     @Override
@@ -144,7 +160,11 @@ public class ProductTypeImpl implements ProductType{
     }
 
     @Override
-    public void setNote(String note) { this.notes = note; }
+    public void setNote(String note) {
+        if(note == null)
+            return;
+        this.notes = note;
+    }
 
     @Override
     public String getProductDescription() {
@@ -152,7 +172,11 @@ public class ProductTypeImpl implements ProductType{
     }
 
     @Override
-    public void setProductDescription(String productDescription) { this.description = productDescription; }
+    public void setProductDescription(String productDescription) {
+        if(productDescription == null)
+            return;
+        this.description = productDescription;
+    }
 
     @Override
     public String getBarCode() {
@@ -161,7 +185,9 @@ public class ProductTypeImpl implements ProductType{
 
     @Override
     public void setBarCode(String barCode) {
-    this.barcode=barCode;
+        if(barCode == null)
+            return;
+        this.barcode=barCode;
     }
 
     @Override
@@ -170,7 +196,11 @@ public class ProductTypeImpl implements ProductType{
     }
 
     @Override
-    public void setPricePerUnit(Double pricePerUnit) { this.sellPrice = pricePerUnit;}
+    public void setPricePerUnit(Double pricePerUnit) {
+        if(pricePerUnit == null)
+            return;
+        this.sellPrice = pricePerUnit;
+    }
 
     @Override
     public Integer getId() {
@@ -178,11 +208,19 @@ public class ProductTypeImpl implements ProductType{
     }
 
     @Override
-    public void setId(Integer id) { this.productID = id; }
+    public void setId(Integer id) {
+        if(id==null)
+            return;
+        this.productID = id;
+    }
 
-
+    public double getSellPrice(){
+        return this.sellPrice;
+    }
 
     public void updateProductQuantity(Integer changeQuantity) {
+        if(changeQuantity == null)
+            return;
         this.quantity=this.quantity+changeQuantity;
     }
 

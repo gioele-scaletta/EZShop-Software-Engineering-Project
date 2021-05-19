@@ -30,6 +30,8 @@ public class UserImpl implements User{
 
     @Override
     public void setId(Integer id) {
+        if(id==null)
+            return;
         this.id = id;
     }
 
@@ -39,7 +41,11 @@ public class UserImpl implements User{
     }
 
     @Override
-    public void setUsername(String username) { this.username = username; }
+    public void setUsername(String username) {
+        if(username==null)
+            return;
+        this.username = username;
+    }
 
     @Override
     public String getPassword() {
@@ -47,7 +53,10 @@ public class UserImpl implements User{
     }
 
     @Override
-    public void setPassword(String password) { this.password = password; }
+    public void setPassword(String password) {
+        if(password==null)
+            return;
+        this.password = password; }
 
     @Override
     public String getRole() {
@@ -55,7 +64,11 @@ public class UserImpl implements User{
     }
 
     @Override
-    public void setRole(String role) { this.role = RoleType.valueOf(role); }
+    public void setRole(String role) {
+        if(role==null)
+            return;
+        this.role = RoleType.valueOf(role);
+    }
 
     @Override
     public String toString() {

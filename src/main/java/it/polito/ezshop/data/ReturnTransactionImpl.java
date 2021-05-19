@@ -36,6 +36,7 @@ public class ReturnTransactionImpl {
         return saleTransaction;
     }
 
+    //MARCO: Not tested since it refers to another class, so it's more about integration test
     public void setSaleTransaction(SaleTransactionImpl saleTransaction) {
         this.saleTransaction = saleTransaction;
     }
@@ -44,6 +45,7 @@ public class ReturnTransactionImpl {
         return returnProducts;
     }
 
+    //MARCO: Not tested since it refers to another class, so it's more about integration test
     public void setReturnProducts(Map<ProductTypeImpl, Integer> returnProducts) {
         this.returnProducts = returnProducts;
     }
@@ -76,10 +78,12 @@ public class ReturnTransactionImpl {
         return balanceOperation;
     }
 
+    //MARCO: Not tested since it refers to another class, so it's more about integration test
     public void setBalanceOperation(BalanceOperationImpl balanceOperation) {
         this.balanceOperation = balanceOperation;
     }
 
+    //MARCO: Not tested since they've not parameters
     public boolean isInProgress() {
         return (this.state == State.INPROGRESS);
     }
@@ -92,6 +96,7 @@ public class ReturnTransactionImpl {
         return (this.state == State.PAYED);
     }
 
+    //MARCO: Not tested since it refers to another class, so it's more about integration test
     public void addProduct(ProductTypeImpl productType, Integer quantity) {
         // Add product to the returnProducts
         this.returnProducts.put(productType, quantity);

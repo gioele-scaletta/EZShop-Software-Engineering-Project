@@ -25,7 +25,11 @@ public class OrderImpl implements Order{
     }
 
     @Override
-    public void setBalanceId(Integer balanceId) { this.balanceId = balanceId; }
+    public void setBalanceId(Integer balanceId) {
+        if(balanceId == null)
+            return;
+        this.balanceId = balanceId;
+    }
 
     @Override
     public String getProductCode() {
@@ -33,7 +37,11 @@ public class OrderImpl implements Order{
     }
 
     @Override
-    public void setProductCode(String productCode) { this.productCode = productCode; }
+    public void setProductCode(String productCode) {
+        if(productCode == null)
+            return;
+        this.productCode = productCode;
+    }
 
     @Override
     public double getPricePerUnit() {
@@ -41,7 +49,9 @@ public class OrderImpl implements Order{
     }
 
     @Override
-    public void setPricePerUnit(double pricePerUnit){this.pricePerUnit = pricePerUnit;  }
+    public void setPricePerUnit(double pricePerUnit){
+        this.pricePerUnit = pricePerUnit;
+    }
 
     @Override
     public int getQuantity() { return this.quantity; }
@@ -55,7 +65,11 @@ public class OrderImpl implements Order{
     }
 
     @Override
-    public void setStatus(String status) { this.status = status; }
+    public void setStatus(String status) {
+        if(status == null)
+            return;
+        this.status = status;
+    }
 
     @Override
     public Integer getOrderId() {
@@ -63,5 +77,9 @@ public class OrderImpl implements Order{
     }
 
     @Override
-    public void setOrderId(Integer orderId) { this.orderId = orderId; }
+    public void setOrderId(Integer orderId) {
+        if(orderId == null)
+            return;
+        this.orderId = orderId;
+    }
 }
