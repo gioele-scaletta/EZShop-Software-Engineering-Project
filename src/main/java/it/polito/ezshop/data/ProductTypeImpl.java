@@ -58,6 +58,9 @@ public class ProductTypeImpl implements ProductType{
     }
 
     public static boolean isValidCode(String productCode) {
+        if(productCode==null){
+            return false;
+        }
         Long p;
         //Checking if length is correct
         if(productCode.length()<12 || productCode.length()>14)
@@ -89,7 +92,7 @@ public class ProductTypeImpl implements ProductType{
 
     //Having a null parameter it's ok since it means reset of the location
     public static boolean isValidLocation(String location) {
-        if(location == null||location.equals(""))
+        if(location == null  || location.equals(""))
             return true;
         return Pattern.compile("^[0-9]+[-][a-zA-Z0-9]+[-][0-9]+$").matcher(location).matches();
     }
@@ -141,7 +144,7 @@ public class ProductTypeImpl implements ProductType{
     //Having a null parameter it's ok since it means reset of the location
     @Override
     public void setLocation(String location) {
-        if(location == null||location.equals("")) {
+        if(location == null || location.equals("")) {
             this.aisleId = 0;
             this.rackId = "empty";
             this.levelId = 0;
