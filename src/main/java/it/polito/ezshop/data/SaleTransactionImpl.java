@@ -72,11 +72,13 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     @Override
     public Integer getTicketNumber() {
+
         return this.transactionId;
     }
 
     @Override
     public void setTicketNumber(Integer ticketNumber) {
+        if (ticketNumber==null) return;
         this.transactionId=ticketNumber;
     }
 
@@ -96,6 +98,7 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     @Override
     public void setEntries(List<TicketEntry> entries) {
+        if (entries==null) return;
       this.listOfProductsSale= new HashMap<>();
 
       entries.stream().forEach(t->{
@@ -113,6 +116,7 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     @Override
     public void setDiscountRate(double discountRate) {
+
         this.discountRate=discountRate;
     }
 
@@ -123,6 +127,7 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     @Override
     public void setPrice(double price) {
+
         this.amount=price;
     }
 
