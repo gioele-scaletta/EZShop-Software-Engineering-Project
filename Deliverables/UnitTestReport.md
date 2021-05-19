@@ -88,8 +88,8 @@ Version: 1.0
 
 | Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
 | --------------------------------- | --------------- | ---------------------------- | --------------- |
-| Valid                             | V               | setRole(admin_role)<br/>getRole().equals(admin_role)<br/><br/>-> true | TestUserImpl.testSetRole() |
-| NULL                              | I               | setRole(admin_role)<br/>setRole(null)<br/>getRole().equals(admin_role)<br/><br/>-> true (not modified) | TestUserImpl.testSetRole() |
+| Valid                             | V               | String admin_role="Administrator"<br/>setRole(admin_role)<br/>getRole().equals(admin_role)<br/><br/>-> true | TestUserImpl.testSetRole() |
+| NULL                              | I               | String admin_role="Administrator"<br/>setRole(admin_role)<br/>setRole(null)<br/>getRole().equals(admin_role)<br/><br/>-> true (not modified) | TestUserImpl.testSetRole() |
 
 
 ## Method setId
@@ -137,10 +137,10 @@ Version: 1.0
 
 |  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-------|-------|-------|-------|
-| Valid                            |  V                      | admin_role="Administrator"  <br />isAllowedRole(admin_role) <br /><br />-> true|     testisAllowedRole()            |
-| Invalid                          |  I                | admin_role="administrator"  <br /> isAllowedRole(admin_role) <br /><br />-> false                 |  testisAllowedRole()  |
-| Empty                            |  I               |  admin_role=""  <br />isAllowedRole(admin_role) <br /><br />-> false                 |  testisAllowedRole()  |
-| NULL                             |  I                |  admin_role=null  <br /> isAllowedRole(admin_role) <br /><br />-> false                 |   testisAllowedRole()|
+| Valid                            |  V                      | String admin_role="Administrator"  <br />isAllowedRole(admin_role) <br /><br />-> true|     testisAllowedRole()            |
+| Invalid                          |  I                | String admin_role="administrator"  <br /> isAllowedRole(admin_role) <br /><br />-> false                 |  testisAllowedRole()  |
+| Empty                            |  I               |  String admin_role=""  <br />isAllowedRole(admin_role) <br /><br />-> false                 |  testisAllowedRole()  |
+| NULL                             |  I                |  String admin_role=null  <br /> isAllowedRole(admin_role) <br /><br />-> false                 |   testisAllowedRole()|
 
 
 # Class ProductTypeImpl 
@@ -334,10 +334,10 @@ Version: 1.0
 
 |  Validity of the String parameter |  Validity of length| Validity of digits type | Validity of digits sum  | Valid / Invalid | Description of the test case | JUnit test case |
 |-------|-------|-------|-------|-------|-------|-------|
-| Valid    |   >12 and <14     | is  parsable   | Valid   |  V                      | isValidCode("5701234567899") <br /><br />-> true   | testisValidCode ()|       
+| Valid    |   >=12 and <=14     | is  parsable   | Valid   |  V                      | isValidCode("5701234567899") <br /><br />-> true   | testisValidCode ()|       
 | *  |   *      |  *        | Invalid |  I                | isValidCode("111111111111") <br /><br />-> false                 |  testisValidCode () |
 | *  |   *       |  is not parsable        | * |  I                | isValidCode("5701234a67899") <br /><br />-> false                 | testisValidCode ()|
-| *  |   >12 and <14       |  *     | * |  I                | isValidCode("570167899") <br /><br />-> false | testisValidCode ()|
+| *  |   >=12 and <=14       |  *     | * |  I                | isValidCode("570167899") <br /><br />-> false | testisValidCode ()|
 |Empty |   *      |  *       | * |  I                |isValidCode("")  <br /><br />-> false                 |   testisValidCode ()              |
 |null |   *      |  *       | * |  I                | isValidCode(null)  <br /><br />-> false |   testisValidCode ()    |
 
@@ -409,8 +409,8 @@ Version: 1.0
 
 |  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                |setCustomerCard("0123456789")<br/>getCustomerCard( ).equals("0123456789")<br/>->true| TestCustomerImpl.testCustomerCard() |
-|NULL                               |I                |setCustomerCard(null)<br/>getCustomerCard( ).equals("0123456789")<br/>->true (not modified)| TestCustomerImpl.testCustomerCard() |
+|Valid                              |V                |setCustomerCard("0123456789")<br/>getCustomerCard( ).equals("0123456789")<br/><br/>-> true| TestCustomerImpl.testCustomerCard() |
+|NULL                               |I                |setCustomerCard("0123456789")<br/>setCustomerCard(null)<br/>getCustomerCard( ).equals("0123456789")<br/><br/>-> true (not modified)| TestCustomerImpl.testCustomerCard() |
 
 
 ## Method setId
@@ -429,8 +429,8 @@ Version: 1.0
 
 | Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                |setId(2)<br/>getId( ).equals(2)<br/>->true| TestCustomerImpl.testCustomerId()|
-|NULL                               |I                |setId(null)<br/>getId( ).equals(2)<br/>->true (not modified)|TestCustomerImpl.testCustomerId()|
+|Valid                              |V                |setId(2)<br/>getId( ).equals(2)<br/><br/>-> true| TestCustomerImpl.testCustomerId()|
+|NULL                               |I                |setId(2)<br/>setId(null)<br/>getId( ).equals(2)<br/><br/>-> true (not modified)|TestCustomerImpl.testCustomerId()|
 
 
 
@@ -450,8 +450,8 @@ Version: 1.0
 
 | Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                |setPoints(10)<br/>getPoints( ).equals(10)<br/>->true| TestCustomerImpl.testCustomerPoints() |
-|NULL                               |I                |setPoints(null)<br/>getPoints( ).equals(10)<br/>->true (not modified)| TestCustomerImpl.testCustomerPoints() |
+|Valid                              |V                |setPoints(10)<br/>getPoints( ).equals(10)<br/><br/>-> true| TestCustomerImpl.testCustomerPoints() |
+|NULL                               |I                |setPoints(10)<br/>setPoints(null)<br/>getPoints( ).equals(10)<br/><br/>-> true (not modified)| TestCustomerImpl.testCustomerPoints() |
 
 
 
@@ -522,18 +522,18 @@ Version: 1.0
 
 **Criteria for method *setPricePerUnit*:**
 
--discountRate parameter is a valid double object or null
+-discountRate parameter is a valid Double object or null
 
 **Predicates for method *setPricePerUnit*:**
 
 | Criterion                        | Predicate  |
 | -------------------------------- | ---------- |
-| Validity of double parameter    | Valid      |
+| Validity of Double parameter    | Valid      |
 |                                  | NULL       |
 
 **Combination of predicates**:
 
-| Validity of the double parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| Validity of the Double parameter | Valid / Invalid | Description of the test case | JUnit test case |
 | --------------------------------- | --------------- | ---------------------------- | --------------- |
 | Valid                             | V               | setPricePerUnit(0.5)<br/>getPricePerUnit().equals(0.5)<br/><br/>-> true | TesOrderImpl.testSetPricePerUnit() |
 | NULL                              | I               | setPricePerUnit(0.5)<br/>setPricePerUnit(null)<br/>getPricePerUnit().equals(0.5)<br/><br/>-> true (not modified) | TestOrderImpl.testSetPricePerUnit() |
@@ -679,7 +679,7 @@ Version: 1.0
 | Validity of the String parameter  | Valid / Invalid | Description of the test case | JUnit test case |
 | --------------------------------- | --------------- | ---------------------------- | --------------- |
 | Valid                             | V               | setProductDescription("ZZZ")<br/>getProductDescription().equals("ZZZ")<br/><br/>-> true | TestTicketEntryImpl.testSetProductDescription() |
-| NULL                              | I               | setProductDescription("ZZZ")<br/>setProductDescription(null)<br/>getBarCode().equals(ZZZ)<br/><br/>-> true (not modified) | TestTicketEntryImpl.testSetProductDescription() |
+| NULL                              | I               | setProductDescription("ZZZ")<br/>setProductDescription(null)<br/>getBarCode().equals("ZZZ")<br/><br/>-> true (not modified) | TestTicketEntryImpl.testSetProductDescription() |
 
 ## Method setAmount
 
@@ -782,9 +782,9 @@ Version: 1.0
 
 |  Validity of the String parameter |Value of String Parameter| Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-------------------------|-----------------|------------------------------|-----------------|
-|NULL                               |*                        |I                |setState("INPROGRESS")<br/>setState(null)<br/>getState( ).equals("INPROGRESS")<br/><br/>-> true(not modified)|testReturnTransactionImpl.testSetState( )|
+|NULL                               |*                        |I                |setState("INPROGRESS")<br/>setState(null)<br/>getState( ).equals("INPROGRESS")<br/><br/>-> true (not modified)|testReturnTransactionImpl.testSetState( )|
 |Valid                              |Empty                    |I                |setState("")<br/><br/>-> exception thrown|testReturnTransactionImpl.testSetState( )|
-|"                                 |INPROGRESS               |V                |setState("INPROGRESS")<br/>getState( ).equals("INPROGRESS)<br/><br/>-> true|testReturnTransactionImpl.testSetState( )|
+|"                                 |INPROGRESS               |V                |setState("INPROGRESS")<br/>getState( ).equals("INPROGRESS")<br/><br/>-> true|testReturnTransactionImpl.testSetState( )|
 |"                                  |CLOSED                   |V                |setState("CLOSED")<br/>getState( ).equals("CLOSED")<br/><br/>-> true|testReturnTransactionImpl.testSetState( )|
 |"                                  |PAYED                    |V                |setState("PAYED")<br/>getState( ).equals("PAYED")<br/><br/>-> true|testReturnTransactionImpl.testSetState( )|
 |"                                  |Other Value              |I                |setState("rAnDoM VaLuE")<br/><br/>-> exception thrown|testReturnTransactionImpl.testSetState( )|
@@ -809,7 +809,7 @@ Version: 1.0
 |  Validity of the Double parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
 |Valid                              |V                |setAmount(17.50)<br/>getAmount( ).equals(17.50)<br/><br/>->true|testReturnTransactionImpl.testSetAmount( )|
-|NULL                               |I                |setAmount(22.30)<br/>setAmount(null)<br/>getAmount( ).equals(22.30)<br/><br/>-> true(not modified)|testReturnTransactionImpl.testSetAmount( )|
+|NULL                               |I                |setAmount(22.30)<br/>setAmount(null)<br/>getAmount( ).equals(22.30)<br/><br/>-> true (not modified)|testReturnTransactionImpl.testSetAmount( )|
 
 ## Method setPaymentType
 
@@ -834,7 +834,7 @@ Version: 1.0
 
 |  Validity of the String parameter |Value of String Parameter| Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-------------------------|-----------------|------------------------------|-----------------|
-|NULL                               |*                        |I                |setPaymentType("CARD")<br/>setPaymentType(null)<br/>getPaymentType( ).equals("CARD")<br/><br/>-> true(not modified)|testReturnTransactionImpl.testSetPaymentType( )|
+|NULL                               |*                        |I                |setPaymentType("CARD")<br/>setPaymentType(null)<br/>getPaymentType( ).equals("CARD")<br/><br/>-> true (not modified)|testReturnTransactionImpl.testSetPaymentType( )|
 |Valid                              |Empty                    |I                |setPaymentType("")<br/><br/>-> exception thrown|testReturnTransactionImpl.testSetPaymentType( )|
 |"                                  |CARD                     |V                |setPaymentType("CARD")<br/>getPaymentType( ).equals(null)<br/><br/>-> true|testReturnTransactionImpl.testSetPaymentType( )|
 |"                                  |CASH                     |V                |setPaymentType("CASH")<br/>getPaymentType( ).equals(null)<br/><br/>-> true|testReturnTransactionImpl.testSetPaymentType( )|
@@ -880,7 +880,7 @@ Version: 1.0
 |Validity of the LocalDate parameter| Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
 |Valid                              |V                |LocalDate l = LocalDate.now( )<br/>setLocalDate(l)<br/>getLocalDate( ).equals(l)<br/><br/>-> true|testBalanceOperationImpl.testSetDate( )|
-|NULL                               |I                |LocalDate l = LocalDate.now( )<br/>setLocalDate(l)<br/>setLocalDate(null)<br/>getLocalDate( ).equals(l)<br/><br/>-> true(not modified)|testBalanceOperationImpl.testSetDate( )|
+|NULL                               |I                |LocalDate l = LocalDate.now( )<br/>setLocalDate(l)<br/>setLocalDate(null)<br/>getLocalDate( ).equals(l)<br/><br/>-> true (not modified)|testBalanceOperationImpl.testSetDate( )|
 
 ## Method setMoney
 
@@ -920,7 +920,7 @@ Version: 1.0
 |  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
 |Valid                              |V                |setType("CREDIT")<br/>getType( ).equals("CREDIT")<br/><br/>-> true|testBalanceOperationImpl.testSetType( )|
-|NULL                               |I                |setType("CREDIT")<br/>setType(null)<br/>getType( ).equals("CREDIT")<br/><br/>-> true(not modified)|testBalanceOperationImpl.testSetType( )|
+|NULL                               |I                |setType("CREDIT")<br/>setType(null)<br/>getType( ).equals("CREDIT")<br/><br/>-> true (not modified)|testBalanceOperationImpl.testSetType( )|
 
 # White Box Unit Tests
 
@@ -932,7 +932,7 @@ Version: 1.0
 
 
 | Unit name | JUnit test case |
-|---------|-------|
+|:---------:|-------|
 | UserImpl | testUserImpl.testCanManageUsers() |
 |" | testUserImpl.testCanManageInventory()|
 | " | testUserImpl.testCanManageAccounting() |
