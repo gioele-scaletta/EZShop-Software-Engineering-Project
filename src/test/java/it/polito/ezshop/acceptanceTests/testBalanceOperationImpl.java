@@ -33,14 +33,14 @@ public class testBalanceOperationImpl {
         b.setDate(null);
         assertTrue(b.getDate().equals(l));
     }
-*/
+
     @Test
     public void testSetMoney() {
         b.setMoney(12.50);
         assertTrue(b.getMoney() == 12.50);
         assertFalse(b.getMoney()== 0.12);
     }
-/*
+
     @Test
     public void testSetType() {
         b.setType("CREDIT");
