@@ -1,7 +1,6 @@
 package it.polito.ezshop.unitTest;
 
-import it.polito.ezshop.EZShop;
-import it.polito.ezshop.data.*;
+import it.polito.ezshop.model.ReturnTransactionImpl;
 import org.junit.Test;
 import org.junit.Before;
 

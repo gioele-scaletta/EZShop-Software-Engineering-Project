@@ -1,4 +1,6 @@
-package it.polito.ezshop.data;
+package it.polito.ezshop.model;
+
+import it.polito.ezshop.data.BalanceOperation;
 
 import java.time.LocalDate;
 

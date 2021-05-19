@@ -1,4 +1,4 @@
-package it.polito.ezshop.data;
+package it.polito.ezshop.model;
 
 import java.util.Map;
 

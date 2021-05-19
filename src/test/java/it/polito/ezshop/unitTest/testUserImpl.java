@@ -1,7 +1,6 @@
 package it.polito.ezshop.unitTest;
+import it.polito.ezshop.model.UserImpl;
 import org.junit.Before;
-import it.polito.ezshop.data.*;
-import it.polito.ezshop.exceptions.*;
 
 
 import static org.junit.Assert.assertFalse;

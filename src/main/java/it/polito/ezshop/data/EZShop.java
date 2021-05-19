@@ -1,6 +1,7 @@
 package it.polito.ezshop.data;
 
 import it.polito.ezshop.exceptions.*;
+import it.polito.ezshop.model.*;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -1922,7 +1923,7 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
-        if(sale.getState().equals(SaleTransactionImpl.State.CLOSED) ){
+        if(sale.isClosed()){
             System.err.println(methodName + ": The SaleTransaction is already closed");
             return false;
         }
@@ -1970,7 +1971,7 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
-        if(sale.getState().equals(SaleTransactionImpl.State.PAYED)){
+        if(sale.isPayed()){
             System.err.println(methodName + ": The SaleTransaction is already payed");
             return false;
         }
@@ -2017,7 +2018,7 @@ public class EZShop implements EZShopInterface {
             return null;
         }
 
-        if (!sale.getState().equals(SaleTransactionImpl.State.CLOSED)) {
+        if (!sale.isClosed()) {
             System.err.println(methodName + ": The SaleTransaction is not closed yet");
             return null;
         }
