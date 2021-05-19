@@ -1,7 +1,6 @@
-package it.polito.ezshop.acceptanceTests;
+package it.polito.ezshop.unitTest;
 
-import it.polito.ezshop.EZShop;
-import it.polito.ezshop.data.*;
+import it.polito.ezshop.model.ReturnTransactionImpl;
 import org.junit.Test;
 import org.junit.Before;
 
@@ -57,5 +56,35 @@ public class testReturnTransactionImpl {
         assertTrue(r.getPaymentType().equals("CASH"));
         assertThrows(IllegalArgumentException.class, () -> r.setPaymentType(""));
         assertThrows(IllegalArgumentException.class, () -> r.setPaymentType("rAnDoM VaLuE"));
+    }
+
+    @Test
+    public void testIsInProgress() {
+        r.setState("INPROGRESS");
+        assertTrue(r.isInProgress());
+        r.setState("PAYED");
+        assertFalse(r.isInProgress());
+        r.setState("CLOSED");
+        assertFalse(r.isInProgress());
+    }
+
+    @Test
+    public void testIsPayed() {
+        r.setState("INPROGRESS");
+        assertFalse(r.isPayed());
+        r.setState("PAYED");
+        assertTrue(r.isPayed());
+        r.setState("CLOSED");
+        assertFalse(r.isPayed());
+    }
+
+    @Test
+    public void testIsClosed() {
+        r.setState("INPROGRESS");
+        assertFalse(r.isClosed());
+        r.setState("PAYED");
+        assertFalse(r.isClosed());
+        r.setState("CLOSED");
+        assertTrue(r.isClosed());
     }
 }

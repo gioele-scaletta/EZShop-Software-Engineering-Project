@@ -1,9 +1,9 @@
-package it.polito.ezshop.acceptanceTests;
+package it.polito.ezshop.unitTest;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import it.polito.ezshop.data.TicketEntryImpl;
+import it.polito.ezshop.model.TicketEntryImpl;
 
 import static org.junit.Assert.*;
 

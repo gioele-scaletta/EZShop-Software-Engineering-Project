@@ -1,6 +1,7 @@
 package it.polito.ezshop.data;
 
 import it.polito.ezshop.exceptions.*;
+import it.polito.ezshop.model.*;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -621,8 +622,10 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
+        Integer newQuantity = p.getQuantity()+toBeAdded;
+
         //Checking if location is set
-        if(p.getLocation().equals("empty")) {
+        if(p.getLocation().equals("")) {
             System.out.println("Cannot set quantity if location is not set first");
             return false;
         }
@@ -631,8 +634,9 @@ public class EZShop implements EZShopInterface {
         String sql2 = "UPDATE PRODUCTTYPES SET Quantity=? WHERE productId=?";
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql2);
-            pstmt.setInt(1, toBeAdded);
+            pstmt.setInt(1, newQuantity);
             pstmt.setInt(2, productId);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -1700,7 +1704,7 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
-        if ((currentSale.listOfProductsSale.get(product)<amount )){
+        if ((currentSale.getListOfProductsSale().get(product)<amount )){
            return false;
         }
 
@@ -1919,7 +1923,7 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
-        if(sale.getState().equals(SaleTransactionImpl.State.CLOSED) ){
+        if(sale.isClosed()){
             System.err.println(methodName + ": The SaleTransaction is already closed");
             return false;
         }
@@ -1967,7 +1971,7 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
-        if(sale.getState().equals(SaleTransactionImpl.State.PAYED)){
+        if(sale.isPayed()){
             System.err.println(methodName + ": The SaleTransaction is already payed");
             return false;
         }
@@ -2014,7 +2018,7 @@ public class EZShop implements EZShopInterface {
             return null;
         }
 
-        if (!sale.getState().equals(SaleTransactionImpl.State.CLOSED)) {
+        if (!sale.isClosed()) {
             System.err.println(methodName + ": The SaleTransaction is not closed yet");
             return null;
         }
@@ -2750,7 +2754,7 @@ public class EZShop implements EZShopInterface {
         //IF PRODUCT IS INVOLVED IN CURRENT SALE THE UP TO DATE INFORMATION ARE STORED ONLY IN RAM AT THE MOMENT
         List<ProductTypeImpl> prodl=null;
         if (currentSale != null) {
-            prodl= currentSale.listOfProductsSale.keySet().stream().filter(e->e.getBarCode().equals(barCode)).collect(Collectors.toList());
+            prodl= currentSale.getListOfProductsSale().keySet().stream().filter(e->e.getBarCode().equals(barCode)).collect(Collectors.toList());
 
             if (prodl.size()>0){
                 // System.out.println("ok");

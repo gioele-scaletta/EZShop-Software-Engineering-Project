@@ -1,4 +1,8 @@
-package it.polito.ezshop.data;
+package it.polito.ezshop.model;
+
+import it.polito.ezshop.data.BalanceOperation;
+import it.polito.ezshop.data.SaleTransaction;
+import it.polito.ezshop.data.TicketEntry;
 
 import java.util.ArrayList;
 import java.util.HashMap;

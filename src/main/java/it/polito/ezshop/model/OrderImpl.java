@@ -1,6 +1,8 @@
-package it.polito.ezshop.data;
+package it.polito.ezshop.model;
 
-public class OrderImpl implements Order{
+import it.polito.ezshop.data.Order;
+
+public class OrderImpl implements Order {
 
     Integer balanceId;
 

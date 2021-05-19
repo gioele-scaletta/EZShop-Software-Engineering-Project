@@ -1,6 +1,6 @@
-package it.polito.ezshop.acceptanceTests;
+package it.polito.ezshop.unitTest;
 
-import it.polito.ezshop.data.CustomerImpl;
+import it.polito.ezshop.model.CustomerImpl;
 import org.junit.Before;
 import org.junit.Test;
 

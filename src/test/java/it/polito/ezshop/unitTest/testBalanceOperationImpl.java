@@ -1,7 +1,7 @@
-package it.polito.ezshop.acceptanceTests;
+package it.polito.ezshop.unitTest;
 
 import java.time.LocalDate;
-import it.polito.ezshop.data.BalanceOperationImpl;
+import it.polito.ezshop.model.BalanceOperationImpl;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;

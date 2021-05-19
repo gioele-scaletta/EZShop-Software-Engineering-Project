@@ -1,6 +1,8 @@
-package it.polito.ezshop.data;
+package it.polito.ezshop.model;
 
-public class CustomerImpl implements Customer{
+import it.polito.ezshop.data.Customer;
+
+public class CustomerImpl implements Customer {
 
     private String customerName;
     private String customerCard;

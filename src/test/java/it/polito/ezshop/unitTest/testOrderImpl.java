@@ -1,7 +1,6 @@
-package it.polito.ezshop.acceptanceTests;
+package it.polito.ezshop.unitTest;
+import it.polito.ezshop.model.OrderImpl;
 import org.junit.Before;
-import it.polito.ezshop.data.*;
-import it.polito.ezshop.exceptions.*;
 
 
 import org.junit.Test;

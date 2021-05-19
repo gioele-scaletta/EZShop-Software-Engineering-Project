@@ -1,4 +1,4 @@
-package it.polito.ezshop.data;
+package it.polito.ezshop.model;
 
 import java.util.Map;
 
@@ -104,7 +104,7 @@ public class ReturnTransactionImpl {
         this.balanceOperation = balanceOperation;
     }
 
-    //MARCO: Not tested since they've not parameters
+
     public boolean isInProgress() {
         return (this.state == State.INPROGRESS);
     }

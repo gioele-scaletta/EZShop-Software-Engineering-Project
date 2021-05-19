@@ -1,11 +1,13 @@
-package it.polito.ezshop.data;
+package it.polito.ezshop.model;
+
+import it.polito.ezshop.data.ProductType;
 
 import java.awt.datatransfer.FlavorEvent;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ProductTypeImpl implements ProductType{
+public class ProductTypeImpl implements ProductType {
     private Integer productID;
     private String barcode;
     private String description;
