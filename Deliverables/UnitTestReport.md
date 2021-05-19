@@ -218,8 +218,8 @@ Version:
 
 |  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                |setCustomerName("Name2")<br/>getCustomerName( ).equals("Name2")<br/>->true||
-|NULL                               |I                |setCustomerName(null)<br/>getCustomerName( ).equals("Name2")<br/>->true (not modified)||
+|Valid                              |V                |setCustomerName("Name2")<br/>getCustomerName( ).equals("Name2")<br/>->true| TestCustomerImpl.testCustomerName() |
+|NULL                               |I                |setCustomerName(null)<br/>getCustomerName( ).equals("Name2")<br/>->true (not modified)| TestCustomerImpl.testCustomerName()|
 
 
 ## Method setCustomerCard
@@ -238,8 +238,8 @@ Version:
 
 |  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                |setCustomerCard("0123456789")<br/>getCustomerCard( ).equals("0123456789")<br/>->true||
-|NULL                               |I                |setCustomerCard(null)<br/>getCustomerCard( ).equals("0123456789")<br/>->true (not modified)||
+|Valid                              |V                |setCustomerCard("0123456789")<br/>getCustomerCard( ).equals("0123456789")<br/>->true| TestCustomerImpl.testCustomerCard() |
+|NULL                               |I                |setCustomerCard(null)<br/>getCustomerCard( ).equals("0123456789")<br/>->true (not modified)| TestCustomerImpl.testCustomerCard() |
 
 
 ## Method setId
@@ -258,8 +258,8 @@ Version:
 
 | Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                |setId(2)<br/>getId( ).equals(2)<br/>->true||
-|NULL                               |I                |setId(null)<br/>getId( ).equals(2)<br/>->true (not modified)||
+|Valid                              |V                |setId(2)<br/>getId( ).equals(2)<br/>->true| TestCustomerImpl.testCustomerId()|
+|NULL                               |I                |setId(null)<br/>getId( ).equals(2)<br/>->true (not modified)|TestCustomerImpl.testCustomerId()|
 
 
 
@@ -279,8 +279,8 @@ Version:
 
 | Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                |setPoints(10)<br/>getPoints( ).equals(10)<br/>->true||
-|NULL                               |I                |setPoints(null)<br/>getPoints( ).equals(10)<br/>->true (not modified)||
+|Valid                              |V                |setPoints(10)<br/>getPoints( ).equals(10)<br/>->true| TestCustomerImpl.testCustomerPoints() |
+|NULL                               |I                |setPoints(null)<br/>getPoints( ).equals(10)<br/>->true (not modified)| TestCustomerImpl.testCustomerPoints() |
 
 
 
