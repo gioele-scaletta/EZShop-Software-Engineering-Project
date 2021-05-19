@@ -27,7 +27,10 @@ public class testProductTypeImpl {
     
     @Before
     public void constructor() {
+        prod= new ProductTypeImpl (2, "b", "c", 0.3, "ciao");
+        prod= new ProductTypeImpl ("s", "b", 0.1, 0.2);
         prod= new ProductTypeImpl(1, "a", "b",0.2, 3, 0.5, "ciao", 2, "a", 5 );
+
     }
 
     @Test
@@ -105,7 +108,7 @@ public class testProductTypeImpl {
 
     @Test
     public void testisValidCode (){
-        prod =new ProductTypeImpl(prodId, barCode, description,sellPrice, quantity, discountRate, notes, aisleId, rackId, levelID );
+
 
         assertTrue(prod.isValidCode("5701234567899"));
         assertFalse(prod.isValidCode("111111111111"));
@@ -118,7 +121,7 @@ public class testProductTypeImpl {
     @Test
     public void testisValidLocation (){
 
-        prod =new ProductTypeImpl(prodId, barCode, description,sellPrice, quantity, discountRate, notes, aisleId, rackId, levelID );
+
 
         assertTrue(prod.isValidLocation("3-a-2"));
         assertTrue(prod.isValidLocation(location));

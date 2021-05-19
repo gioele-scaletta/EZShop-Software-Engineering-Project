@@ -1,5 +1,5 @@
 package it.polito.ezshop.acceptanceTests;
-
+import org.junit.Before;
 import it.polito.ezshop.data.*;
 import it.polito.ezshop.exceptions.*;
 
@@ -22,6 +22,58 @@ public class testUserImpl {
     UserImpl usersm=null;
     UserImpl userc=null;
 
+    @Before
+    public void testUserConstructor() {
+
+        usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
+        userc =new UserImpl(3, "stefano", "rossi", cashier_role);
+        userad =new UserImpl(1, "gioela", "scaletti",shop_manager_role );
+
+
+        assertTrue(userad.toString().equals("UserImpl{" +
+                "id=" + 1 +
+                ", username='" + "gioela" + '\'' +
+                ", password='" +"scaletti" + '\'' +
+                ", role=" + shop_manager_role +
+                '}'));
+
+
+    }
+
+    @Test
+    public void testSetUsername(){
+        userad.setUsername("gioele");
+        assertTrue(userad.getUsername().equals("gioele"));
+        userad.setUsername(null);
+        assertTrue(userad.getUsername().equals("gioele"));
+    }
+
+    @Test
+    public void testSetPassword(){
+        userad.setPassword("scaletta");
+        assertTrue(userad.getPassword().equals("scaletta"));
+        userad.setPassword(null);
+        assertTrue(userad.getPassword().equals("scaletta"));
+    }
+
+    @Test
+    public void testSetRole() {
+        userad.setRole(admin_role);
+        userad.getRole().equals(admin_role);
+        userad.setRole(null);
+        userad.getRole().equals(admin_role);
+    }
+
+    @Test
+    public void test (){
+        userad.setId(1);
+        assertTrue(userad.getId().equals(1));
+        userad.setId(null);
+        assertTrue(userad.getId().equals(1));
+
+    }
+
+
     @Test
     public void testisAllowedRole() {
 
@@ -34,33 +86,9 @@ public class testUserImpl {
 
     }
 
-    @Test
-    public void testUserConstructorGetters(){
-        userad =new UserImpl(1, "gioela", "scaletti",shop_manager_role );
-        usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
-        userc =new UserImpl(3, "stefano", "rossi", cashier_role);
-
-        userad.setUsername("gioele");
-        assertTrue(userad.getUsername().equals("gioele"));
-        userad.setPassword("scaletta");
-        assertTrue(userad.getPassword().equals("scaletta"));
-        userad.setRole(admin_role);
-        userad.getRole().equals(admin_role);
-        userad.setId(1);
-        assertTrue(userad.getId().equals(1));
-
-        assertTrue(userad.toString().equals("UserImpl{" +
-                "id=" + 1 +
-                ", username='" + "gioele" + '\'' +
-                ", password='" +"scaletta" + '\'' +
-                ", role=" + admin_role +
-                '}'));
-
-
-    }
 
     @Test
-    public void testcanManageUsers() {
+    public void testCanManageUsers() {
 
         userad =new UserImpl(1, "gioela", "scaletti",admin_role );
         usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
@@ -74,7 +102,7 @@ public class testUserImpl {
     }
 
     @Test
-    public void testcanManageProductList() {
+    public void testCanManageProductList() {
 
 
         userad =new UserImpl(1, "gioela", "scaletti",admin_role );
@@ -88,7 +116,7 @@ public class testUserImpl {
     }
 
     @Test
-    public void testcanManageInventory() {
+    public void testCanManageInventory() {
 
         userad =new UserImpl(1, "gioela", "scaletti",admin_role );
         usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
@@ -102,7 +130,7 @@ public class testUserImpl {
     }
 
     @Test
-    public void testcanManageAccounting() {
+    public void testCanManageAccounting() {
 
         userad =new UserImpl(1, "gioela", "scaletti",admin_role );
         usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
@@ -115,7 +143,7 @@ public class testUserImpl {
     }
 
     @Test
-    public void testcanManageCustomers() {
+    public void testCanManageCustomers() {
 
         userad =new UserImpl(1, "gioela", "scaletti",admin_role );
         usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
@@ -128,7 +156,7 @@ public class testUserImpl {
     }
 
     @Test
-    public void testcanManageSaleTransactions() {
+    public void testCanManageSaleTransactions() {
 
         userad =new UserImpl(1, "gioela", "scaletti",admin_role );
         usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
@@ -142,7 +170,7 @@ public class testUserImpl {
 
 
     @Test
-    public void testcanManagePayments() {
+    public void testCanManagePayments() {
 
         userad =new UserImpl(1, "gioela", "scaletti",admin_role );
         usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
@@ -155,7 +183,7 @@ public class testUserImpl {
     }
 
     @Test
-    public void testcanListProducts() {
+    public void testCanListProducts() {
 
         userad =new UserImpl(1, "gioela", "scaletti",admin_role );
         usersm =new UserImpl(2, "marco", "raglyo", shop_manager_role);
@@ -164,8 +192,6 @@ public class testUserImpl {
         assertTrue(userad.canListProducts());
         assertTrue(usersm.canListProducts());
         assertTrue(userc.canListProducts());
-
-
 
     }
 
