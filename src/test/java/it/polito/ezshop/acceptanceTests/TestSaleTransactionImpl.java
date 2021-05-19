@@ -20,8 +20,9 @@ public class TestSaleTransactionImpl {
         saleTransaction.setTicketNumber(10);
         assertEquals(Integer.valueOf(10), saleTransaction.getTicketNumber());
 
+        saleTransaction.setTicketNumber(10);
         saleTransaction.setTicketNumber(null);
-        assertNull(saleTransaction.getTicketNumber());
+        assertEquals(Integer.valueOf(10), saleTransaction.getTicketNumber());
     }
 
     @Test

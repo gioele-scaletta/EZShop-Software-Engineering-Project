@@ -20,8 +20,9 @@ public class TestTicketEntryImpl {
         ticketEntry.setBarCode("5701234567899");
         assertEquals("5701234567899", ticketEntry.getBarCode());
 
+        ticketEntry.setBarCode("5701234567899");
         ticketEntry.setBarCode(null);
-        assertNull(ticketEntry.getBarCode());
+        assertEquals("5701234567899", ticketEntry.getBarCode());
     }
 
     @Test
@@ -29,8 +30,9 @@ public class TestTicketEntryImpl {
         ticketEntry.setProductDescription("ZZZ");
         assertEquals("ZZZ", ticketEntry.getProductDescription());
 
+        ticketEntry.setProductDescription("ZZZ");
         ticketEntry.setProductDescription(null);
-        assertNull(ticketEntry.getProductDescription());
+        assertEquals("ZZZ", ticketEntry.getProductDescription());
     }
 
     @Test
