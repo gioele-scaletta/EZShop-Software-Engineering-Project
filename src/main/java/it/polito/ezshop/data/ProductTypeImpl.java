@@ -89,7 +89,7 @@ public class ProductTypeImpl implements ProductType{
 
     //Having a null parameter it's ok since it means reset of the location
     public static boolean isValidLocation(String location) {
-        if(location.equals("")||location == null)
+        if(location == null||location.equals(""))
             return true;
         return Pattern.compile("^[0-9]+[-][a-zA-Z0-9]+[-][0-9]+$").matcher(location).matches();
     }
@@ -141,9 +141,9 @@ public class ProductTypeImpl implements ProductType{
     //Having a null parameter it's ok since it means reset of the location
     @Override
     public void setLocation(String location) {
-        if(location.equals("")||location == null) {
+        if(location == null||location.equals("")) {
             this.aisleId = 0;
-            this.rackId = "";
+            this.rackId = "empty";
             this.levelId = 0;
         }
         else {

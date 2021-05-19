@@ -22,6 +22,7 @@ public class testBalanceOperationImpl {
     public void testSetBalanceId() {
         b.setBalanceId(12);
         assertTrue(b.getBalanceId()==12);
+        assertFalse(b.getBalanceId()==28);
     }
 
     @Test
@@ -30,25 +31,25 @@ public class testBalanceOperationImpl {
         b.setDate(l);
         assertTrue(b.getDate().equals(l));
         b.setDate(null);
-        assertNull(b.getDate());
+        assertTrue(b.getDate().equals(l));
     }
 
     @Test
     public void testSetMoney() {
         b.setMoney(12.50);
         assertTrue(b.getMoney() == 12.50);
+        assertFalse(b.getMoney()== 0.12);
     }
 
-    @Test(expected = IllegalArgumentException.class, NullPointerException.class)
+    @Test
     public void testSetType() {
         b.setType("CREDIT");
         assertTrue(b.getType().equals("CREDIT"));
         b.setType("DEBIT");
         assertTrue(b.getType().equals("DEBIT"));
         b.setType(null);
-        assertNull(b.getType());
-        assertThrows(IllegalArgumentException.class, () -> b.setType(""));
-        assertThrows(IllegalArgumentException.class, () -> b.setType("rAnDoM VaLuE"));
+        assertTrue(b.getType().equals("DEBIT"));
+        assertThrows(IllegalArgumentException.class,()->b.setType(""));
+        assertThrows(IllegalArgumentException.class,()->b.setType("random Value"));
     }
-
 }

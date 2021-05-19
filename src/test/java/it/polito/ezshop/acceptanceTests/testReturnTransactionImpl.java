@@ -22,10 +22,10 @@ public class testReturnTransactionImpl {
         r.setReturnId(100);
         assertTrue(r.getReturnId().equals(100));
         r.setReturnId(null);
-        assertNull(r.getReturnId());
+        assertTrue(r.getReturnId().equals(100));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSetState() {
         r.setState("INPROGRESS");
         assertTrue(r.getState().equals("INPROGRESS"));
@@ -34,7 +34,7 @@ public class testReturnTransactionImpl {
         r.setState("PAYED");
         assertTrue(r.getState().equals("PAYED"));
         r.setState(null);
-        assertTrue(r.getState().equals(null));
+        assertTrue(r.getState().equals("PAYED"));
         assertThrows(IllegalArgumentException.class, () -> r.setState(""));
         assertThrows(IllegalArgumentException.class, () -> r.setState("rAnDoM VaLuE"));
     }
@@ -44,17 +44,17 @@ public class testReturnTransactionImpl {
         r.setAmount(23.90);
         assertTrue(r.getAmount().equals(23.90));
         r.setAmount(null);
-        assertTrue(r.getAmount().equals(null));
+        assertTrue(r.getAmount().equals(23.90));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSetPaymentType() {
         r.setPaymentType("CARD");
         assertTrue(r.getPaymentType().equals("CARD"));
         r.setPaymentType("CASH");
         assertTrue(r.getPaymentType().equals("CASH"));
         r.setState(null);
-        assertTrue(r.getPaymentType().equals(null));
+        assertTrue(r.getPaymentType().equals("CASH"));
         assertThrows(IllegalArgumentException.class, () -> r.setPaymentType(""));
         assertThrows(IllegalArgumentException.class, () -> r.setPaymentType("rAnDoM VaLuE"));
     }
