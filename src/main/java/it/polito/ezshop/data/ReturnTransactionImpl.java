@@ -29,6 +29,9 @@ public class ReturnTransactionImpl {
     }
 
     public void setReturnId(Integer returnId) {
+        if (returnId == null) {
+            return;
+        }
         this.returnId = returnId;
     }
 
@@ -37,6 +40,9 @@ public class ReturnTransactionImpl {
     }
 
     public void setSaleTransaction(SaleTransactionImpl saleTransaction) {
+        if (saleTransaction == null) {
+            return;
+        }
         this.saleTransaction = saleTransaction;
     }
 
@@ -45,6 +51,9 @@ public class ReturnTransactionImpl {
     }
 
     public void setReturnProducts(Map<ProductTypeImpl, Integer> returnProducts) {
+        if (returnProducts == null) {
+            return;
+        }
         this.returnProducts = returnProducts;
     }
 
@@ -53,6 +62,9 @@ public class ReturnTransactionImpl {
     }
 
     public void setState(String state) {
+        if (state == null) {
+            return;
+        }
         this.state = State.valueOf(state);
     }
 
@@ -61,6 +73,9 @@ public class ReturnTransactionImpl {
     }
 
     public void setAmount(Double amount) {
+        if (amount == null) {
+            return;
+        }
         this.amount = amount;
     }
 
@@ -69,6 +84,9 @@ public class ReturnTransactionImpl {
     }
 
     public void setPaymentType(String paymentType) {
+        if (paymentType == null) {
+            return;
+        }
         this.paymentType = PaymentType.valueOf(paymentType);
     }
 
@@ -77,6 +95,9 @@ public class ReturnTransactionImpl {
     }
 
     public void setBalanceOperation(BalanceOperationImpl balanceOperation) {
+        if (balanceOperation == null) {
+            return;
+        }
         this.balanceOperation = balanceOperation;
     }
 

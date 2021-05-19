@@ -14,7 +14,7 @@ public class BalanceOperationImpl implements BalanceOperation {
         this.balanceId = balanceId;
         this.date = date;
         this.money = money;
-        this.type = Type.valueOf(type);
+        this.type = (type != null) ? Type.valueOf(type) : null;
     }
 
     @Override
@@ -34,6 +34,9 @@ public class BalanceOperationImpl implements BalanceOperation {
 
     @Override
     public void setDate(LocalDate date) {
+        if (date == null) {
+            return;
+        }
         this.date = date;
     }
 
@@ -54,6 +57,9 @@ public class BalanceOperationImpl implements BalanceOperation {
 
     @Override
     public void setType(String type) {
+        if (type == null) {
+            return;
+        }
         this.type = Type.valueOf(type);
     }
 }
