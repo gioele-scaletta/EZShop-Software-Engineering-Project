@@ -1,5 +1,6 @@
 package it.polito.ezshop.acceptanceTests;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import it.polito.ezshop.data.SaleTransactionImpl;
@@ -7,18 +8,32 @@ import it.polito.ezshop.data.SaleTransactionImpl;
 import static org.junit.Assert.*;
 
 public class TestSaleTransactionImpl {
+    private SaleTransactionImpl saleTransaction;
+
+    @Before
+    public void constructor() {
+        saleTransaction = new SaleTransactionImpl(1);
+    }
+
     @Test
-    public void testSaleTransactionConstructorGetters() {
-        SaleTransactionImpl saleTransaction = new SaleTransactionImpl(1, "INPROGRESS", null, 0.0, 0.0, null, null, null);
+    public void testSetTicketNumber() {
+        saleTransaction.setTicketNumber(10);
+        assertEquals(Integer.valueOf(10), saleTransaction.getTicketNumber());
 
-        saleTransaction.setTicketNumber(2);
-        assertEquals(2, (int) saleTransaction.getTicketNumber());
+        saleTransaction.setTicketNumber(null);
+        assertNull(saleTransaction.getTicketNumber());
+    }
 
-        saleTransaction.setPrice(1.29);
-        assertEquals(1.29, saleTransaction.getPrice(), 0);
+    @Test
+    public void testSetPrice() {
+        saleTransaction.setPrice(4.99);
+        assertEquals(4.99, saleTransaction.getPrice(), 0);
+    }
 
-        saleTransaction.setDiscountRate(0.20);
-        assertEquals(0.20, saleTransaction.getDiscountRate(), 0);
+    @Test
+    public void testSetDiscountRate() {
+        saleTransaction.setDiscountRate(0.15);
+        assertEquals(0.15, saleTransaction.getDiscountRate(), 0);
     }
 
     @Test
