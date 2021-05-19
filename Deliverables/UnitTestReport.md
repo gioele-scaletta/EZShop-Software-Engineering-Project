@@ -371,8 +371,8 @@ Version:
 
 |  Validity of the Integer parameter| Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                |setReturnId(100)<br/>getReturnId( ).equals(100)<br/>->true||
-|NULL                               |V                |setReturnId(null)<br/>getReturnId( ).equals(null)<br/>->true||
+|Valid                              |V                |setReturnId(100)<br/>getReturnId( ).equals(100)<br/><br/>-> true|testReturnTransactionImpl.testSetReturnId()|
+|NULL                               |I                |setRetutnId(12)<br/>setReturnId(null)<br/>getReturnId( ).equals(12)<br/><br/>-> true(not modified)|testReturnTransactionImpl.testSetReturnId( )|
 
 
 ## Method setState
@@ -399,12 +399,12 @@ Version:
 
 |  Validity of the String parameter |Value of String Parameter| Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-------------------------|-----------------|------------------------------|-----------------|
-|NULL                               |*                        |V                |setState(null)<br/>getState( ).equals(null)<br/>->true||
-|Valid                              |Empty                    |I                |setState("")<br/>->error||
-|"                                 |INPROGRESS               |V                |setState("INPROGRESS")<br/>getState( ).equals("INPROGRESS)<br/>->true||
-|"                                  |CLOSED                   |V                |setState("CLOSED")<br/>getState( ).equals("CLOSED")<br/>->true||
-|"                                  |PAYED                    |V                |setState("PAYED")<br/>getState( ).equals("PAYED")<br/>->true||
-|"                                  |Other Value              |I                |setState("rAnDoM VaLuE")<br/>->error||
+|NULL                               |*                        |I                |setState("INPROGRESS")<br/>setState(null)<br/>getState( ).equals("INPROGRESS")<br/><br/>-> true(not modified)|testReturnTransactionImpl.testSetState( )|
+|Valid                              |Empty                    |I                |setState("")<br/><br/>-> exception thrown|testReturnTransactionImpl.testSetState( )|
+|"                                 |INPROGRESS               |V                |setState("INPROGRESS")<br/>getState( ).equals("INPROGRESS)<br/><br/>-> true|testReturnTransactionImpl.testSetState( )|
+|"                                  |CLOSED                   |V                |setState("CLOSED")<br/>getState( ).equals("CLOSED")<br/><br/>-> true|testReturnTransactionImpl.testSetState( )|
+|"                                  |PAYED                    |V                |setState("PAYED")<br/>getState( ).equals("PAYED")<br/><br/>-> true|testReturnTransactionImpl.testSetState( )|
+|"                                  |Other Value              |I                |setState("rAnDoM VaLuE")<br/><br/>-> exception thrown|testReturnTransactionImpl.testSetState( )|
 
 
 ## Method setAmount
@@ -425,8 +425,8 @@ Version:
 
 |  Validity of the Double parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                |setAmount(17.50)<br/>getAmount( ).equals(17.50)<br/>->true||
-|NULL                               |V                |setAmount(null)<br/>getAmount( ).equals(null)<br/>->true||
+|Valid                              |V                |setAmount(17.50)<br/>getAmount( ).equals(17.50)<br/><br/>->true|testReturnTransactionImpl.testSetAmount( )|
+|NULL                               |I                |setAmount(22.30)<br/>setAmount(null)<br/>getAmount( ).equals(22.30)<br/><br/>-> true(not modified)|testReturnTransactionImpl.testSetAmount( )|
 
 ## Method setPaymentType
 
@@ -451,11 +451,11 @@ Version:
 
 |  Validity of the String parameter |Value of String Parameter| Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-------------------------|-----------------|------------------------------|-----------------|
-|NULL                               |*                        |V                |setPaymentType(null)<br/>getPaymentType( ).equals(null)<br/>->true||
-|Valid                              |Empty                    |I                |setPaymentType("")<br/>->error||
-|"                                  |CARD                     |V                |setPaymentType("CARD")<br/>getPaymentType( ).equals(null)<br/>->true||
-|"                                  |CASH                     |V                |setPaymentType("CASH")<br/>getPaymentType( ).equals(null)<br/>->true||
-|"                                  |Other Value              |I                |setPaymentType("sOmE sTuFF")<br/>->error||
+|NULL                               |*                        |I                |setPaymentType("CARD")<br/>setPaymentType(null)<br/>getPaymentType( ).equals("CARD")<br/><br/>-> true(not modified)|testReturnTransactionImpl.testSetPaymentType( )|
+|Valid                              |Empty                    |I                |setPaymentType("")<br/><br/>-> exception thrown|testReturnTransactionImpl.testSetPaymentType( )|
+|"                                  |CARD                     |V                |setPaymentType("CARD")<br/>getPaymentType( ).equals(null)<br/><br/>-> true|testReturnTransactionImpl.testSetPaymentType( )|
+|"                                  |CASH                     |V                |setPaymentType("CASH")<br/>getPaymentType( ).equals(null)<br/><br/>-> true|testReturnTransactionImpl.testSetPaymentType( )|
+|"                                  |Other Value              |I                |setPaymentType("sOmE sTuFF")<br/><br/>-> exception thrown|testReturnTransactionImpl.testSetPaymentType( )|
 
 
 # Class BalanceOperationImpl
@@ -476,7 +476,7 @@ Version:
 
 |  Validity of the int parameter    | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                |setBalanceId(27)<br/>getBalanceId( ).equals(27)<br/>->true||
+|Valid                              |V                |setBalanceId(27)<br/>getBalanceId( ).equals(27)<br/><br/>-> true|testBalanceOperationImpl.testSetBalanceId( )|
 
 ## Method setDate
 
@@ -496,8 +496,8 @@ Version:
 
 |Validity of the LocalDate parameter| Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                |LocalDate l = LocalDate.now( )<br/>setLocalDate(l)<br/>getLocalDate( ).equals(l)<br/>->true||
-|NULL                               |V                |setLocalDate(null)<br/>getLocalDate( ).equals(null)<br/>->true||
+|Valid                              |V                |LocalDate l = LocalDate.now( )<br/>setLocalDate(l)<br/>getLocalDate( ).equals(l)<br/><br/>-> true|testBalanceOperationImpl.testSetDate( )|
+|NULL                               |I                |LocalDate l = LocalDate.now( )<br/>setLocalDate(l)<br/>setLocalDate(null)<br/>getLocalDate( ).equals(l)<br/><br/>-> true(not modified)|testBalanceOperationImpl.testSetDate( )|
 
 ## Method setMoney
 
@@ -516,7 +516,7 @@ Version:
 
 |  Validity of the double parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                | setMoney(23.50)<br/>getMoney( ).equals(23.50)<br/>->true||
+|Valid                              |V                | setMoney(23.50)<br/>getMoney( ).equals(23.50)<br/><br/>-> true|testBalanceOperationImpl.testSetMoney( )|
 
 ## Method setType
 
@@ -536,9 +536,8 @@ Version:
 
 |  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
 |-----------------------------------|-----------------|------------------------------|-----------------|
-|Valid                              |V                |setType("CREDIT")<br/>getType( ).equals("CREDIT")<br/>->true||
-|NULL                               |V                |setType(null)<br/>getType( ).equals(null)<br/>->true||
-
+|Valid                              |V                |setType("CREDIT")<br/>getType( ).equals("CREDIT")<br/><br/>-> true|testBalanceOperationImpl.testSetType( )|
+|NULL                               |I                |setType("CREDIT")<br/>setType(null)<br/>getType( ).equals("CREDIT")<br/><br/>-> true(not modified)|testBalanceOperationImpl.testSetType( )|
 
 # White Box Unit Tests
 
