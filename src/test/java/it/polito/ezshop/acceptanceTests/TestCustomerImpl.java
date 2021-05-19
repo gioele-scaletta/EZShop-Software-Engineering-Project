@@ -19,17 +19,17 @@ public class TestCustomerImpl {
         @Test
         public void testSetCustomerName() {
             c.setCustomerName("Name2");
-            assertEquals (c.getCustomerName(), "Name2");
+            assertTrue (c.getCustomerName().equals("Name2"));
             c.setCustomerName(null);
-            assertEquals (c.getCustomerName(), "Name2");
+            assertTrue (c.getCustomerName().equals("Name2"));
         }
 
         @Test
         public void testSetCustomerCard() {
             c.setCustomerCard("0123456789");
-            assertEquals (c.getCustomerCard(), "0123456789");
+            assertTrue (c.getCustomerCard().equals("0123456789"));
             c.setCustomerCard(null);
-            assertEquals (c.getCustomerCard(), "0123456789");
+            assertTrue (c.getCustomerCard().equals("0123456789"));
         }
 
         @Test

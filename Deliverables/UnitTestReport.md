@@ -198,6 +198,92 @@ Version:
 |Empty |   -    |  V              | isValidLocation("")  <br /><br />-> true  (location reset values)             |  testisValidLocation ()              |
 |null  |  -     |  V              | isValidLocation(null)  <br /><br />-> true (location reset values)    |testisValidLocation ()|
 
+
+
+# Class CustomerImpl
+
+## Method setCustomerName
+
+- customerName parameter is a valid String object or null
+
+**Predicates for method *setCustomerName*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of String parameter                   | Valid      |
+|                                               | NULL       |
+
+**Combination of predicates**:
+
+
+|  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |setCustomerName("Name2")<br/>getCustomerName( ).equals("Name2")<br/>->true| TestCustomerImpl.testCustomerName() |
+|NULL                               |I                |setCustomerName(null)<br/>getCustomerName( ).equals("Name2")<br/>->true (not modified)| TestCustomerImpl.testCustomerName()|
+
+
+## Method setCustomerCard
+
+- customerCard parameter is a valid String object or null
+
+**Predicates for method *setCustomerCard*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of String parameter                   | Valid      |
+|                                               | NULL       |
+
+**Combination of predicates**:
+
+
+|  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |setCustomerCard("0123456789")<br/>getCustomerCard( ).equals("0123456789")<br/>->true| TestCustomerImpl.testCustomerCard() |
+|NULL                               |I                |setCustomerCard(null)<br/>getCustomerCard( ).equals("0123456789")<br/>->true (not modified)| TestCustomerImpl.testCustomerCard() |
+
+
+## Method setId
+
+- id parameter is a valid Integer object or null
+
+**Predicates for method *setId*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of Integer parameter                  | Valid      |
+|                                               | NULL       |
+
+**Combination of predicates**:
+
+
+| Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |setId(2)<br/>getId( ).equals(2)<br/>->true| TestCustomerImpl.testCustomerId()|
+|NULL                               |I                |setId(null)<br/>getId( ).equals(2)<br/>->true (not modified)|TestCustomerImpl.testCustomerId()|
+
+
+
+## Method setPoints
+
+- points parameter is a valid Integer object or null
+
+**Predicates for method *setPoints*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of Integer parameter                  | Valid      |
+|                                               | NULL       |
+
+**Combination of predicates**:
+
+
+| Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |setPoints(10)<br/>getPoints( ).equals(10)<br/>->true| TestCustomerImpl.testCustomerPoints() |
+|NULL                               |I                |setPoints(null)<br/>getPoints( ).equals(10)<br/>->true (not modified)| TestCustomerImpl.testCustomerPoints() |
+
+
+
 # Class SaleTransactionImpl
 
 ## Method setTicketNumber
