@@ -198,6 +198,159 @@ Version:
 |Empty |   -    |  V              | isValidLocation("")  <br /><br />-> true  (location reset values)             |  testisValidLocation ()              |
 |null  |  -     |  V              | isValidLocation(null)  <br /><br />-> true (location reset values)    |testisValidLocation ()|
 
+# Class SaleTransactionImpl
+
+## Method setTicketNumber
+
+**Criteria for method *setTicketNumber*:**
+
+- setTicketNumber parameter is a valid Integer object or null
+
+**Predicates for method *setTicketNumber*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of Integer parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setTicketNumber(10)<br/>getTicketNumber().equals(10)<br/><br/>-> true | TestSaleTransactionImpl.testSetTicketNumber() |
+| NULL                              | I               | setTicketNumber(10)<br/>setTicketNumber(null)<br/>getTicketNumber().equals(10)<br/><br/>-> true (not modified) | TestSaleTransactionImpl.testSetTicketNumber() |
+
+## Method setPrice
+
+**Criteria for method *setPrice*:**
+
+- price parameter is a valid double base type
+
+**Predicates for method *setPrice*:**
+
+| Criterion                                     | Predicate  |
+| --------------------------------------------- | ---------- |
+| Validity of double parameter                  | Valid      |
+
+**Combination of predicates**:
+
+|  Validity of the double parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setPrice(4.99)<br/>getPrice().equals(4.99)<br/><br/>-> true | TestSaleTransactionImpl.testSetPrice() |
+
+## Method setDiscountRate
+
+**Criteria for method *setDiscountRate*:**
+
+- discountRate parameter is a valid double base type
+
+**Predicates for method *setDiscountRate*:**
+
+| Criterion                                     | Predicate  |
+| --------------------------------------------- | ---------- |
+| Validity of double parameter                  | Valid      |
+
+**Combination of predicates**:
+
+|  Validity of the double parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setDiscountRate(0.15)<br/>getDiscountRate().equals(0.15)<br/><br/>-> true | TestSaleTransactionImpl.testSetDiscountRate() |
+
+# Class TicketEntryImpl
+
+## Method setBarCode
+
+**Criteria for method *setBarCode*:**
+
+- barCode parameter is a valid String object or null
+
+**Predicates for method *setBarCode*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of String parameter     | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the String parameter  | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setBarCode("5701234567899")<br/>getBarCode().equals("5701234567899")<br/><br/>-> true | TestTicketEntryImpl.testSetBarCode() |
+| NULL                              | I               | setBarCode("5701234567899")<br/>setBarCode(null)<br/>getBarCode().equals("5701234567899")<br/><br/>-> true (not modified) | TestTicketEntryImpltestSetBarCode() |
+
+## Method setProductDescription
+
+**Criteria for method *setProductDescription*:**
+
+- productDescription parameter is a valid String object or null
+
+**Predicates for method *setProductDescription*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of String parameter     | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the String parameter  | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setProductDescription("ZZZ")<br/>getProductDescription().equals("ZZZ")<br/><br/>-> true | TestTicketEntryImpl.testSetProductDescription() |
+| NULL                              | I               | setProductDescription("ZZZ")<br/>setProductDescription(null)<br/>getBarCode().equals(ZZZ)<br/><br/>-> true (not modified) | TestTicketEntryImpl.testSetProductDescription() |
+
+## Method setAmount
+
+**Criteria for method *setAmount*:**
+
+- amount parameter is a valid int base type
+
+**Predicates for method *setAmount*:**
+
+| Criterion                                     | Predicate  |
+| --------------------------------------------- | ---------- |
+| Validity of int parameter                     | Valid      |
+
+**Combination of predicates**:
+
+| Validity of the int parameter     | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setAmount(10)<br/>getAmount().equals(10)<br/><br/>-> true | TestTicketEntryImpl.testSetAmount() |
+
+## Method setPricePerUnit
+
+**Criteria for method *setPricePerUnit*:**
+
+- pricePerUnit parameter is a valid double base type
+
+**Predicates for method *setPricePerUnit*:**
+
+| Criterion                                     | Predicate  |
+| --------------------------------------------- | ---------- |
+| Validity of double parameter                  | Valid      |
+
+**Combination of predicates**:
+
+| Validity of the double parameter  | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setPricePerUnit(2.49)<br/>getPricePerUnit().equals(2.49)<br/><br/>-> true | TestTicketEntryImpl.testSetPricePerUnit() |
+
+## Method setDiscountRate
+
+**Criteria for method *setDiscountRate*:**
+
+- pricePerUnit parameter is a valid double base type
+
+**Predicates for method *setDiscountRate*:**
+
+| Criterion                                     | Predicate  |
+| --------------------------------------------- | ---------- |
+| Validity of double parameter                  | Valid      |
+
+**Combination of predicates**:
+
+| Validity of the double parameter  | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setDiscountRate(0.50)<br/>getDiscountRate().equals(0.50)<br/><br/>-> true | TestTicketEntryImpl.testSetDiscountRate() |
 
 # Class ReturnTransactionImpl
 
