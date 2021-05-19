@@ -165,13 +165,13 @@ Version: 1.0
 | Valid                             | V               | setId(10)<br/>getId().equals(10)<br/><br/>-> true | TestTestProductTypeImpl.testSetId() |
 | NULL                              | I               | setid(10)<br/>setId(null)<br/>getId().equals(10)<br/><br/>-> true (not modified) | TestTestProductTypeImpl.testSetId() |
 
-## Method testSetBarCode
+## Method setBarCode
 
-**Criteria for method *testSetBarCode*:**
+**Criteria for method *setBarCode*:**
 
 -barCode parameter is a valid String object or null
 
-**Predicates for method *testSetBarCode*:**
+**Predicates for method *setBarCode*:**
 
 | Criterion                        | Predicate  |
 | -------------------------------- | ---------- |
@@ -185,13 +185,13 @@ Version: 1.0
 | Valid                             | V               | setBarCode("5701234567899")<br/>getBarCode().equals("5701234567899")<br/><br/>-> true | TestProductTypeImpl.testSetBarCode() |
 | NULL                              | I               | setBarCode("5701234567899")<br/>seBarCode(null)<br/>getBarCode().equals("5701234567899")<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetBarCode() |
 
-## Method testSetProductDiscountRate
+## Method setProductDiscountRate
 
-**Criteria for method *testSetProductDiscountRate*:**
+**Criteria for method *setProductDiscountRate*:**
 
 -discountRate parameter is a valid double object or null
 
-**Predicates for method *testProductDiscountRate*:**
+**Predicates for method *setProductDiscountRate*:**
 
 | Criterion                        | Predicate  |
 | -------------------------------- | ---------- |
@@ -206,13 +206,13 @@ Version: 1.0
 | NULL                              | I               | setProductDiscountRate(0.5)<br/>seProductDiscountRate(null)<br/>getProductDiscountRate().equals(0.5)<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetProductDiscountRate() |
 
 
-## Method testSetProductDescription
+## Method setProductDescription
 
-**Criteria for method *testSetProductDescription *:**
+**Criteria for method *setProductDescription *:**
 
 -ProductDescription  parameter is a valid String object or null
 
-**Predicates for method *testProductDescription*:**
+**Predicates for method *setProductDescription*:**
 
 | Criterion                        | Predicate  |
 | -------------------------------- | ---------- |
@@ -226,13 +226,13 @@ Version: 1.0
 | Valid                             | V               | setProductDescription ("spaghetti")<br/>getProductDescription().equals("spaghetti")<br/><br/>-> true | TestProductTypeImpl.testProductDescription() |
 | NULL                              | I               | setProductDescription ("spaghetti")<br/>setProductDescription(null)<br/>getProductDescription().equals("spaghetti")<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetProductDescription() |
 
-## Method testSetPricePerUnit
+## Method setPricePerUnit
 
-**Criteria for method *testSetPricePerUnit*:**
+**Criteria for method *setPricePerUnit*:**
 
 -discountRate parameter is a valid double object or null
 
-**Predicates for method *testSetPricePerUnit*:**
+**Predicates for method *setPricePerUnit*:**
 
 | Criterion                        | Predicate  |
 | -------------------------------- | ---------- |
@@ -246,13 +246,13 @@ Version: 1.0
 | Valid                             | V               | setPricePerUnit(0.5)<br/>getPricePerUnit().equals(0.5)<br/><br/>-> true | TestProductTypeImpl.testSetPricePerUnit() |
 | NULL                              | I               | setPricePerUnit(0.5)<br/>setPricePerUnit(null)<br/>getPricePerUnit().equals(0.5)<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetPricePerUnit() |
 
-## Method testSetQuantity
+## Method setQuantity
 
-**Criteria for method *testSetQuantity*:**
+**Criteria for method *setQuantity*:**
 
 -quantity parameter is a valid Integer object or null
 
-**Predicates for method *testSetQuantity*:**
+**Predicates for method *setQuantity*:**
 
 | Criterion                        | Predicate  |
 | -------------------------------- | ---------- |
@@ -266,13 +266,13 @@ Version: 1.0
 | Valid                             | V               | setQuantity(10)<br/>getQuantity().equals(10)<br/><br/>-> true | TestProductTypeImpl.testSetQuantity() |
 | NULL                              | I               | setQuantity(10)<br/>setQuantity(null)<br/>getQuantity().equals(10)<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetQuantity() |
 
-# Method testSetNote
+# Method setNote
 
-**Criteria for method *testSetNote*:**
+**Criteria for method *setNote*:**
 
 -note parameter is a valid String object or null
 
-**Predicates for method *testSetNote*:**
+**Predicates for method *setNote*:**
 
 | Criterion                        | Predicate  |
 | -------------------------------- | ---------- |
@@ -286,13 +286,13 @@ Version: 1.0
 | Valid                             | V               | setNote("barilla")<br/>getNote().equals("barilla")<br/><br/>-> true | TestProductTypeImpl.testSetNote() |
 | NULL                              | I               | setNote("barilla")<br/>setNote(null)<br/>getNote().equals("barilla")<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetNote() |
 
-# Method testSetLocation
+# Method setLocation
 
-**Criteria for method *testSetLocation*:**
+**Criteria for method *setLocation*:**
 
 -location parameter is a valid String object or null
 
-**Predicates for method *testSetLocation*:**
+**Predicates for method *setLocation*:**
 
 | Criterion                        | Predicate  |
 | -------------------------------- | ---------- |
@@ -497,13 +497,13 @@ Version: 1.0
 | Valid                             | V               | setBalanceId(10)<br/>getBalanceId().equals(10)<br/><br/>-> true | TestOrderImpl.testBalanceId() |
 | NULL                              | I               | setBalanceId(10)<br/>setBalanceId(null)<br/>getBalanceId().equals(10)<br/><br/>-> true (not modified) | TestOrderImpl.testSetBalanceId() |
 
-## Method testSetProductCode
+## Method setProductCode
 
-**Criteria for method *testSetProductCode*:**
+**Criteria for method *setProductCode*:**
 
 -barCode parameter is a valid String object or null
 
-**Predicates for method *testSetProductCode*:**
+**Predicates for method *setProductCode*:**
 
 | Criterion                        | Predicate  |
 | -------------------------------- | ---------- |
@@ -518,13 +518,13 @@ Version: 1.0
 | NULL                              | I               | setProductCode("5701234567899")<br/>setProductCode(null)<br/>getProductCode().equals("5701234567899")<br/><br/>-> true (not modified) | TestOrderImpl.testSetProductCode() |
 
 
-## Method testSetPricePerUnit
+## Method setPricePerUnit
 
-**Criteria for method *testSetPricePerUnit*:**
+**Criteria for method *setPricePerUnit*:**
 
 -discountRate parameter is a valid double object or null
 
-**Predicates for method *testSetPricePerUnit*:**
+**Predicates for method *setPricePerUnit*:**
 
 | Criterion                        | Predicate  |
 | -------------------------------- | ---------- |
@@ -538,13 +538,13 @@ Version: 1.0
 | Valid                             | V               | setPricePerUnit(0.5)<br/>getPricePerUnit().equals(0.5)<br/><br/>-> true | TesOrderImpl.testSetPricePerUnit() |
 | NULL                              | I               | setPricePerUnit(0.5)<br/>setPricePerUnit(null)<br/>getPricePerUnit().equals(0.5)<br/><br/>-> true (not modified) | TestOrderImpl.testSetPricePerUnit() |
 
-## Method testSetQuantity
+## Method setQuantity
 
-**Criteria for method *testSetQuantity*:**
+**Criteria for method *setQuantity*:**
 
 -quantity parameter is a valid Integer object or null
 
-**Predicates for method *testSetQuantity*:**
+**Predicates for method *setQuantity*:**
 
 | Criterion                        | Predicate  |
 | -------------------------------- | ---------- |
@@ -558,13 +558,13 @@ Version: 1.0
 | Valid                             | V               | setQuantity(10)<br/>getQuantity().equals(10)<br/><br/>-> true | TestOrderImpl.testSetQuantity() |
 | NULL                              | I               | setQuantity(10)<br/>setQuantity(null)<br/>getQuantity().equals(10)<br/><br/>-> true (not modified) | TestOrderImpl.testSetQuantity() |
 
-## Method testSetStatus
+## Method setStatus
 
-**Criteria for method *testSetStatus*:**
+**Criteria for method *setStatus*:**
 
 -status parameter is a valid String object or null
 
-**Predicates for method *testSetStatus*:**
+**Predicates for method *setStatus*:**
 
 | Criterion                        | Predicate  |
 | -------------------------------- | ---------- |
