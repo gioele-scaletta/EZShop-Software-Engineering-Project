@@ -65,7 +65,7 @@ public class testUserImpl {
     }
 
     @Test
-    public void test (){
+    public void testSetId(){
         userad.setId(1);
         assertTrue(userad.getId().equals(1));
         userad.setId(null);

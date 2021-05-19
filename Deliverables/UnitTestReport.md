@@ -1,10 +1,10 @@
 # Unit Testing Documentation
 
-Authors:
+Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scaletta
 
-Date:
+Date: 19/05/2021
 
-Version:
+Version: 1.0
 
 # Contents
 
@@ -28,6 +28,90 @@ Version:
     <We used a bottom-up testing strategy>
 
 # Class UserImpl 
+
+## Method setUsername
+
+**Criteria for method *setUsername*:**
+
+- username parameter is a valid String object or null
+
+**Predicates for method *setUsername*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of String parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setUsername("gioele")<br/>getUsername().equals("gioele")<br/><br/>-> true | TestUserImpl.testSetUsername() |
+| NULL                              | I               | setUsername("gioele")<br/>setUsername(null)<br/>getUsername().equals(10)<br/><br/>-> true (not modified) | TestUserImpl.testSetUsername() |
+
+
+## Method setPassword
+
+**Criteria for method *setPassword*:**
+
+- password parameter is a valid String object or null
+
+**Predicates for method *setPassword*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of String parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setPassword("scaletta")<br/>getPassword().equals("scaletta")<br/><br/>-> true | TestUserImpl.testSetPassword() |
+| NULL                              | I               | setPassword("scaletta")<br/>setPassword(null)<br/>getPassword().equals("scaletta")<br/><br/>-> true (not modified) | TestUserImpl.testSetPassword() |
+
+
+## Method setRole
+
+**Criteria for method *setRole*:**
+
+- role parameter is a valid String object or null
+
+**Predicates for method *setRole*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of String parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setRole(admin_role)<br/>getRole().equals(admin_role)<br/><br/>-> true | TestUserImpl.testSetRole() |
+| NULL                              | I               | setRole(admin_role)<br/>setRole(null)<br/>getRole().equals(admin_role)<br/><br/>-> true (not modified) | TestUserImpl.testSetRole() |
+
+
+## Method setId
+
+**Criteria for method *setId*:**
+
+- id parameter is a valid Integer object or null
+
+**Predicates for method *setId*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of Integer parameter    | Valid      |
+|                                 | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setId(10)<br/>getId().equals(10)<br/><br/>-> true | TestUserImpl.testSetId() |
+| NULL                              | I               | setid(10)<br/>setId(null)<br/>getId().equals(10)<br/><br/>-> true (not modified) | TestUserImpl.testSetId() |
+
 
 ## Method isAllowedRole
 
@@ -59,82 +143,169 @@ Version:
 | NULL                             |  I                |  admin_role=null  <br /> isAllowedRole(admin_role) <br /><br />-> false                 |   testisAllowedRole()|
 
 
-
-
-## Methods canManageUsers
-
-**Criteria for methods *CanManageUsers*:**
-
-- Value of field role
-
-
-**Predicates for methods *canManageUsers*:**
-
-| Criterion                        | Predicate |
-| -------------------------------- | --------- |
-|Value of field role               | Administrator |
-|                                  | Cashier   |
-|                                  | ShopManager  |
-
-**Combination of predicates**:
-
-
-|  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
-|-------|-------|-------|-------|
-| Aministrator                          |  V                     |  user.setRole(admin_role)<br /> user.canManageUsers()<br /><br />-> true|     testcanManageUsers()|
-| Cashier                               |  I               |  user.setRole(cashier_role) <br /> user.canManageUsers()<br /><br />-> false| testcanManageUsers() |
-| ShopManager                           |  I               |  user.setRole(shop_manager_role) <br /> user.canManageUsers()<br /><br />-> false | testcanManageUsers() |
-
-
-## Methods canManageProductList, canManageInventory, canManageAccounting
-
-**Criteria for methods *canManageProductList, canManageInventory, canManageAccounting*:**
-
-- Value of field role
-
-**Predicates for methods *canManageProductList, canManageInventory, canManageAccounting*:**
-
-| Criterion                        | Predicate |
-| -------------------------------- | --------- |
-|Value of field role               | Administrator |
-|                                  | Cashier   |
-|                                  | ShopManager  |
-
-**Combination of predicates**:
-
-|  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
-|-------|-------|-------|-------|
-| Aministrator                          |  V                     |  user.setRole(admin_role)<br /><br /> user.canManageProductList()<br /> user.canManageInventory()<br />user.canManageAccounting()<br /><br />-> true|   testcanManageProductList()<br/>testcanManageInventory()<br/>testcanManageAccounting()  |
-| Cashier                               |  V               |  user.setRole(cashier_role) <br /><br /> user.canManageProductList()<br /> user.canManageInventory()<br />user.canManageAccounting()<br /><br />-> true|   testcanManageProductList()<br/>testcanManageInventory()<br/>testcanManageAccounting() |
-| ShopManager                           |  I               |  user.setRole(shop_manager_role) <br /><br /> user.canManageProductList()<br /> user.canManageInventory()<br />user.canManageAccounting()<br /><br />-> false| testcanManageProductList()<br/>testcanManageInventory()<br/>testcanManageAccounting()  |
-
-
-
-## Methods canManageCustomers, canManageSaleTransactions, canManagePayments
-
-**Criteria for methods *canManageCustomers, canManageSaleTransactions, canManagePayments*:**
-
-- Value of field role
-
-**Predicates for methods *canManageCustomers, canManageSaleTransactions, canManagePayments*:**
-
-| Criterion                        | Predicate |
-| -------------------------------- | --------- |
-| Value of field role              | Administrator |
-|                                  | Cashier   |
-|                                  | ShopManager  |
-
-**Combination of predicates**:
-
-|  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
-|-------|-------|-------|-------|
-| Aministrator                          |  V                     |  user.setRole(admin_role)<br /><br /> user.canManageCustomers()<br /> user.canManageSaleTransactions()<br />user.canManagePayments()<br /><br />-> true|     testcanManageCustomers()<br />testcanManageSaleTransactions()<br />testcanManagePayments()|
-| Cashier                               |  V               |  user.setRole(cashier_role) <br /><br /> user.canManageCustomers()<br /> user.canManageSaleTransactions()<br />user.canManagePayments()<br /><br />-> true|  testcanManageCustomers()<br />testcanManageSaleTransactions()<br />testcanManagePayments()|
-| ShopManager                           |  V               |  user.setRole(shop_manager_role) <br /><br /> user.canManageCustomers()<br /> user.canManageSaleTransactions()<br />user.canManagePayments()<br /><br />-> true|  testcanManageCustomers()<br />testcanManageSaleTransactions()<br />testcanManagePayments()|
-
-
-
 # Class ProductTypeImpl 
+
+## Method setId
+
+**Criteria for method *setId*:**
+
+-id parameter is a valid Integer object or null
+
+**Predicates for method *setId*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of Integer parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setId(10)<br/>getId().equals(10)<br/><br/>-> true | TestTestProductTypeImpl.testSetId() |
+| NULL                              | I               | setid(10)<br/>setId(null)<br/>getId().equals(10)<br/><br/>-> true (not modified) | TestTestProductTypeImpl.testSetId() |
+
+## Method testSetBarCode
+
+**Criteria for method *testSetBarCode*:**
+
+-barCode parameter is a valid String object or null
+
+**Predicates for method *testSetBarCode*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of String parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setBarCode("5701234567899")<br/>getBarCode().equals("5701234567899")<br/><br/>-> true | TestProductTypeImpl.testSetBarCode() |
+| NULL                              | I               | setBarCode("5701234567899")<br/>seBarCode(null)<br/>getBarCode().equals("5701234567899")<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetBarCode() |
+
+## Method testSetProductDiscountRate
+
+**Criteria for method *testSetProductDiscountRate*:**
+
+-discountRate parameter is a valid double object or null
+
+**Predicates for method *testProductDiscountRate*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of double parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the double parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setProductDiscountRate(0.5)<br/>getProductDiscountRate().equals(0.5)<br/><br/>-> true | TestProductTypeImpl.testSetProductDiscountRate() |
+| NULL                              | I               | setProductDiscountRate(0.5)<br/>seProductDiscountRate(null)<br/>getProductDiscountRate().equals(0.5)<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetProductDiscountRate() |
+
+
+## Method testSetProductDescription
+
+**Criteria for method *testSetProductDescription *:**
+
+-ProductDescription  parameter is a valid String object or null
+
+**Predicates for method *testProductDescription*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of String parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setProductDescription ("spaghetti")<br/>getProductDescription().equals("spaghetti")<br/><br/>-> true | TestProductTypeImpl.testProductDescription() |
+| NULL                              | I               | setProductDescription ("spaghetti")<br/>setProductDescription(null)<br/>getProductDescription().equals("spaghetti")<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetProductDescription() |
+
+## Method testSetPricePerUnit
+
+**Criteria for method *testSetPricePerUnit*:**
+
+-discountRate parameter is a valid double object or null
+
+**Predicates for method *testSetPricePerUnit*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of double parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the double parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setPricePerUnit(0.5)<br/>getPricePerUnit().equals(0.5)<br/><br/>-> true | TestProductTypeImpl.testSetPricePerUnit() |
+| NULL                              | I               | setPricePerUnit(0.5)<br/>setPricePerUnit(null)<br/>getPricePerUnit().equals(0.5)<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetPricePerUnit() |
+
+## Method testSetQuantity
+
+**Criteria for method *testSetQuantity*:**
+
+-quantity parameter is a valid Integer object or null
+
+**Predicates for method *testSetQuantity*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of Integer parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setQuantity(10)<br/>getQuantity().equals(10)<br/><br/>-> true | TestProductTypeImpl.testSetQuantity() |
+| NULL                              | I               | setQuantity(10)<br/>setQuantity(null)<br/>getQuantity().equals(10)<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetQuantity() |
+
+# Method testSetNote
+
+**Criteria for method *testSetNote*:**
+
+-note parameter is a valid String object or null
+
+**Predicates for method *testSetNote*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of String parameter     | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setNote("barilla")<br/>getNote().equals("barilla")<br/><br/>-> true | TestProductTypeImpl.testSetNote() |
+| NULL                              | I               | setNote("barilla")<br/>setNote(null)<br/>getNote().equals("barilla")<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetNote() |
+
+# Method testSetLocation
+
+**Criteria for method *testSetLocation*:**
+
+-location parameter is a valid String object or null
+
+**Predicates for method *testSetLocation*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of String parameter     | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setLocation("0-a-1")<br/>getNote().equals("0-a-1")<br/><br/>-> true | TestProductTypeImpl.testSetLocation() |
+| NULL                              | V               | setLocation("")<br/>setNote(null)<br/>getNote().equals("")<br/><br/>-> true (reset) | TestProductTypeImpl.testSetLocation() |
+
 
 ## Method isValidCode
 
@@ -197,6 +368,218 @@ Version:
 |Valid  | Invalid format| I | isValidLocation("a-2-1") <br /> isValidLocation("1b-3") <br /><br />-> false  | testisValidLocation ()|
 |Empty |   -    |  V              | isValidLocation("")  <br /><br />-> true  (location reset values)             |  testisValidLocation ()              |
 |null  |  -     |  V              | isValidLocation(null)  <br /><br />-> true (location reset values)    |testisValidLocation ()|
+
+
+
+# Class CustomerImpl
+
+## Method setCustomerName
+
+- customerName parameter is a valid String object or null
+
+**Predicates for method *setCustomerName*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of String parameter                   | Valid      |
+|                                               | NULL       |
+
+**Combination of predicates**:
+
+
+|  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |setCustomerName("Name2")<br/>getCustomerName( ).equals("Name2")<br/>->true| TestCustomerImpl.testCustomerName() |
+|NULL                               |I                |setCustomerName(null)<br/>getCustomerName( ).equals("Name2")<br/>->true (not modified)| TestCustomerImpl.testCustomerName()|
+
+
+## Method setCustomerCard
+
+- customerCard parameter is a valid String object or null
+
+**Predicates for method *setCustomerCard*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of String parameter                   | Valid      |
+|                                               | NULL       |
+
+**Combination of predicates**:
+
+
+|  Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |setCustomerCard("0123456789")<br/>getCustomerCard( ).equals("0123456789")<br/>->true| TestCustomerImpl.testCustomerCard() |
+|NULL                               |I                |setCustomerCard(null)<br/>getCustomerCard( ).equals("0123456789")<br/>->true (not modified)| TestCustomerImpl.testCustomerCard() |
+
+
+## Method setId
+
+- id parameter is a valid Integer object or null
+
+**Predicates for method *setId*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of Integer parameter                  | Valid      |
+|                                               | NULL       |
+
+**Combination of predicates**:
+
+
+| Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |setId(2)<br/>getId( ).equals(2)<br/>->true| TestCustomerImpl.testCustomerId()|
+|NULL                               |I                |setId(null)<br/>getId( ).equals(2)<br/>->true (not modified)|TestCustomerImpl.testCustomerId()|
+
+
+
+## Method setPoints
+
+- points parameter is a valid Integer object or null
+
+**Predicates for method *setPoints*:**
+
+| Criterion                                     | Predicate  |
+| ----------------------------------------------| -----------|
+|Validity of Integer parameter                  | Valid      |
+|                                               | NULL       |
+
+**Combination of predicates**:
+
+
+| Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
+|-----------------------------------|-----------------|------------------------------|-----------------|
+|Valid                              |V                |setPoints(10)<br/>getPoints( ).equals(10)<br/>->true| TestCustomerImpl.testCustomerPoints() |
+|NULL                               |I                |setPoints(null)<br/>getPoints( ).equals(10)<br/>->true (not modified)| TestCustomerImpl.testCustomerPoints() |
+
+
+
+# Class OrderImpl
+
+## Method setOrderID
+
+**Criteria for method *setOrderID*:**
+
+-id parameter is a valid Integer object or null
+
+**Predicates for method *setOrderID*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of Integer parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setOrderID(10)<br/>getOrderID().equals(10)<br/><br/>-> true | TestOrderImpl.testSetOrderID() |
+| NULL                              | I               | setOrderID(10)<br/>setOrderID(null)<br/>getOrderID().equals(10)<br/><br/>-> true (not modified) | TestOrderImpl.testSetOrderID() |
+
+## Method setBalanceId
+
+**Criteria for method *setBalanceId*:**
+
+-id parameter is a valid Integer object or null
+
+**Predicates for method *setBalanceId*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of Integer parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setBalanceId(10)<br/>getBalanceId().equals(10)<br/><br/>-> true | TestOrderImpl.testBalanceId() |
+| NULL                              | I               | setBalanceId(10)<br/>setBalanceId(null)<br/>getBalanceId().equals(10)<br/><br/>-> true (not modified) | TestOrderImpl.testSetBalanceId() |
+
+## Method testSetProductCode
+
+**Criteria for method *testSetProductCode*:**
+
+-barCode parameter is a valid String object or null
+
+**Predicates for method *testSetProductCode*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of String parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setProductCode("5701234567899")<br/>getProductCode().equals("5701234567899")<br/><br/>-> true | TestOrderImpl.testSetProductCode() |
+| NULL                              | I               | setProductCode("5701234567899")<br/>setProductCode(null)<br/>getProductCode().equals("5701234567899")<br/><br/>-> true (not modified) | TestOrderImpl.testSetProductCode() |
+
+
+## Method testSetPricePerUnit
+
+**Criteria for method *testSetPricePerUnit*:**
+
+-discountRate parameter is a valid double object or null
+
+**Predicates for method *testSetPricePerUnit*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of double parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the double parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setPricePerUnit(0.5)<br/>getPricePerUnit().equals(0.5)<br/><br/>-> true | TesOrderImpl.testSetPricePerUnit() |
+| NULL                              | I               | setPricePerUnit(0.5)<br/>setPricePerUnit(null)<br/>getPricePerUnit().equals(0.5)<br/><br/>-> true (not modified) | TestOrderImpl.testSetPricePerUnit() |
+
+## Method testSetQuantity
+
+**Criteria for method *testSetQuantity*:**
+
+-quantity parameter is a valid Integer object or null
+
+**Predicates for method *testSetQuantity*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of Integer parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the Integer parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setQuantity(10)<br/>getQuantity().equals(10)<br/><br/>-> true | TestOrderImpl.testSetQuantity() |
+| NULL                              | I               | setQuantity(10)<br/>setQuantity(null)<br/>getQuantity().equals(10)<br/><br/>-> true (not modified) | TestOrderImpl.testSetQuantity() |
+
+## Method testSetStatus
+
+**Criteria for method *testSetStatus*:**
+
+-status parameter is a valid String object or null
+
+**Predicates for method *testSetStatus*:**
+
+| Criterion                        | Predicate  |
+| -------------------------------- | ---------- |
+| Validity of String parameter    | Valid      |
+|                                  | NULL       |
+
+**Combination of predicates**:
+
+| Validity of the String parameter | Valid / Invalid | Description of the test case | JUnit test case |
+| --------------------------------- | --------------- | ---------------------------- | --------------- |
+| Valid                             | V               | setProductCode("ok")<br/>getProductCode().equals("ok")<br/><br/>-> true | TestOrderImpl.testSetStatus() |
+| NULL                              | I               | setProductCode("ok")<br/>setProductCode(null)<br/>getProductCode().equals("ok")<br/><br/>-> true (not modified) | TestOrderImpl.testSetStatus() |
+
+
+
 
 # Class SaleTransactionImpl
 
@@ -550,9 +933,13 @@ Version:
 
 | Unit name | JUnit test case |
 |---------|-------|
-| UserImpl | testUserImpl/testUserConstructorGetters() |
-| ProductTypeImpl | testProductTypeImpl/testProductConstructorGetters() |
-
+| UserImpl | testUserImpl/testCanManageUsers() |
+| UserImpl | testUserImpl/testCanManageInventory()|
+| UserImpl | testUserImpl/testCanManageAccounting() |
+| UserImpl | testUserImpl/testCanManageCustomers() |
+| UserImpl | testUserImpl/testManageSaleTransactions() |
+| UserImpl | testUserImpl/testCanManagePayments() |
+| UserImpl | testUserImpl/testCanListProducts() |
 
 ### Code coverage report
 
