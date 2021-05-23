@@ -10,7 +10,7 @@ import org.junit.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+
 
 public class TestEZShop {
 
@@ -175,7 +175,7 @@ public class TestEZShop {
     public boolean compareUsers(User u1, User u2){
         if(u1.getId().equals(u2.getId()) &&
         u1.getId().equals(u2.getId()) &&
-                u1.getRole().equals(u2.getRole()) &&
+                u2.getRole().equals(u1.getRole()) &&
                 u1.getPassword().equals(u2.getPassword()))
         return true;
         return false;
@@ -659,7 +659,7 @@ public class TestEZShop {
 
     private boolean compareProducts(ProductType p1, ProductType p2) {
         if(p1.getId().equals(p2.getId()) &&
-                p1.getBarCode().equals(p2.getBarCode()) &&
+                p1.getBarCode().contentEquals(p2.getBarCode()) &&
                 p1.getNote().equals(p2.getNote()) &&
                 p1.getProductDescription().equals(p2.getProductDescription()))
             return true;
@@ -1311,12 +1311,6 @@ try{
         return false;
 
     }
-
-
-
-
-
-
 
 
 /*
