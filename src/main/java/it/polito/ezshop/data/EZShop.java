@@ -72,6 +72,15 @@ public class EZShop implements EZShopInterface {
             System.out.println("Error with db connection deleting orders");
             e.printStackTrace();
         }
+        try {
+            Statement st = conn.createStatement();
+            String deleteAllBalances = "DELETE FROM BALANCE_OPERATIONS WHERE BalanceId > 0";
+            st.executeUpdate(deleteAllBalances);
+        }
+        catch (Exception e) {
+            System.out.println("Error with db connection deleting orders");
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -767,7 +776,7 @@ public class EZShop implements EZShopInterface {
         }
 
         //Checking if barcode is null or empty and if it is valid
-        if(productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
+        if(productCode ==null || productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -843,7 +852,7 @@ public class EZShop implements EZShopInterface {
         }
 
         //Checking if barcode is null or empty and if it is valid
-        if(productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
+        if(productCode==null || productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -866,6 +875,21 @@ public class EZShop implements EZShopInterface {
             PreparedStatement pstmt = this.conn.prepareStatement(sql);
             pstmt.setString(1, productCode);
             ResultSet rs = pstmt.executeQuery();
+            if(!rs.isBeforeFirst()) {
+                System.out.println("Product with barcode " + productCode + " is not present");
+                return -1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+/*
+        //Checking if product barcode is already present
+        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+            pstmt.setString(1, productCode);
+            ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() != false) {
                 System.out.println("Product with barcode " + productCode + " is already present");
                 return -1;
@@ -874,7 +898,7 @@ public class EZShop implements EZShopInterface {
             e.printStackTrace();
             return -1;
         }
-
+*/
         Double currentBalance = getCurrentBalance();
         if (currentBalance == null) {
             System.out.println("There are some problems with the DB");

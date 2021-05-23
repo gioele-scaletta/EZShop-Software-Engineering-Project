@@ -8,7 +8,9 @@ import static org.junit.Assert.*;
 import org.junit.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class TestEZShop {
 
@@ -171,9 +173,9 @@ public class TestEZShop {
 
 
     public boolean compareUsers(User u1, User u2){
-        if(u1.getId().equals(u2.getId()) ||
-        u1.getId().equals(u2.getId()) ||
-                u1.getRole().equals(u2.getRole()) ||
+        if(u1.getId().equals(u2.getId()) &&
+        u1.getId().equals(u2.getId()) &&
+                u1.getRole().equals(u2.getRole()) &&
                 u1.getPassword().equals(u2.getPassword()))
         return true;
         return false;
@@ -628,8 +630,8 @@ public class TestEZShop {
             //Check correspondence between list got from db and list created manually
             Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
             Integer id2= ezshop.createProductType("spaghettini", "9780072125757", 2.5, "note" );
-            ProductType p1= new ProductTypeImpl(id1, "spaghetti", "5701234567899", 5.0, "nota" );
-            ProductType p2= new ProductTypeImpl(id2, "spaghettini", "9780072125757", 2.5, "note" );
+            ProductType p1= new ProductTypeImpl(id1,  "5701234567899","spaghetti", 5.0, "nota" );
+            ProductType p2= new ProductTypeImpl(id2,  "9780072125757","spaghettini", 2.5, "note" );
             list.add(p1);
             list.add(p2);
 
@@ -656,9 +658,9 @@ public class TestEZShop {
     }
 
     private boolean compareProducts(ProductType p1, ProductType p2) {
-        if(p1.getId().equals(p2.getId()) ||
-                p1.getBarCode().equals(p2.getBarCode()) ||
-                p1.getNote().equals(p2.getNote()) ||
+        if(p1.getId().equals(p2.getId()) &&
+                p1.getBarCode().equals(p2.getBarCode()) &&
+                p1.getNote().equals(p2.getNote()) &&
                 p1.getProductDescription().equals(p2.getProductDescription()))
             return true;
         return false;
@@ -726,7 +728,7 @@ try{
     }
 
     @Test
-    public void testGetproductByDescription(){
+    public void testGetProductByDescription(){
         try{
             ezshop.login("shopmanager", "password");
             // create test prod
@@ -867,8 +869,6 @@ try{
                 ezshop.updatePosition(id1, "a2e");
             });
 
-
-
         //id les than 0
         assertThrows(InvalidProductIdException.class, () -> {
             ezshop.updatePosition(-2, "b-2-c");
@@ -904,6 +904,419 @@ try{
         Assert.fail();
     }
     }
+
+    @Test
+    public void testIssueOrder(){
+    try{
+    ezshop.login("shopmanager", "password");
+    // create test prod
+    Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+
+    //order one valid
+    Integer oid1= ezshop.issueOrder("9780072125757",5,10);
+    //prder two inavlid
+    Integer oid2= ezshop.issueOrder("5701234567899",5,10);
+
+
+    Integer id2= ezshop.createProductType("spaghettioni", "9780072125757", 5.0, "nota" );
+
+    //order 3 valid
+    Integer oid3= ezshop.issueOrder("9780072125757",5,10);
+
+
+    assertTrue(oid1.equals(-1));
+    assertEquals(ezshop.getAllOrders().stream().filter(e -> e.getOrderId().equals(oid2) ||e.getOrderId().equals(oid3)).count(),2);
+
+
+    // quantity less than p0
+    assertThrows(InvalidQuantityException.class, () -> {
+        ezshop.issueOrder( "9780072125757",-1, 3);;
+    });
+
+    // quantity 0
+    assertThrows(InvalidQuantityException.class, () -> {
+        ezshop.issueOrder( "9780072125757",0, 3);;
+    });
+
+
+    // price1
+    assertThrows(InvalidPricePerUnitException.class, () -> {
+        ezshop.issueOrder( "9780072125757",5, -1);;
+    });
+
+    // price2
+    assertThrows(InvalidPricePerUnitException.class, () -> {
+        ezshop.issueOrder( "9780072125757",5, 0 );
+    });
+
+    // Empty productcode
+    assertThrows(InvalidProductCodeException.class, () -> {
+        ezshop.issueOrder("",5,0.5);
+    });
+
+
+    // Null productcode
+    assertThrows(InvalidProductCodeException.class, () -> {
+
+        ezshop.issueOrder(null,5,0.5);
+    });
+
+    // Not number productcode
+    assertThrows(InvalidProductCodeException.class, () -> {
+        ezshop.issueOrder("57a1234567899",5,0.5);
+    });
+
+
+    // Not valid productcode
+    assertThrows(InvalidProductCodeException.class, () -> {
+        ezshop.issueOrder("5701234567",5,0.5);
+    });
+
+
+    ezshop.logout();
+        //  null user
+        assertThrows(UnauthorizedException.class, () -> {
+            ezshop.issueOrder("5701234567899",5,0.5);
+
+        });
+
+        ezshop.login("cashier","password"); // Cashier
+        // Unauthorized user
+        assertThrows(UnauthorizedException.class, () -> {
+            ezshop.issueOrder("5701234567899",5,0.5);
+
+        });
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail();
+    }
+    }
+
+    @Test
+    public void testPayOrderFor(){
+        try{
+            ezshop.login("shopmanager", "password");
+            // create test prod
+            Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+
+            //order one invalid no balance
+            Integer oid0= ezshop.payOrderFor("5701234567899",5,10);
+
+            ezshop.recordBalanceUpdate(200);
+            //invalid order because of prod not present
+            Integer oid1= ezshop.payOrderFor("9780072125757",5,10);
+            //valid order n1
+            Integer oid2= ezshop.payOrderFor("5701234567899",5,10);
+
+
+            Integer id2= ezshop.createProductType("spaghettioni", "9780072125757", 5.0, "nota" );
+
+            //order 3 valid
+            Integer oid3= ezshop.payOrderFor("9780072125757",5,10);
+            Double bal=ezshop.computeBalance();
+
+
+            assertTrue(oid1.equals(-1));
+            assertEquals(ezshop.getAllOrders().stream().filter(e -> e.getOrderId().equals(oid2) ||e.getOrderId().equals(oid3)).count(),2);
+            assertTrue(oid0.equals(-1));
+            //check balance has been correctly updated after payments
+            assertTrue(bal.equals(100.0));
+
+            // quantity less than p0
+            assertThrows(InvalidQuantityException.class, () -> {
+                ezshop.payOrderFor( "9780072125757",-1, 3);;
+            });
+
+            // quantity 0
+            assertThrows(InvalidQuantityException.class, () -> {
+                ezshop.payOrderFor( "9780072125757",0, 3);;
+            });
+
+
+            // price1
+            assertThrows(InvalidPricePerUnitException.class, () -> {
+                ezshop.payOrderFor( "9780072125757",5, -1);;
+            });
+
+            // price2
+            assertThrows(InvalidPricePerUnitException.class, () -> {
+                ezshop.payOrderFor( "9780072125757",5, 0 );
+            });
+
+            // Empty productcode
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.payOrderFor("",5,0.5);
+            });
+
+
+            // Null productcode
+            assertThrows(InvalidProductCodeException.class, () -> {
+
+                ezshop.payOrderFor(null,5,0.5);
+            });
+
+            // Not number productcode
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.payOrderFor("57a1234567899",5,0.5);
+            });
+
+
+            // Not valid productcode
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.payOrderFor("5701234567",5,0.5);
+            });
+
+
+            ezshop.logout();
+            //  null user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.payOrderFor("5701234567899",5,0.5);
+
+            });
+
+            ezshop.login("cashier","password"); // Cashier
+            // Unauthorized user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.payOrderFor("5701234567899",5,0.5);
+
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }}
+
+    @Test
+    public void testPayOrder(){
+        try{
+            ezshop.login("shopmanager", "password");
+            // create test prod
+            Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+            Integer id2= ezshop.createProductType("spaghettini",     "5012345678900", 5.0, "nota" );
+
+            //need aditional order to checke exceptions
+            Integer oid4=ezshop.issueOrder("5012345678900", 5, 10);
+
+            //order one invalid no balance
+            Integer oid0= ezshop.issueOrder("5701234567899",5,10);
+            boolean notok=ezshop.payOrder(oid0);
+
+            ezshop.recordBalanceUpdate(200);
+            //invalid order because of prod not present
+            /*
+            Integer oid1= ezshop.issueOrder("9780072125757",5,4);
+            boolean notok1=ezshop.payOrder(oid1);
+
+             */
+            //valid order n1
+            Integer oid2= ezshop.issueOrder("5701234567899",5,4);
+            boolean ok=ezshop.payOrder(oid2);
+
+            Integer id3= ezshop.createProductType("spaghettioni", "9780072125757", 5.0, "nota" );
+            Double bal=ezshop.computeBalance();
+            assertTrue(bal.equals(180.0));
+
+            //check the order results payed
+            assertEquals(ezshop.getAllOrders().stream().filter(e -> e.getOrderId().equals(oid2) && e.getStatus().equals("PAYED")).count(),1);
+
+
+            //order 3 valid
+            Integer oid3= ezshop.payOrderFor("9780072125757",5,10);
+            boolean notok2=ezshop.payOrder(oid3);
+           bal=ezshop.computeBalance();
+
+            //inexistent orderid
+            boolean notok3=ezshop.payOrder(5);
+
+
+            assertTrue(ok);
+            assertFalse(notok);
+            //assertFalse(notok1);
+            assertFalse(notok2);
+            assertFalse(notok3);
+
+            //check there are two payed order and the status is correctly set
+            assertEquals(ezshop.getAllOrders().stream().filter(e ->  (e.getOrderId().equals(oid2)||e.getOrderId().equals(oid3)) && e.getStatus().equals("PAYED")).count(),2);
+
+            //check balance has been correctly updated after payments
+            assertTrue(bal.equals(130.0));
+
+            //  order id less than 0
+            assertThrows(InvalidOrderIdException.class, () -> {
+                ezshop.payOrder(-5);
+
+            });
+
+            //  order id equals 0
+            assertThrows(InvalidOrderIdException.class, () -> {
+                ezshop.payOrder(0);
+
+            });
+
+            ezshop.logout();
+            //  null user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.payOrder(oid4);
+
+            });
+
+            ezshop.login("cashier","password"); // Cashier
+            // Unauthorized user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.payOrder(oid4);
+
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }}
+
+     @Test
+    public void testRecordOrderArrival(){
+         try{
+             ezshop.login("admin", "password");
+
+             // create test prod
+             Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+             Integer id2= ezshop.createProductType("spaghettini",     "5012345678900", 5.0, "nota" );
+             Integer id3= ezshop.createProductType("spaghettioni", "9780072125757", 5.0, "nota" );
+
+             ezshop.getProductTypeByBarCode("5701234567899").setLocation("a-1-a");
+             ezshop.getProductTypeByBarCode("5012345678900").setLocation("a-1-a");
+             ezshop.recordBalanceUpdate(200);
+
+             //create sample orders for testing
+             //order not completed
+             Integer oid0= ezshop.issueOrder("5701234567899",5,10);
+             //ok
+             Integer oid1= ezshop.payOrderFor("5701234567899",5,4);
+             //no locations set
+             Integer oid2= ezshop.payOrderFor("9780072125757",5,10);
+             //ok for others
+             Integer oid3=ezshop.payOrderFor("5012345678900", 5, 10);
+
+
+         assertFalse(ezshop.recordOrderArrival(oid0));
+         assertTrue(ezshop.recordOrderArrival(oid1));
+         assertTrue(ezshop.getProductTypeByBarCode("9780072125757").getQuantity().equals(5));
+
+
+         //has no assigned location
+         assertThrows(InvalidLocationException.class, () -> {
+             ezshop.recordOrderArrival(oid2);
+         });
+
+         //  order id less than 0
+         assertThrows(InvalidOrderIdException.class, () -> {
+             ezshop.recordOrderArrival(-5);
+
+         });
+
+         //  order id equals 0
+         assertThrows(InvalidOrderIdException.class, () -> {
+             ezshop.recordOrderArrival(0);
+
+         });
+
+         ezshop.logout();
+         //  null user
+         assertThrows(UnauthorizedException.class, () -> {
+             ezshop.payOrder(oid3);
+
+         });
+
+         ezshop.login("cashier","password"); // Cashier
+         // Unauthorized user
+         assertThrows(UnauthorizedException.class, () -> {
+             ezshop.payOrder(oid3);
+
+         });
+
+     } catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail();
+    }
+    }
+
+    @Test
+    public void testGetAllOrders(){
+        try{
+            ezshop.login("admin", "password");
+
+            //Check that if there are no users empty list is returned
+            List<Order> list=new ArrayList<>();
+
+
+            // create test prod
+            Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+            Integer id2= ezshop.createProductType("spaghettini",     "5012345678900", 5.0, "nota" );
+            Integer id3= ezshop.createProductType("spaghettioni", "9780072125757", 5.0, "nota" );
+
+            ezshop.getProductTypeByBarCode("5701234567899").setLocation("1-a-2");
+            ezshop.getProductTypeByBarCode("5012345678900").setLocation("2-b-1");
+            ezshop.recordBalanceUpdate(200);
+
+            //create sample orders for testing
+            //order not completed
+            Integer maxid=ezshop.getCreditsAndDebits(null,null).stream().map(b->b.getBalanceId()).max((Comparator.comparing(Integer::valueOf))).get();
+            Integer oid0= ezshop.issueOrder("5701234567899",5,10);
+            Order o0 = new OrderImpl(0,  "5701234567899",10,5,"ISSUED", oid0);
+            //ok
+            Integer oid1= ezshop.payOrderFor("5701234567899",5,5);
+            Order o1 = new OrderImpl(maxid+1,  "5701234567899",5,5,"PAYED", oid1);
+            //no locations set
+            Integer oid2=ezshop.payOrderFor("5012345678900", 5, 10);
+            Order o2 = new OrderImpl(maxid+2,  "5012345678900",10,5,"PAYED", oid2);
+            //ok for others
+            list.add(o0);
+            list.add(o1);
+            list.add(o2);
+            ;
+
+            List<Order> listmp=new ArrayList<>();
+            listmp=ezshop.getAllOrders();
+            int i=0;
+            while(i<list.size()) {
+                assertTrue(compareOrders(list.get(i),listmp.get(i)));
+                i++;
+            }
+
+            ezshop.logout();
+            //  null user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.getAllOrders();
+            });
+
+            ezshop.login("cashier","password"); // Cashier
+            // Unauthorized user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.getAllOrders();
+            });
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    private boolean compareOrders(Order o1, Order o2) {
+        if(o1.getOrderId().equals(o2.getOrderId()) &&
+                o1.getProductCode().equals(o2.getProductCode()) &&
+                (o1.getQuantity()==o2.getQuantity()) &&
+                o1.getStatus().equals(o2.getStatus()) &&
+                 o1.getPricePerUnit()==o2.getPricePerUnit())
+            return true;
+        return false;
+
+    }
+
+
+
+
+
+
 
 
 /*
