@@ -35,6 +35,7 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public void reset() {
+        loggedIn=null;
         try {
             Statement st = conn.createStatement();
             String deleteAllCustomers = "DELETE FROM CUSTOMERS WHERE CustomerId > 0";
@@ -44,23 +45,51 @@ public class EZShop implements EZShopInterface {
             System.out.println("Error with db connection");
             e.printStackTrace();
         }
-
+        try {
+            Statement st = conn.createStatement();
+            String deleteAllusers = "DELETE FROM USERS WHERE Id > 0";
+            st.executeUpdate(deleteAllusers);
+        }
+        catch (Exception e) {
+            System.out.println("Error with db connection deleting users");
+            e.printStackTrace();
+        }
+        try {
+            Statement st = conn.createStatement();
+            String deleteAllProducts = "DELETE FROM PRODUCTTYPES WHERE productId > 0";
+            st.executeUpdate(deleteAllProducts);
+        }
+        catch (Exception e) {
+            System.out.println("Error with db connection deleting products");
+            e.printStackTrace();
+        }
+        try {
+            Statement st = conn.createStatement();
+            String deleteAllOrders = "DELETE FROM ORDERS WHERE orderId > 0";
+            st.executeUpdate(deleteAllOrders);
+        }
+        catch (Exception e) {
+            System.out.println("Error with db connection deleting orders");
+            e.printStackTrace();
+        }
     }
 
     @Override
     public Integer createUser(String username, String password, String role) throws InvalidUsernameException, InvalidPasswordException, InvalidRoleException {
+
+
         //Check if username is valid
-        if (username.isBlank()) {
+        if (username==null || username.isBlank()) {
             System.out.println("Invalid username");
             throw new InvalidUsernameException();
         }
         //Check if password is valid
-        if (password.isBlank()) {
+        if (password==null || password.isBlank()) {
             System.out.println("Invalid password");
             throw new InvalidPasswordException();
         }
         //Check if role is valid
-        if(role.isBlank() || !UserImpl.isAllowedRole(role)) {
+        if(role==null || role.isBlank() || !UserImpl.isAllowedRole(role)) {
             System.out.println("Invalid role");
             throw new InvalidRoleException();
         }
@@ -233,7 +262,7 @@ public class EZShop implements EZShopInterface {
         }
 
         //Check if role is valid
-        if(role.isBlank() || !UserImpl.isAllowedRole(role)) {
+        if(role==null || role.isBlank() || !UserImpl.isAllowedRole(role)) {
             System.out.println("Invalid role");
             throw new InvalidRoleException();
         }
@@ -326,12 +355,12 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
         //Checking if description is null or empty
-        if(description.isBlank()) {
+        if(description==null || description.isBlank()) {
             System.out.println("Invalid product description");
             throw new InvalidProductDescriptionException();
         }
         //Checking if barcode is null or empty and if it is valid
-        if(productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
+        if(productCode==null || productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -406,17 +435,17 @@ public class EZShop implements EZShopInterface {
             throw new InvalidProductIdException();
         }
         //Checking if description is null or empty
-        if(newDescription.isBlank()) {
+        if(newDescription==null || newDescription.isBlank()) {
             System.out.println("Invalid product description");
             throw new InvalidProductDescriptionException();
         }
         //Checking if barcode is null or empty and if it is valid
-        if(newCode.isBlank()||!ProductTypeImpl.isValidCode(newCode)) {
+        if(newCode==null || newCode.isBlank()||!ProductTypeImpl.isValidCode(newCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
         //Checking if pricePerUnit is >0
-        if(newPrice<=0) {
+        if( newPrice<=0) {
             System.out.println("Invalid price per unit");
             throw new InvalidPricePerUnitException();
         }
@@ -535,7 +564,7 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
         //Checking if barcode is null or empty and if it is valid
-        if(barCode.isBlank()||!ProductTypeImpl.isValidCode(barCode)) {
+        if(barCode==null || barCode.isBlank()||!ProductTypeImpl.isValidCode(barCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -551,7 +580,12 @@ public class EZShop implements EZShopInterface {
             System.out.println("Unauthorized access");
             throw new UnauthorizedException();
         }
-
+        if(description==null ||description.equals("")){ //NOT SURE ABOUT THIS API DESCRIPTION IS NOT CLEAR
+            return getAllProductTypes();
+        } else {
+            return getAllProductTypes().stream().filter(e -> e.getProductDescription().contains(description)).collect(Collectors.toList());
+        }
+    /*
         String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.Description=?";
         List<ProductType> products = new ArrayList<>();
         try {
@@ -575,6 +609,8 @@ public class EZShop implements EZShopInterface {
             return null;
         }
         return products;
+
+     */
     }
 
     @Override
@@ -642,6 +678,7 @@ public class EZShop implements EZShopInterface {
             return false;
         }
         System.out.println("Quantity " + toBeAdded + " has now been added to the ");
+        System.out.println("tot"+ p.getQuantity());
         return true;
     }
 

@@ -1,32 +1,912 @@
 package it.polito.ezshop.acceptanceTests;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.List;
-
 import it.polito.ezshop.data.*;
+import it.polito.ezshop.model.*;
 import it.polito.ezshop.exceptions.*;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.Assert.*;
+
+import org.junit.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestEZShop {
 
     private static EZShop ezshop;
 
-/*
-    @BeforeAll
-    static void setUpBeforeClass() throws Exception {
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
         ezshop = new EZShop();
     }
 
-    @BeforeEach
-    void setUp() throws Exception {
+    @AfterClass
+    public static void cleanUpAfterClass(){
         ezshop.reset();
-        ezshop.login("giovanni", "password"); //administrator
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        ezshop.reset();
+        //ezshop.logout();
+        ezshop.createUser("admin","password","Administrator");
+        ezshop.createUser("shopmanager","password","ShopManager");
+        ezshop.createUser("cashier","password","Cashier");
+    }
+
+    @Test
+    public void testCreateUser (){
+        try {
+            // First user
+            Integer id1= ezshop.createUser("user1", "password", "Administrator");
+            Integer expected1 = 4;
+
+            // Second user
+            Integer id2 = ezshop.createUser("user2","password2", "ShopManager");
+            Integer expected2 = 5;
+
+            //Third User
+            Integer id4= ezshop.createUser("user3","password2", "Cashier");
+            Integer expected4 = 6;
+
+            // Username is not unique
+            Integer id3 = ezshop.createUser("user1","password3","Administrator");
+            Integer expected3 = -1;
+            //MISSING DB PROBLEMS return -1
+
+            // Asserts
+            assertEquals (expected1, id1);
+            assertEquals (expected2, id2);
+            assertEquals (expected4, id4);
+            assertEquals (expected3, id3);
+
+            // Empty username
+            assertThrows(InvalidUsernameException.class, () -> {
+                ezshop.createUser("","password", "Cashier");
+            });
+
+            // username is null
+            assertThrows(InvalidUsernameException.class, () -> {
+                ezshop.createUser( null, "password", "Cashier" );
+            });
+
+            // Empty password
+            assertThrows(InvalidPasswordException.class, () -> {
+                ezshop.createUser("user5","", "Cashier");
+            });
+
+            // password is null
+            assertThrows(InvalidPasswordException.class, () -> {
+                ezshop.createUser( "user6", null, "Cashier" );
+            });
+
+            // Empty role
+            assertThrows(InvalidRoleException.class, () -> {
+                ezshop.createUser("user7","password", "");
+            });
+
+            // role is null
+            assertThrows(InvalidRoleException.class, () -> {
+                ezshop.createUser( "user8", "password", null );
+            });
+
+            // role is invalid
+            assertThrows(InvalidRoleException.class, () -> {
+                ezshop.createUser( "user9", "password", "cashier" );
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+
+    }
+
+    @Test
+    public void testDeleteUser(){
+        try {
+            ezshop.login("admin","password");
+
+            // Delete user with id = id1
+            Integer id1 = ezshop.createUser("user1","password", "Administrator");
+            Boolean deleted1 = ezshop.deleteUser(id1);
+            User usernull = ezshop.getUser(id1);
+
+            // Delete user with id = id2
+            Integer id2 = ezshop.createUser("user1","password", "Administrator");
+            Boolean deleted2 = ezshop.deleteUser(id2);
+            User usernull2 = ezshop.getUser(id2);
+
+            // Customer with id = 3 does not exist
+            Boolean deleted3 = ezshop.deleteUser(4);
+
+            // Asserts
+            assertTrue(deleted1);
+            assertTrue(deleted2);
+            assertFalse(deleted3);
+            assertNull(usernull);
+            assertNull(usernull2);
+
+            // Customer id is null
+            assertThrows(InvalidUserIdException.class, () -> {
+                ezshop.deleteUser(null);
+            });
+
+            // Customer id equal to 0
+            assertThrows(InvalidUserIdException.class, () -> {
+                ezshop.deleteUser(0);
+            });
+
+            // Customer id less than 0
+            assertThrows(InvalidUserIdException.class, () -> {
+                ezshop.deleteUser(-1);
+            });
+
+
+            Integer id3 = ezshop.createUser("user3","password2", "Cashier");
+            ezshop.logout();
+            //  null user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.deleteUser(id3);
+            });
+
+            ezshop.login("shopmanager", "password"); //Shopmanager
+            // Unauthorized user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.deleteUser(id3);
+            });
+
+            ezshop.logout();
+            ezshop.login("cashier","password"); // Cashier
+            // Unauthorized user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.deleteUser(id3);
+            });
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
     }
 
 
+    public boolean compareUsers(User u1, User u2){
+        if(u1.getId().equals(u2.getId()) ||
+        u1.getId().equals(u2.getId()) ||
+                u1.getRole().equals(u2.getRole()) ||
+                u1.getPassword().equals(u2.getPassword()))
+        return true;
+        return false;
+    }
+
+    @Test
+    public void testGetAllusers(){
+    try{
+        //Check that if there are no users empty list is returned
+        List<User> list=new ArrayList<>();
+        ezshop.reset();
+        //NON FUNZIONA PERCHE OVVIAMENTE LANCIA UNAUTHORIZED
+        //assertEquals(ezshop.getAllUsers().size(),0);
+
+        //Check correspondence between list got from db and list created manually
+        ezshop.createUser("admin","password","Administrator");
+        ezshop.createUser("shopmanager","password","ShopManager");
+        ezshop.createUser("cashier","password","Cashier");
+        User u1= new UserImpl(1, "admin","password","Administrator");
+        User u2= new UserImpl(2, "shopmanager","password","ShopManager");
+        User u3= new UserImpl(3, "cashier","password","Cashier");
+        list.add(u1);
+        list.add(u2);
+        list.add(u3);
+        ezshop.login("admin","password");
+
+        List<User> listmp=new ArrayList<>();
+        listmp=ezshop.getAllUsers();
+        int i=0;
+        while(i<list.size()) {
+            assertTrue(compareUsers(list.get(i),listmp.get(i)));
+        i++;
+        }
+
+        ezshop.logout();
+        //  null user
+        assertThrows(UnauthorizedException.class, () -> {
+            ezshop.getAllUsers();
+        });
+
+        ezshop.login("shopmanager", "password"); //Shopmanager
+        // Unauthorized user
+        assertThrows(UnauthorizedException.class, () -> {
+            ezshop.getAllUsers();
+        });
+
+        ezshop.logout();
+        ezshop.login("cashier","password"); // Cashier
+        // Unauthorized user
+        assertThrows(UnauthorizedException.class, () -> {
+            ezshop.getAllUsers();
+        });
+    }
+        catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail();
+    }
+}
+
+    @Test
+    public void testGetUser(){
+        try {
+
+            ezshop.login("admin", "password");
+
+            // Get User with id = id1
+            int id1= ezshop.createUser("user1", "password", "Administrator");
+            User u1 = ezshop.getUser(id1);
+            User expected1 = new UserImpl(id1, "user1", "password", "Administrator");
+
+
+            // Get User with id = id2
+            int id2= ezshop.createUser("user2", "password2", "Administrator");
+            User u2 = ezshop.getUser(id2);
+            User expected2 = new UserImpl(id2, "user2", "password2", "Administrator");
+
+            // Customer with id = 3 does not exist
+            User u3 = ezshop.getUser(10);
+
+            // Asserts
+            assertTrue(compareUsers(u1,u2));
+
+            assertNull(u3);
+
+            // Customer id is null
+            assertThrows(InvalidUserIdException.class, () -> {
+                ezshop.getUser(null);
+            });
+
+            // Customer id equal to 0
+            assertThrows(InvalidUserIdException.class, () -> {
+                ezshop.getUser(0);
+            });
+
+            // Customer id less than 0
+            assertThrows(InvalidUserIdException.class, () -> {
+                ezshop.getUser(-1);
+            });
+
+
+            ezshop.logout();
+            //  null user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.getUser(2);
+            });
+
+            ezshop.login("shopmanager", "password"); //Shopmanager
+            // Unauthorized user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.getUser(2);
+            });
+
+            ezshop.logout();
+            ezshop.login("cashier","password"); // Cashier
+            // Unauthorized user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.getUser(2);
+            });
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testUpdateUserRights(){
+    try{
+        ezshop.login("admin","password");
+        int id=ezshop.createUser("user1", "password","Administrator" );
+
+        assertTrue(ezshop.updateUserRights(id,"Cashier"));
+        assertTrue(ezshop.getUser(id).getRole().equals("Cashier"));
+        assertFalse(ezshop.updateUserRights(9, "Administrator"));
+
+        // Empty role
+        assertThrows(InvalidRoleException.class, () -> {
+            ezshop.updateUserRights(id, "");
+        });
+
+        // role is null
+        assertThrows(InvalidRoleException.class, () -> {
+            ezshop.updateUserRights( id,  null );
+        });
+
+        // role is invalid
+        assertThrows(InvalidRoleException.class, () -> {
+            ezshop.updateUserRights( id, "cashier" );
+        });
+
+
+        // User id is null
+        assertThrows(InvalidUserIdException.class, () -> {
+            ezshop.updateUserRights(null, "Cashier");
+        });
+
+        // User id equal to 0
+        assertThrows(InvalidUserIdException.class, () -> {
+            ezshop.updateUserRights(0,"Administrator");
+        });
+
+        // User id less than 0
+        assertThrows(InvalidUserIdException.class, () -> {
+            ezshop.updateUserRights(-1,"Administrator");
+        });
+
+
+        ezshop.logout();
+        //  null user
+        assertThrows(UnauthorizedException.class, () -> {
+            ezshop.updateUserRights( id, "Cashier" );
+        });
+
+        ezshop.login("shopmanager", "password"); //Shopmanager
+        // Unauthorized user
+        assertThrows(UnauthorizedException.class, () -> {
+            ezshop.updateUserRights( id, "Cashier" );
+        });
+
+        ezshop.logout();
+        ezshop.login("cashier","password"); // Cashier
+        // Unauthorized user
+        assertThrows(UnauthorizedException.class, () -> {
+            ezshop.updateUserRights( id, "Cashier" );
+        });
+    }
+        catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail();
+    }
+    }
+
+
+
+    @Test
+    public void testCreateProductType(){
+        try {
+        ezshop.login("shopmanager", "password");
+            // First prod
+            Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+            Integer expected1 = 1;
+
+            // Second prod
+            Integer id2 =ezshop.createProductType("spaghettini", "9780072125757", 2.5, "note" );
+            Integer expected2 = 2;
+
+            //Third prod
+            Integer id3=ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+            Integer expected3 = -1;
+
+            // Asserts
+            assertEquals (expected1, id1);
+            assertEquals (expected2, id2);
+            assertEquals (expected3, id3);
+
+            // Empty description
+            assertThrows(InvalidProductDescriptionException.class, () -> {
+                ezshop.createProductType("", "5012345678900", 2.5, "note" );
+            });
+
+            // description is null
+            assertThrows(InvalidProductDescriptionException.class, () -> {
+                ezshop.createProductType(null, "5012345678900", 2.5, "note" );
+            });
+
+            // Empty productcode
+            assertThrows(InvalidProductCodeException.class, () -> {
+
+                    ezshop.createProductType("spaghettoni", "", 2.5, "note" );
+                });
+
+
+            // Null productcode
+            assertThrows(InvalidProductCodeException.class, () -> {
+
+                    ezshop.createProductType("spaghettoni", null, 2.5, "note" );
+            });
+
+            // Not number productcode
+            assertThrows(InvalidProductCodeException.class, () -> {
+
+                    ezshop.createProductType("spaghettoni", "50123456789a0", 2.5, "note" );
+                });
+
+
+            // Not number productcode
+            assertThrows(InvalidProductCodeException.class, () -> {
+
+                    ezshop.createProductType("spaghettoni", "1234567890", 2.5, "note" );
+
+            });
+
+            // price1
+            assertThrows(InvalidPricePerUnitException.class, () -> {
+                ezshop.createProductType("spaghettoni", "5012345678900", -1, "note" );
+            });
+
+            // price2
+            assertThrows(InvalidPricePerUnitException.class, () -> {
+                ezshop.createProductType("spaghettoni", "5012345678900", 0, "note" );
+            });
+
+            ezshop.logout();
+            //  null user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.createProductType("spaghettoni", "5012345678900", 3, "note" );
+            });
+
+            ezshop.login("cashier","password"); // Cashier
+            // Unauthorized user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.createProductType("spaghettoni", "5012345678900", 3, "note" );
+            });
+
+    }
+        catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail();
+    }
+    }
+
+    @Test
+    public void testUpdateProduct(){
+        try {
+            ezshop.login("shopmanager", "password");
+            // create test prod
+            Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+
+            // update prod not found
+            boolean update=ezshop.updateProduct(2,"spaghettini", "9780072125757", 2.5, "note" );
+
+            Integer id2=ezshop.createProductType("spaghettini", "9780072125757", 2.5, "note" );
+            //update newbarcode already present
+            boolean update2=ezshop.updateProduct(id2,"spaghettoni", "5701234567899", 2.5, "note" );
+
+            //update success
+            boolean update3=ezshop.updateProduct(id2,"spaghettoni", "5012345678900", 2.5, "note" );
+
+            // Asserts
+            assertTrue (update3);
+            assertFalse (update2);
+            assertFalse (update);
+
+            //id les than 0
+            assertThrows(InvalidProductIdException.class, () -> {
+                ezshop.updateProduct(-1,"kindermaxi", "4012345678901", 2.5, "note" );
+            });
+
+            //id equal 0
+            assertThrows(InvalidProductIdException.class, () -> {
+                ezshop.updateProduct(0,"kindermaxi", "4012345678901", 2.5, "note" );
+            });
+
+            //id null
+            assertThrows(InvalidProductIdException.class, () -> {
+                ezshop.updateProduct(null,"kindermaxi", "4012345678901", 2.5, "note" );
+            });
+
+            // Empty description
+            assertThrows(InvalidProductDescriptionException.class, () -> {
+                ezshop.updateProduct(id1,"", "4012345678901", 2.5, "note" );
+            });
+
+            // description is null
+            assertThrows(InvalidProductDescriptionException.class, () -> {
+                ezshop.updateProduct(id1,null, "4012345678901", 2.5, "note" );
+            });
+
+            // Empty productcode
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.updateProduct(id1,"spaghettoni", "", 2.5, "note" );
+            });
+
+
+            // Null productcode
+            assertThrows(InvalidProductCodeException.class, () -> {
+
+                ezshop.updateProduct(id1,"spaghettoni", null, 2.5, "note" );
+            });
+
+            // Not number productcode
+            assertThrows(InvalidProductCodeException.class, () -> {
+
+                ezshop.updateProduct(id1,"spaghettoni", "50123456789a0", 2.5, "note" );
+            });
+
+
+            // Not valid productcode
+            assertThrows(InvalidProductCodeException.class, () -> {
+
+                ezshop.updateProduct(id1,"spaghettoni", "1234567890", 2.5, "note" );
+
+            });
+
+            // price1
+            assertThrows(InvalidPricePerUnitException.class, () -> {
+                ezshop.updateProduct(id1,"spaghettoni", "4012345678901", -1, "note" );
+            });
+
+            // price2
+            assertThrows(InvalidPricePerUnitException.class, () -> {
+                ezshop.updateProduct(id2,"spaghettoni", "4012345678901", 0, "note" );
+            });
+
+            ezshop.logout();
+            //  null user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.updateProduct(id2,"spaghettoni", "4012345678901", 2, "note" );
+            });
+
+            ezshop.login("cashier","password"); // Cashier
+            // Unauthorized user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.updateProduct(id2,"spaghettoni", "4012345678901", 2, "note" );
+            });
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testDeleteProductType(){
+        try {
+            ezshop.login("admin", "password");
+            // create test prod
+            Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+
+            Integer id2=ezshop.createProductType("spaghettini", "9780072125757", 2.5, "note" );
+
+            boolean delete=ezshop.deleteProductType(id1);
+            ProductType p=ezshop.getProductTypeByBarCode("5701234567899");
+            boolean delete2=ezshop.deleteProductType(id2);
+            boolean delete1=ezshop.deleteProductType(id1);
+
+            Integer id3= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+
+            // Asserts
+            assertTrue (delete);
+            assertFalse (delete1);
+            assertTrue(delete2);
+            assertNull(p);
+
+
+            //id les than 0
+            assertThrows(InvalidProductIdException.class, () -> {
+                ezshop.deleteProductType(-1 );
+            });
+
+            //id equal 0
+            assertThrows(InvalidProductIdException.class, () -> {
+                ezshop.deleteProductType(0);
+            });
+
+            //id null
+            assertThrows(InvalidProductIdException.class, () -> {
+                ezshop.deleteProductType(null);
+            });
+
+            ezshop.logout();
+            //  null user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.deleteProductType(id3);
+            });
+
+            ezshop.login("cashier","password"); // Cashier
+            // Unauthorized user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.deleteProductType(id3);
+            });
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testGetAllproductTypes() {
+
+
+        try {
+            ezshop.login("admin", "password");
+            //Check that if there are no users empty list is returned
+            List<ProductType> list = new ArrayList<>();
+
+            assertEquals(ezshop.getAllProductTypes().size(),0);
+
+
+            //Check correspondence between list got from db and list created manually
+            Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+            Integer id2= ezshop.createProductType("spaghettini", "9780072125757", 2.5, "note" );
+            ProductType p1= new ProductTypeImpl(id1, "spaghetti", "5701234567899", 5.0, "nota" );
+            ProductType p2= new ProductTypeImpl(id2, "spaghettini", "9780072125757", 2.5, "note" );
+            list.add(p1);
+            list.add(p2);
+
+
+
+            List<ProductType> listmp = new ArrayList<>();
+            listmp = ezshop.getAllProductTypes();
+            int i = 0;
+            while (i < list.size()) {
+                assertTrue(compareProducts(list.get(i), listmp.get(i)));
+                i++;
+            }
+
+            ezshop.logout();
+            //  null user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.getAllProductTypes();
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    private boolean compareProducts(ProductType p1, ProductType p2) {
+        if(p1.getId().equals(p2.getId()) ||
+                p1.getBarCode().equals(p2.getBarCode()) ||
+                p1.getNote().equals(p2.getNote()) ||
+                p1.getProductDescription().equals(p2.getProductDescription()))
+            return true;
+        return false;
+    }
+
+
+    @Test
+    public void testGetProductTypeByBarCode(){
+try{
+    ezshop.login("shopmanager", "password");
+    // create test prod
+
+    Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+    Integer id2=ezshop.createProductType("spaghettini", "9780072125757", 2.5, "note" );
+
+    ProductType p= new ProductTypeImpl(id1, "spaghetti", "5701234567899", 5.0, "nota" );
+    ProductType p1= new ProductTypeImpl(id2, "spaghettini", "9780072125757", 2.5, "note" );
+    ProductType p2=ezshop.getProductTypeByBarCode("4012345678901");
+
+    assertTrue(compareProducts(p,ezshop.getProductTypeByBarCode("5701234567899")));
+    assertTrue(compareProducts(p1,ezshop.getProductTypeByBarCode("9780072125757")));
+    assertNull(p2);
+
+        // Empty productcode
+        assertThrows(InvalidProductCodeException.class, () -> {
+            ezshop.getProductTypeByBarCode("");
+        });
+
+
+        // Null productcode
+        assertThrows(InvalidProductCodeException.class, () -> {
+
+            ezshop.getProductTypeByBarCode(null);
+        });
+
+        // Not number productcode
+        assertThrows(InvalidProductCodeException.class, () -> {
+            ezshop.getProductTypeByBarCode("57a1234567899");
+        });
+
+
+        // Not valid productcode
+        assertThrows(InvalidProductCodeException.class, () -> {
+            ezshop.getProductTypeByBarCode("5701234567");
+        });
+
+    ezshop.logout();
+    //  null user
+    assertThrows(UnauthorizedException.class, () -> {
+        ezshop.getProductTypeByBarCode("5701234567899");
+
+    });
+
+    ezshop.login("cashier","password"); // Cashier
+    // Unauthorized user
+    assertThrows(UnauthorizedException.class, () -> {
+        ezshop.getProductTypeByBarCode("5701234567899");
+
+    });
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail();
+    }
+    }
+
+    @Test
+    public void testGetproductByDescription(){
+        try{
+            ezshop.login("shopmanager", "password");
+            // create test prod
+        Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+        Integer id2=ezshop.createProductType("spaghettini", "9780072125757", 2.5, "note" );
+        Integer id3=ezshop.createProductType("kinder", "4012345678901", 2.5, "note" );
+
+            List<ProductType> list = new ArrayList<>();
+
+            ProductType p1= new ProductTypeImpl(id1, "spaghetti", "5701234567899", 5.0, "nota" );
+            ProductType p2= new ProductTypeImpl(id2, "spaghettini", "9780072125757", 2.5, "note" );
+            ProductType p3= new ProductTypeImpl(id3, "kinder", "4012345678901", 2.5, "note" );
+            list.add(p1);
+            list.add(p2);
+
+
+            List<ProductType> listmp = new ArrayList<>();
+            listmp = ezshop.getProductTypesByDescription("spaghet");
+            int i = 0;
+            while (i < list.size()) {
+                assertTrue(compareProducts(list.get(i), listmp.get(i)));
+                i++;
+            }
+
+            list.add(p3);
+            listmp = ezshop.getProductTypesByDescription("");
+            i = 0;
+            while (i < list.size()) {
+                assertTrue(compareProducts(list.get(i), listmp.get(i)));
+                i++;
+            }
+
+            listmp = ezshop.getProductTypesByDescription(null);
+             i = 0;
+            while (i < list.size()) {
+                assertTrue(compareProducts(list.get(i), listmp.get(i)));
+                i++;
+            }
+
+            ezshop.logout();
+            //  null user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.getProductTypesByDescription("4012345678901");
+
+            });
+
+            ezshop.login("cashier","password"); // Cashier
+            // Unauthorized user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.getProductTypesByDescription("5701234567899");
+
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testUpdateQuantity(){
+        try{
+            ezshop.login("shopmanager", "password");
+            // create test prod
+            Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+            assertFalse(ezshop.updateQuantity(id1, 5));
+            ezshop.updatePosition(id1,"1-a-2");
+
+            assertTrue(ezshop.updateQuantity(id1, 5));
+            assertTrue(ezshop.updateQuantity(id1, -2));
+            assertTrue(ezshop.getProductTypeByBarCode("5701234567899").getQuantity().equals(3));
+            assertFalse(ezshop.updateQuantity(id1, -6));
+            assertFalse(ezshop.updateQuantity(2, 5));
+
+            //id les than 0
+            assertThrows(InvalidProductIdException.class, () -> {
+                ezshop.updateQuantity(-2, 6);
+            });
+
+            //id equal 0
+            assertThrows(InvalidProductIdException.class, () -> {
+                ezshop.updateQuantity(0, 6);
+            });
+
+            //id null
+            assertThrows(InvalidProductIdException.class, () -> {
+                ezshop.updateQuantity(null, 6);
+            });
+
+
+            ezshop.logout();
+            //  null user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.updateQuantity(id1, 6);
+
+            });
+
+            ezshop.login("cashier","password"); // Cashier
+            // Unauthorized user
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.updateQuantity(id1, 6);
+
+            });
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail();
+    }
+    }
+
+    @Test
+    public void testUpdatePosition(){
+        try{
+
+            ezshop.login("shopmanager", "password");
+            // create test prod
+            Integer id1= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+            assertTrue(ezshop.updatePosition(id1,"1-a-2"));
+            assertTrue(ezshop.getProductTypeByBarCode("5701234567899").getLocation().equals("1-a-2"));
+            assertFalse(ezshop.updatePosition(5,"1-a-2"));
+
+            assertThrows(InvalidLocationException.class, () -> {
+                ezshop.updatePosition(id1, "1-2-c");
+            });
+            assertThrows(InvalidLocationException.class, () -> {
+                ezshop.updatePosition(id1, "a-a-c");
+            });
+            assertThrows(InvalidLocationException.class, () -> {
+                ezshop.updatePosition(id1, "a-2-2");
+            });
+            assertThrows(InvalidLocationException.class, () -> {
+                ezshop.updatePosition(id1, "a--c");
+            });
+            assertThrows(InvalidLocationException.class, () -> {
+                ezshop.updatePosition(id1, "a2-e");
+            });
+            assertThrows(InvalidLocationException.class, () -> {
+                ezshop.updatePosition(id1, "a2e");
+            });
+
+
+
+        //id les than 0
+        assertThrows(InvalidProductIdException.class, () -> {
+            ezshop.updatePosition(-2, "b-2-c");
+        });
+
+        //id equal 0
+        assertThrows(InvalidProductIdException.class, () -> {
+            ezshop.updatePosition(0, "b-2-c");
+        });
+
+        //id null
+        assertThrows(InvalidProductIdException.class, () -> {
+            ezshop.updatePosition(null, "b-2-c");
+        });
+
+
+        ezshop.logout();
+        //  null user
+        assertThrows(UnauthorizedException.class, () -> {
+            ezshop.updatePosition(id1, "b-2-c");
+
+        });
+
+        ezshop.login("cashier","password"); // Cashier
+        // Unauthorized user
+        assertThrows(UnauthorizedException.class, () -> {
+            ezshop.updatePosition(id1, "b-2-c");
+
+        });
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail();
+    }
+    }
+
+
+/*
     @Test
     void testDefineCustomer() {
 
