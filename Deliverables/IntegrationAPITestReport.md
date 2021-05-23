@@ -39,26 +39,24 @@ Version:
    <define below a table for each integration step. For each integration step report the group of classes under test, and the names of
      JUnit test cases applied to them> JUnit test classes should be here src/test/java/it/polito/ezshop
 
-## Step 1
+## Step 1 - Unit testing
+| Classes  | JUnit test cases |
+|--|--|
+|model.OrderImpl|unitTest.testOrderImpl|
+|model.UserImpl|unitTest.testUserImpl|
+|model.ProductTypeImpl|unitTest.testProductTypeImpl|
+
+## Step 2 - EzShop private low level methods
 | Classes  | JUnit test cases |
 |--|--|
 |||
 
 
-## Step 2
-| Classes  | JUnit test cases |
-|--|--|
-|||
-
-
-## Step n 
-
-   
+## Step 3 -API test
 
 | Classes  | JUnit test cases |
 |--|--|
-|||
-
+|EZShop| TestEzShop|
 
 
 
@@ -68,16 +66,87 @@ Version:
 <If needed, define here additional scenarios for the application. Scenarios should be named
  referring the UC in the OfficialRequirements that they detail>
 
-## Scenario UCx.y
+##### Scenario UC1.4 Delete product
 
-| Scenario |  name |
+| Scenario |  Delete product type |
 | ------------- |:-------------:| 
-|  Precondition     |  |
-|  Post condition     |   |
+|  Precondition     | Employee C exists and is logged in |
+|  | Product type X exists |
+|  Post condition     | X deleted |
 | Step#        | Description  |
-|  1     |  ... |  
-|  2     |  ... |
+|  1    |  C searches X via bar code |
+|  2    |  C selects X's record |
+|  3    |  C deletes X |
+|  4   |  C confirms the update |
 
+##### Scenario UC1.5 Get List of products
+
+| Scenario |  List product types |
+| ------------- |:-------------:| 
+|  Precondition     | Employee C exists and is logged in |
+|  | Product list is not empty |
+|  Post condition     | list returned |
+| Step#        | Description  |
+|  1    |  C requests list of products|
+|  2    |  C receives list of products |
+
+##### Scenario UC1.6 Search a product
+
+| Scenario |  List product types |
+| ------------- |:-------------:| 
+|  Precondition     | Employee C exists and is logged in |
+|  | Product list is not empty |
+|  Post condition     | list returned |
+| Step#        | Description  |
+|  1    |  C inserts barcode of product to be searched |
+|1| C inserts the description (or part of it) of the products he is looking for |
+|  2    |  C receives the product/products |
+
+##### Scenario UC2.4 Get list of Users
+
+| Scenario |  List Users |
+| ------------- |:-------------:| 
+|  Precondition     | Employee C exists and is logged in |
+|  | Users list is not empty |
+|  Post condition     | list returned |
+| Step#        | Description  |
+|  1    |  C requests list of users|
+|  2    |  C receives list of users |
+
+#### Scenario UC2.5 Search a user
+
+| Scenario |  List product types |
+| ------------- |:-------------:| 
+|  Precondition     | Employee C exists and is logged in |
+|  | Users list  is not empty |
+|  Post condition     | list returned |
+| Step#        | Description  |
+|  1    |  C inserts id of user to be searched |
+|  2    |  C receives the user |
+
+##### Scenario UC3.4 Update product Quantity
+
+| Scenario |  Delete product type |
+| ------------- |:-------------:| 
+|  Precondition     | Employee C exists and is logged in |
+|  | Product type X exists |
+|  Post condition     | X quantity updated |
+| Step#        | Description  |
+|  1    |  C searches X via bar code |
+|  2    |  C selects X's record |
+|  3    |  C modifies X's quantity |
+|  4   |  C confirms the update |
+
+##### Scenario UC3.5 Get lists of Orders
+
+| Scenario |  List Orders |
+| ------------- |:-------------:| 
+|  Precondition     | Employee C exists and is logged in |
+|  | Orders list is not empty |
+|  Post condition     | list returned |
+| Step#        | Description  |
+|  1    |  C requests list of orders|
+|  2    |  C receives list of orders |
 
 
 # Coverage of Scenarios and FR
@@ -91,13 +160,26 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 
 | Scenario ID | Functional Requirements covered | JUnit  Test(s) | 
 | ----------- | ------------------------------- | ----------- | 
-|  ..         | FRx                             |             |             
-|  ..         | FRy                             |             |             
-| ...         |                                 |             |             
-| ...         |                                 |             |             
-| ...         |                                 |             |             
-| ...         |                                 |             |             
-
+|  1.1      | FR3.1                             |  TestEzShop.testCreateProductType()           |        
+|  1.2       | FR4.2                        |   TestEzShop.testUpdatePosition()          |
+|  1.3        | "                          |   TestEzShop.testUpdateProduct()          |             
+| 1.4        |   FR3.2                            |    TestEzShop.testDeeleteProductType()       |             
+| 1.5        |        FR3.3                         |  TestEzShop.testGetAllProductTypes()           |             
+| 1.6        |   FR3.4                              |   TestEzShop.testGetProductTypeByBarCode()          |             
+|   "       |    "                         |   TestEzShop.testGetProductByDescription()          |             
+|2.1|FR1.1|TestEzShop.testCreateUser()|
+|2.2|FR1.2|TestEzShop.testDeleteUser()|
+|2.3|FR1.5|TestEzShop.testUpdateUserRights()|
+|2.4|FR1.3|TestEzShop.testGetAllUsers()|
+|2.5|FR1.4|TestEzShop.testGetUser()|
+|3.1|FR4.3|TestEzShop.testIssueOrder()|
+|3.2|FR4.4|TestEzShop.testPayOrderFor()|
+|"|FR4.5|TestEzShop.testPayOrder()|
+|3.3|FR4.6|TestEzShop.testrecordOrderArrival()|
+|3.4|FR4.1|TestEZShop.testUpdateQuanity()|
+|3.5|FR4.7|TestEZShop.testGetAllOrders()|
+|5.1|FR1.5|TestEZShop.testLogin()|
+|5.2|"|TestEZShop.testLogout()|
 
 
 # Coverage of Non Functional Requirements
@@ -110,6 +192,6 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 
 | Non Functional Requirement | Test name |
 | -------------------------- | --------- |
-|                            |           |
+|  NFR2                      |  TestTiming   |
 
 

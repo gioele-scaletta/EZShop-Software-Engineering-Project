@@ -300,12 +300,12 @@ public class EZShop implements EZShopInterface {
     @Override
     public User login(String username, String password) throws InvalidUsernameException, InvalidPasswordException {
         //Checking if username is null or empty
-        if(username.isBlank()) {
+        if(username==null || username.isBlank()) {
             System.out.println("Invalid login username");
             throw new InvalidUsernameException();
         }
         //Checking if password is null or empty
-        if(password.isBlank()) {
+        if(password ==null || password.isBlank()) {
             System.out.println("Invalid login password");
             throw new InvalidPasswordException();
         }
@@ -1047,6 +1047,7 @@ public class EZShop implements EZShopInterface {
         String sql = "SELECT * FROM ORDERS WHERE orderId=?";
         String actualState;
         String productCode;
+        Integer quantity;
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql);
             pstmt.setInt(1,orderId);
@@ -1057,6 +1058,8 @@ public class EZShop implements EZShopInterface {
             }
             actualState = rs.getString("status");
             productCode = rs.getString("productCode");
+            //ADDED TESTING
+            quantity= rs.getInt("quantity");
         } catch (SQLException e) {
             System.err.println("Error with the db connection");
             e.printStackTrace();
@@ -1097,6 +1100,27 @@ public class EZShop implements EZShopInterface {
             System.out.println("Location for product is not set. Set location first");
             throw new InvalidLocationException();
         }
+
+        //ADDED DURING TESTING!!!
+        //UPDATE INVENTORY
+        String sp = "UPDATE PRODUCTTYPES SET Quantity=Quantity+? WHERE BarCode=?";
+
+        try (
+                PreparedStatement pstmt = conn.prepareStatement(sp)) {
+
+            // set the value of the parameter
+
+
+            pstmt.setInt(1, quantity);
+            pstmt.setString(2, productCode);
+
+            //
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
 
         //Searching for orderId and doing preliminary controls
         String sql3 = "UPDATE ORDERS SET status='COMPLETED' WHERE orderId=?";

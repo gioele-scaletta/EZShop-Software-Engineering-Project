@@ -37,6 +37,56 @@ public class TestEZShop {
     }
 
     @Test
+    public void testLogin(){
+        try {
+            User u= ezshop.login("admin","password");
+            User u1= ezshop.login("ciso", "nonesisto");
+
+            assertTrue(u.getRole().equals("Administrator"));
+            assertTrue(u.getUsername().equals("admin"));
+            assertTrue(u.getPassword().equals("password"));
+            assertNull(u1);
+            // Empty username
+            assertThrows(InvalidUsernameException.class, () -> {
+                ezshop.login("","password");
+            });
+
+            // username is null
+            assertThrows(InvalidUsernameException.class, () -> {
+                ezshop.login( null, "password");
+            });
+
+            // Empty password
+            assertThrows(InvalidPasswordException.class, () -> {
+                ezshop.login("shopmanager","");
+            });
+
+            // password is null
+            assertThrows(InvalidPasswordException.class, () -> {
+                ezshop.login( "shopmanager", null );
+            });
+        }  catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testLogout(){
+        try{
+            assertFalse(ezshop.logout());
+            ezshop.login("shopmanager","password");
+            assertTrue(ezshop.logout());
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.deleteUser(1);
+            });
+    }  catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail();
+    }
+}
+
+    @Test
     public void testCreateUser (){
         try {
             // First user
@@ -256,8 +306,8 @@ public class TestEZShop {
             User u3 = ezshop.getUser(10);
 
             // Asserts
-           // assertTrue(compareUsers(u1,u2));
-
+            assertTrue(compareUsers(u1,expected1));
+            assertTrue(compareUsers(u2,expected2));
             assertNull(u3);
 
             // Customer id is null
@@ -661,7 +711,14 @@ public class TestEZShop {
         if(p1.getId().equals(p2.getId()) &&
                 p1.getBarCode().contentEquals(p2.getBarCode()) &&
                 p1.getNote().equals(p2.getNote()) &&
-                p1.getProductDescription().equals(p2.getProductDescription()))
+                p1.getProductDescription().equals(p2.getProductDescription()) &&
+                p1.getQuantity().equals(p2.getQuantity()) &&
+                p1.getLocation().equals(p2.getLocation()) &&
+                p1.getPricePerUnit().equals(p2.getPricePerUnit()) )
+
+
+
+
             return true;
         return false;
     }
@@ -669,7 +726,7 @@ public class TestEZShop {
 
     @Test
     public void testGetProductTypeByBarCode(){
-try{
+    try{
     ezshop.login("shopmanager", "password");
     // create test prod
 
