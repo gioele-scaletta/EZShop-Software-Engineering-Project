@@ -1,5 +1,7 @@
 package it.polito.ezshop.model;
 
+import it.polito.ezshop.data.TicketEntry;
+
 import java.util.Map;
 
 public class ReturnTransactionImpl {
@@ -8,13 +10,13 @@ public class ReturnTransactionImpl {
 
     private Integer returnId;
     private SaleTransactionImpl saleTransaction;
-    private Map<ProductTypeImpl, Integer> returnProducts;
+    private Map<String, TicketEntry> returnProducts;
     private State state;
     private Double amount;
     private PaymentType paymentType;
     private BalanceOperationImpl balanceOperation;
 
-    public ReturnTransactionImpl(Integer returnId, SaleTransactionImpl saleTransaction, Map<ProductTypeImpl, Integer> returnProducts, String state, Double amount, String paymentType, BalanceOperationImpl balanceOperation) {
+    public ReturnTransactionImpl(Integer returnId, SaleTransactionImpl saleTransaction, Map<String, TicketEntry> returnProducts, String state, Double amount, String paymentType, BalanceOperationImpl balanceOperation) {
         this.returnId = returnId;
         this.saleTransaction = saleTransaction;
         this.returnProducts = returnProducts;
@@ -47,12 +49,12 @@ public class ReturnTransactionImpl {
         this.saleTransaction = saleTransaction;
     }
 
-    public Map<ProductTypeImpl, Integer> getReturnProducts() {
+    public Map<String, TicketEntry> getReturnProducts() {
         return returnProducts;
     }
 
     //MARCO: Not tested since it refers to another class, so it's more about integration test
-    public void setReturnProducts(Map<ProductTypeImpl, Integer> returnProducts) {
+    public void setReturnProducts(Map<String, TicketEntry> returnProducts) {
         if (returnProducts == null) {
             return;
         }
@@ -119,8 +121,9 @@ public class ReturnTransactionImpl {
 
     //MARCO: Not tested since it refers to another class, so it's more about integration test
     public void addProduct(ProductTypeImpl productType, Integer quantity) {
+        TicketEntry t=new TicketEntryImpl(productType, quantity);
         // Add product to the returnProducts
-        this.returnProducts.put(productType, quantity);
+        this.returnProducts.put(productType.getBarCode(), t);
         // Update amount applying the product discount and the sale discount, if any
         this.amount += quantity * productType.getPricePerUnit() * (1 - productType.getProductDiscountRate()) * (1 - this.saleTransaction.getDiscountRate());
     }

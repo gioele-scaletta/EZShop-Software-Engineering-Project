@@ -1789,7 +1789,7 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
-        if ((currentSale.getListOfProductsSale().get(product)<amount )){
+        if ((currentSale.getListOfProductsEntries().get(product.getBarCode()).getAmount()<amount )){
            return false;
         }
 
@@ -2261,11 +2261,11 @@ public class EZShop implements EZShopInterface {
         }
 
         if (commit) {
-            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
-                ProductTypeImpl productType = entry.getKey();
+            for (TicketEntry entry : returnTransaction.getReturnProducts().values()) {
+                ProductTypeImpl productType = getProductTypeByCode(entry.getBarCode());
 
                 // Increase the product quantity available on the shelves
-                productType.updateProductQuantity(entry.getValue());
+               productType.updateProductQuantity(entry.getAmount());
                 if (!updatePersistenceProductTypeQuantity(productType)) {
                     System.err.println(methodName + ": There are some problems with the DB");
                     return false;
@@ -2273,7 +2273,7 @@ public class EZShop implements EZShopInterface {
 
                 // Update the transaction status (decreasing the number of units sold by the number of returned one and decreasing the final price)
                 SaleTransactionImpl saleTransaction = returnTransaction.getSaleTransaction();
-                saleTransaction.updateProductQuantity(productType, -entry.getValue());
+                saleTransaction.updateProductQuantity(productType, -entry.getAmount());
                 if (!updatePersistenceSaleTransactionQuantity(saleTransaction)) {
                     System.err.println(methodName + ": There are some problems with the DB");
                     return false;
@@ -2334,10 +2334,10 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
-        for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
+        for (TicketEntry entry : returnTransaction.getReturnProducts().values()) {
             // Decrease the product quantity available on the shelves
-            ProductTypeImpl productType = entry.getKey();
-            productType.updateProductQuantity(-entry.getValue());
+            ProductTypeImpl productType = getProductTypeByCode(entry.getBarCode());
+            productType.updateProductQuantity(-entry.getAmount());
             if (!updatePersistenceProductTypeQuantity(productType)) {
                 System.err.println(methodName + ": There are some problems with the DB");
                 return false;
@@ -2345,7 +2345,7 @@ public class EZShop implements EZShopInterface {
 
             // Update the transaction status (increasing the number of units sold by the number of returned one and increasing the final price)
             SaleTransactionImpl saleTransaction = returnTransaction.getSaleTransaction();
-            saleTransaction.updateProductQuantity(productType, entry.getValue());
+           saleTransaction.updateProductQuantity(productType, entry.getAmount());
             if (!updatePersistenceSaleTransactionQuantity(saleTransaction)) {
                 System.err.println(methodName + ": There are some problems with the DB");
                 return false;
@@ -2824,8 +2824,8 @@ public class EZShop implements EZShopInterface {
                 Double discountRate = rs.getDouble("discountRate");
                 CustomerImpl customer = getCustomerById(rs.getInt("transactionCardId"));
                 BalanceOperationImpl balanceOperation = getBalanceOperationById(rs.getInt("BalanceOperationId"));
-                HashMap<ProductTypeImpl, Integer> listOfProductsSale = getProdListForSaleDB(transactionId);
-                sale = new SaleTransactionImpl(transactionId, state, paymentType, amount, discountRate, customer, balanceOperation, listOfProductsSale);
+                HashMap<String, TicketEntry> listOfProductsEntries = getProdListForSaleDB(transactionId);
+                sale = new SaleTransactionImpl(transactionId, state, paymentType, amount, discountRate, customer, balanceOperation, listOfProductsEntries);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -2837,19 +2837,11 @@ public class EZShop implements EZShopInterface {
     private ProductTypeImpl getProductTypeByCode(String barCode){
 
         //IF PRODUCT IS INVOLVED IN CURRENT SALE THE UP TO DATE INFORMATION ARE STORED ONLY IN RAM AT THE MOMENT
-        List<ProductTypeImpl> prodl=null;
-        if (currentSale != null) {
-            prodl= currentSale.getListOfProductsSale().keySet().stream().filter(e->e.getBarCode().equals(barCode)).collect(Collectors.toList());
-
-            if (prodl.size()>0){
-                // System.out.println("ok");
-                return prodl.get(0);
-            }
-        }
-
+        TicketEntry prodl=null;
+        ProductTypeImpl p=null;
         //Retrieving product
         String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=? ";
-        ProductTypeImpl p;
+
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql);
             pstmt.setString(1,barCode);
@@ -2868,13 +2860,23 @@ public class EZShop implements EZShopInterface {
             Integer aisleId = rs.getInt("aisleID");
             String rackId = rs.getString("rackID");
             Integer levelId = rs.getInt("levelID");
-            p = new ProductTypeImpl(productId,barcode,description,sellPrice,quantity,prodDiscountRate,notes,aisleId,rackId,levelId);
+            if (currentSale != null) {
+                prodl= currentSale.getListOfProductsEntries().get(barCode);
+                if(prodl!=null){
+                    p = new ProductTypeImpl(productId,barcode,description,sellPrice,quantity-prodl.getAmount(),prodDiscountRate,notes,aisleId,rackId,levelId);
+                } else{
+                    p = new ProductTypeImpl(productId, barcode, description, sellPrice, quantity, prodDiscountRate, notes, aisleId, rackId, levelId);
+                }
+            } else {
+                p = new ProductTypeImpl(productId, barcode, description, sellPrice, quantity, prodDiscountRate, notes, aisleId, rackId, levelId);
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
         System.out.println("Data for product with barcode " + barCode + " has been retrieved with success");
-        System.out.println(p);
+
         return p;
 
     }
@@ -2926,13 +2928,14 @@ public class EZShop implements EZShopInterface {
 
        // HashMap<ProductTypeImpl, Integer> map= new HashMap<>();
      //UPDATE SALESANDPRODUCTS TABLE
-      sale.getListOfProductsSale().entrySet().stream().forEach((el)-> {
+      sale.getListOfProductsEntries().values().stream().forEach((el)-> {
        // map=sale.getListOfProductsSale();
        // for(HashMap.Entry<ProductTypeImpl, Integer> el : map.entrySet()){
       //  Iterator it=sale.getListOfProductsSale().entrySet().iterator();
        //         while(it.hasNext()){
 
-            String sl = "INSERT INTO SALESANDPRODUCTS(transactionId,BarCode,Quantity) VALUES(?,?,?)";
+
+            String sl = "INSERT INTO SALESANDPRODUCTS(transactionId,BarCode,description,Quantity, discountRate, pricePerUnit) VALUES(?,?,?,?,?,?)";
 
             try (
                     PreparedStatement pstmt = this.conn.prepareStatement(sl)) {
@@ -2940,8 +2943,11 @@ public class EZShop implements EZShopInterface {
                 // set the value of the parameter
 
                 pstmt.setInt(1, tid);
-                pstmt.setString(2, el.getKey().getBarCode());
-                pstmt.setInt(3, el.getValue());
+                pstmt.setString(2, el.getBarCode());
+                pstmt.setString(3,el.getProductDescription());
+                pstmt.setInt(4, el.getAmount());
+                pstmt.setDouble(5, el.getDiscountRate());
+                pstmt.setDouble(6,el.getPricePerUnit());
                 //
                 pstmt.executeUpdate();
 
@@ -2949,6 +2955,7 @@ public class EZShop implements EZShopInterface {
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
+
 
             //UPDATE INVENTORY
           String sp = "UPDATE PRODUCTTYPES SET Quantity=Quantity-? WHERE BarCode=?";
@@ -2959,8 +2966,8 @@ public class EZShop implements EZShopInterface {
               // set the value of the parameter
 
 
-              pstmt.setInt(1, el.getValue());
-              pstmt.setString(2, el.getKey().getBarCode());
+              pstmt.setInt(1, el.getAmount());
+              pstmt.setString(2, el.getBarCode());
 
               //
               pstmt.executeUpdate();
@@ -3036,20 +3043,20 @@ public class EZShop implements EZShopInterface {
 
     //GET LIST OF PRODUCTS RELATED TO A SALE CAN BE USEFUL FOR RERURN TRANSACTION
 
-    private HashMap<ProductTypeImpl, Integer> getProdListForSaleDB(int tid) {
-        String salesandproductssql = "SELECT BarCode, Quantity FROM SALESANDPRODUCTS WHERE transactionId=?";
-        HashMap< ProductTypeImpl, Integer> map= new HashMap<>();
+    private HashMap<String, TicketEntry> getProdListForSaleDB(int tid) {
+        String salesandproductssql = "SELECT BarCode, description, Quantity, discountRate, pricePerUnit FROM SALESANDPRODUCTS WHERE transactionId=?";
+        HashMap< String, TicketEntry> map= new HashMap<>();
         try (PreparedStatement pstmt  = conn.prepareStatement(salesandproductssql)) {
             // set the value of the parameter
-            pstmt.setDouble(1,tid);
+            pstmt.setInt(1,tid);
             //
             ResultSet rs  = pstmt.executeQuery();
 
             // loop through the result set
             while (rs.next()) {
-                ProductTypeImpl productType = getProductTypeByCode(rs.getString("BarCode"));
-                Integer quantity = rs.getInt("Quantity");
-                map.put(productType, quantity);
+                TicketEntry ticket = new TicketEntryImpl(rs.getString("BarCode"),rs.getString("description"), rs.getInt("Quantity"),rs.getDouble("discountRate"),rs.getDouble("pricePerUnit"));
+
+                map.put(ticket.getBarCode(), ticket);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -3096,7 +3103,7 @@ public class EZShop implements EZShopInterface {
         String query;
 
         query = "SELECT BarCode, Quantity FROM RETURN_PRODUCTS WHERE ReturnId = ?";
-        Map<ProductTypeImpl, Integer> returnProducts = new HashMap<>();
+        Map<String, TicketEntry> returnProducts = new HashMap<>();
         try (PreparedStatement pstmt  = this.conn.prepareStatement(query)) {
             pstmt.setInt(1, returnId);
 
@@ -3104,7 +3111,9 @@ public class EZShop implements EZShopInterface {
             while (rs.next()) {
                 String barCode = rs.getString("BarCode");
                 Integer quantity = rs.getInt("Quantity");
-                returnProducts.put(getProductTypeByCode(barCode), quantity);
+                ProductTypeImpl p=getProductTypeByCode(barCode);
+                TicketEntry t=new TicketEntryImpl(p, quantity);
+                returnProducts.put(t.getBarCode(), t);
             }
         } catch (SQLException e) {
             System.err.println(methodName + ": " + e.getMessage());
@@ -3171,12 +3180,12 @@ public class EZShop implements EZShopInterface {
 
         if (returnTransaction.getReturnProducts() != null) {
             rowCount = 0;
-            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
+            for (TicketEntry entry : returnTransaction.getReturnProducts().values()) {
                 query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
                 try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
                     pstmt.setInt(1, newId);
-                    pstmt.setString(2, entry.getKey().getBarCode());
-                    pstmt.setInt(3, entry.getValue());
+                    pstmt.setString(2, entry.getBarCode());
+                    pstmt.setInt(3, entry.getAmount());
 
                     rowCount = pstmt.executeUpdate();
                 } catch (SQLException e) {
@@ -3230,12 +3239,12 @@ public class EZShop implements EZShopInterface {
 
         if (returnTransaction.getReturnProducts() != null) {
             rowCount = 0;
-            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
+            for (TicketEntry entry : returnTransaction.getReturnProducts().values()) {
                 query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
                 try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
                     pstmt.setInt(1, returnTransaction.getReturnId());
-                    pstmt.setString(2, entry.getKey().getBarCode());
-                    pstmt.setInt(3, entry.getValue());
+                    pstmt.setString(2, entry.getBarCode());
+                    pstmt.setInt(3, entry.getAmount());
 
                     rowCount = pstmt.executeUpdate();
                 } catch (SQLException e) {
@@ -3288,17 +3297,17 @@ public class EZShop implements EZShopInterface {
         String query;
         int rowCount;
 
-        query = "UPDATE PRODUCTTYPES SET Quantity = ? WHERE productId = ?";
+        query = "UPDATE PRODUCTTYPES SET Quantity = ? WHERE BarCode = ?";
         try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
             pstmt.setInt(1, productType.getQuantity());
-            pstmt.setInt(2, productType.getId());
+            pstmt.setString(2, productType.getBarCode());
 
             rowCount = pstmt.executeUpdate();
         } catch (SQLException e) {
             System.err.println(methodName + ": " + e.getMessage());
             return false;
         }
-        System.out.println(methodName + ": updated "+ rowCount +" rows with productId = "+ productType.getId() +" in PRODUCTTYPES table");
+        System.out.println(methodName + ": updated "+ rowCount +" rows with productCode = "+ productType.getBarCode() +" in PRODUCTTYPES table");
 
         return true;
     }
@@ -3333,14 +3342,17 @@ public class EZShop implements EZShopInterface {
         }
         System.out.println(methodName + ": deleted "+ rowCount +" rows with transactionId = "+ saleTransaction.getTicketNumber() +" in SALESANDPRODUCTS table");
 
-        if (saleTransaction.getListOfProductsSale() != null) {
+        if (saleTransaction.getListOfProductsEntries() != null) {
             rowCount = 0;
-            for (Map.Entry<ProductTypeImpl, Integer> entry : saleTransaction.getListOfProductsSale().entrySet()) {
-                query = "INSERT INTO SALESANDPRODUCTS(transactionId, BarCode, Quantity) VALUES(?, ?, ?)";
+            for ( TicketEntry entry : saleTransaction.getListOfProductsEntries().values()) {
+                query = "INSERT INTO SALESANDPRODUCTS(transactionId, BarCode ,description, Quantity,discountRate, pricePerUnit) VALUES(?, ?, ?,?,?,?)";
                 try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
                     pstmt.setInt(1, saleTransaction.getTicketNumber());
-                    pstmt.setString(2, entry.getKey().getBarCode());
-                    pstmt.setInt(3, entry.getValue());
+                    pstmt.setString(2, entry.getBarCode());
+                    pstmt.setString(3,entry.getProductDescription());
+                    pstmt.setInt(4, entry.getAmount());
+                    pstmt.setDouble(5, entry.getDiscountRate());
+                    pstmt.setDouble(6, entry.getPricePerUnit());
 
                     rowCount = pstmt.executeUpdate();
                 } catch (SQLException e) {
