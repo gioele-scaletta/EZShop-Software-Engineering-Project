@@ -2264,17 +2264,20 @@ public class EZShop implements EZShopInterface {
             for (TicketEntry entry : returnTransaction.getReturnProducts().values()) {
                 ProductTypeImpl productType = getProductTypeByCode(entry.getBarCode());
 
-                // Increase the product quantity available on the shelves
-               productType.updateProductQuantity(entry.getAmount());
-                if (!updatePersistenceProductTypeQuantity(productType)) {
-                    System.err.println(methodName + ": There are some problems with the DB");
-                    return false;
-                }
-
                 // Update the transaction status (decreasing the number of units sold by the number of returned one and decreasing the final price)
                 SaleTransactionImpl saleTransaction = returnTransaction.getSaleTransaction();
                 saleTransaction.updateProductQuantity(productType, -entry.getAmount());
                 if (!updatePersistenceSaleTransactionQuantity(saleTransaction)) {
+                    System.err.println(methodName + ": There are some problems with the DB");
+                    return false;
+                }
+
+                //productType = getProductTypeByCode(entry.getBarCode());
+
+                // Increase the product quantity available on the shelves
+
+                productType.updateProductQuantity(entry.getAmount());
+                if (!updatePersistenceProductTypeQuantity(productType)) {
                     System.err.println(methodName + ": There are some problems with the DB");
                     return false;
                 }
@@ -2337,7 +2340,7 @@ public class EZShop implements EZShopInterface {
         for (TicketEntry entry : returnTransaction.getReturnProducts().values()) {
             // Decrease the product quantity available on the shelves
             ProductTypeImpl productType = getProductTypeByCode(entry.getBarCode());
-            productType.updateProductQuantity(-entry.getAmount());
+            productType.updateProductQuantity(entry.getAmount());
             if (!updatePersistenceProductTypeQuantity(productType)) {
                 System.err.println(methodName + ": There are some problems with the DB");
                 return false;

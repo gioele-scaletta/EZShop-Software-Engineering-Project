@@ -299,7 +299,7 @@ public class SaleTransactionImpl implements SaleTransaction {
     public void updateProductQuantity(ProductTypeImpl productType, Integer quantity) {
         for (HashMap.Entry<String, TicketEntry> entry : this.listOfProductsEntries.entrySet()) {
             if (entry.getKey().equals(productType.getBarCode())) {
-                TicketEntry t=new TicketEntryImpl(productType, entry.getValue().getAmount()/*+quantity*/);
+                TicketEntry t=new TicketEntryImpl(productType, entry.getValue().getAmount()+quantity);
                 this.listOfProductsEntries.replace(t.getBarCode(),t);
                 break;
             }
