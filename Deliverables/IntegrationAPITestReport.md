@@ -113,7 +113,7 @@ Version:
 |  1    |  C requests list of users|
 |  2    |  C receives list of users |
 
-#### Scenario UC2.5 Search a user
+##### Scenario UC2.5 Search a user
 
 | Scenario |  List product types |
 | ------------- |:-------------:| 
@@ -148,6 +148,37 @@ Version:
 |  1    |  C requests list of orders|
 |  2    |  C receives list of orders |
 
+##### Scenario UC4.5
+
+| Scenario |  Delete customer record |
+| ------------- |:-------------:| 
+|  Precondition     | Account U for customer Cu existing |
+|  Post condition     | Account U for customer Cu not existing |
+| Step#        | Description  |
+|  1    | User selects customer record U |
+|  2    | U is deleted |
+
+##### Scenario UC4.6
+
+| Scenario |  List all customer records |
+| ------------- |:-------------:| 
+|  Precondition     | Customers list is not empty |
+|  Post condition     | Customer list returned |
+| Step#        | Description  |
+|  1    | User requests list of customers |
+|  2    | User receives list of customers |
+
+##### Scenario UC4.7
+
+| Scenario |  Modify points on a Loyalty card |
+| ------------- |:-------------:| 
+|  Precondition     | Account U for customer Cu existing |
+|  | Loyalty card L attached to U |
+|  Post condition     | Points on a Loyalty card L modified |
+| Step#        | Description  |
+|  1    |  User selects customer record U |
+|  2    |  User modify points on L |
+
 
 # Coverage of Scenarios and FR
 
@@ -178,6 +209,16 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |3.3|FR4.6|TestEzShop.testrecordOrderArrival()|
 |3.4|FR4.1|TestEZShop.testUpdateQuanity()|
 |3.5|FR4.7|TestEZShop.testGetAllOrders()|
+|4.1|FR5.1|TestEZShop.testDefineCustomer()|
+|4.2|FR5.5|TestEZShop.testCreateCard()|
+|"|FR5.6|TestEZShop.testAttachCardToCustomer()|
+|4.3|FR5.3|TestEZShop.testGetCustomer()|
+|"|FR5.1|TestEZShop.testModifyCustomer()|
+|4.4|FR5.3|TestEZShop.testGetCustomer()|
+|"|FR5.1|TestEZShop.testModifyCustomer()|
+|4.5|FR5.2|TestEZShop.testDeleteCustomer()|
+|4.6|FR5.4|TestEZShop.testGetAllCustomers()|
+|4.7|FR5.7|TestEZShop.testModifyPointsOnCard()|
 |5.1|FR1.5|TestEZShop.testLogin()|
 |5.2|"|TestEZShop.testLogout()|
 
