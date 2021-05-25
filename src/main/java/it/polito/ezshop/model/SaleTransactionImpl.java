@@ -170,7 +170,7 @@ public class SaleTransactionImpl implements SaleTransaction {
 
 
 
-            if(this.amount==0) {
+            if(t.getAmount()==0) {
                 this.listOfProductsEntries.remove(product.getBarCode());
 
                 return true;
@@ -281,7 +281,7 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     public boolean isClosed() {
 
-        return (this.state == State.CLOSED ||this.state==State.PAYED);
+        return (this.state == State.CLOSED);
     }
 
     public Integer getProductQuantity(ProductTypeImpl productType) {

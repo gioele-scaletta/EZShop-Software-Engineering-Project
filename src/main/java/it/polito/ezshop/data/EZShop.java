@@ -2008,8 +2008,8 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
-        if(sale.isClosed()){
-            System.err.println(methodName + ": The SaleTransaction is already closed");
+        if(sale.isClosed() ||sale.isPayed()){
+            System.err.println(methodName + ": The SaleTransaction is already closed/payed");
             return false;
         }
 
