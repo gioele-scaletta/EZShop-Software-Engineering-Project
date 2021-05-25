@@ -1373,19 +1373,29 @@ public class TestEZShop {
     }
 
 
-/*
     @Test
-    void testDefineCustomer() {
+    public void testDefineCustomer() {
 
         try {
+
+            // Admin
+            ezshop.login("admin","password");
 
             // First customer
             Integer id1 = ezshop.defineCustomer("Name1");
             Integer expected1 = 1;
 
+            // Cashier
+            ezshop.logout();
+            ezshop.login("cashier","password");
+
             // Second customer
             Integer id2 = ezshop.defineCustomer("Name2");
             Integer expected2 = 2;
+
+            // Shop Manager
+            ezshop.logout();
+            ezshop.login("shopmanager","password");
 
             // Customer name is not unique
             Integer id3 = ezshop.defineCustomer("Name1");
@@ -1426,20 +1436,30 @@ public class TestEZShop {
 
 
     @Test
-    void testGetCustomer() {
+    public void testGetCustomer() {
 
         try {
+
+            // Admin
+            ezshop.login("admin","password");
 
             // Get customer with id = id1
             Integer id1 = ezshop.defineCustomer("Name1");
             CustomerImpl c1 = ezshop.getCustomer(id1);
             CustomerImpl expected1 = new CustomerImpl("Name1", "", id1, 0);
 
+            // Cashier
+            ezshop.logout();
+            ezshop.login("cashier","password");
 
             // Get customer with id = id2
             Integer id2 = ezshop.defineCustomer("Name2");
             CustomerImpl c2 = ezshop.getCustomer(id2);
             CustomerImpl expected2 = new CustomerImpl("Name2", "", id2, 0);
+
+            // Shop Manager
+            ezshop.logout();
+            ezshop.login("shopmanager","password");
 
             // Customer with id = 3 does not exist
             CustomerImpl c3 = ezshop.getCustomer(3);
@@ -1488,17 +1508,28 @@ public class TestEZShop {
     }
 
     @Test
-    void testDeleteCustomer() {
+    public void testDeleteCustomer() {
 
         try {
+
+            // Admin
+            ezshop.login("admin","password");
 
             // Delete customer with id = id1
             Integer id1 = ezshop.defineCustomer("Name1");
             Boolean deleted1 = ezshop.deleteCustomer(id1);
 
+            // Cashier
+            ezshop.logout();
+            ezshop.login("cashier","password");
+
             // Delete customer with id = id1
             Integer id2 = ezshop.defineCustomer("Name2");
             Boolean deleted2 = ezshop.deleteCustomer(id2);
+
+            // Shop Manager
+            ezshop.logout();
+            ezshop.login("shopmanager","password");
 
             // Customer with id = 3 does not exist
             Boolean deleted3 = ezshop.deleteCustomer(3);
@@ -1540,20 +1571,36 @@ public class TestEZShop {
     }
 
     @Test
-    void testGetAllCustomers() {
+    public void testGetAllCustomers() {
 
         try {
+
+            // Admin
+            ezshop.login("admin","password");
 
             // The list of customers is empty
             List<Customer> list1 = ezshop.getAllCustomers();
             assertTrue (list1.size() == 0);
+
+            // Cashier
+            ezshop.logout();
+            ezshop.login("cashier","password");
 
             // The list of customers has two customers
             Integer id1 = ezshop.defineCustomer("Name1");
             Integer id2 = ezshop.defineCustomer("Name2");
             List<Customer> list2 = ezshop.getAllCustomers();
 
+            // Shop Manager
+            ezshop.logout();
+            ezshop.login("shopmanager","password");
+
+            // The list of customers has three customers
+            Integer id3 = ezshop.defineCustomer("Name3");
+            List<Customer> list3 = ezshop.getAllCustomers();
+
             assertTrue (list2.size() == 2);
+            assertTrue (list3.size() == 3);
 
             assertEquals (list2.get(id1-1).getCustomerName(), ezshop.getCustomer(id1).getCustomerName());
             assertEquals (list2.get(id1-1).getCustomerCard(), ezshop.getCustomer(id1).getCustomerCard());
@@ -1582,9 +1629,12 @@ public class TestEZShop {
 
 
     @Test
-    void testModifyCustomer() {
+    public void testModifyCustomer() {
 
         try {
+
+            // Admin
+            ezshop.login("admin","password");
 
             // Modify only customer card
             Integer id1 = ezshop.defineCustomer("Name1");
@@ -1592,12 +1642,20 @@ public class TestEZShop {
             String card1 = ezshop.getCustomer(id1).getCustomerCard();
             String card1Expected = "0000000010";
 
+            // Cashier
+            ezshop.logout();
+            ezshop.login("cashier","password");
+
             // Modify customer name and detach customer card
             Integer id2 = ezshop.defineCustomer("Name2");
             ezshop.modifyCustomer( id2,"Name2", "0000000020");
             ezshop.modifyPointsOnCard("0000000020",5);
             Integer points1 = ezshop.getCustomer(id2).getPoints();
             Integer points1Expected = 5;
+
+            // Shop Manager
+            ezshop.logout();
+            ezshop.login("shopmanager","password");
 
             Boolean modified2 = ezshop.modifyCustomer( id2,"NameModified2", "");
             Integer points2 = ezshop.getCustomer(id2).getPoints();
@@ -1696,17 +1754,28 @@ public class TestEZShop {
     }
 
     @Test
-    void testAttachCardToCustomer() {
+    public void testAttachCardToCustomer() {
 
         try {
+
+            // Admin
+            ezshop.login("admin","password");
 
             // The customer with id=id1 has not a card assigned
             Integer id1 = ezshop.defineCustomer("Name1");
             Boolean attached1 = ezshop.attachCardToCustomer("0000000001", id1);
 
+            // Cashier
+            ezshop.logout();
+            ezshop.login("cashier","password");
+
             // The customer with id=id2 has not a card assigned
             Integer id2 = ezshop.defineCustomer("Name2");
             Boolean attached2 = ezshop.attachCardToCustomer("0000000002", id2);
+
+            // Shop Manager
+            ezshop.logout();
+            ezshop.login("shopmanager","password");
 
             // The customer with id=id2 has a card assigned
             Boolean attached3 = ezshop.attachCardToCustomer("0000000003", id2);
@@ -1772,13 +1841,20 @@ public class TestEZShop {
 
 
     @Test
-    void testCreateCard() {
+    public void testCreateCard() {
 
         try {
+
+            // Admin
+            ezshop.login("admin","password");
 
             // First card in the database
             String card1 = ezshop.createCard();
             String expected1 = "0000000000";
+
+            // Cashier
+            ezshop.logout();
+            ezshop.login("cashier","password");
 
             // The value "0000000000" of card1 is not attached to a customer, so createCard() returns again "0000000000"
             String card2 = ezshop.createCard();
@@ -1786,6 +1862,10 @@ public class TestEZShop {
 
             Integer id2 = ezshop.defineCustomer("Name2");
             ezshop.attachCardToCustomer(card2, id2);
+
+            // Shop Manager
+            ezshop.logout();
+            ezshop.login("shopmanager","password");
 
             String card3 = ezshop.createCard();
             String expected3 = "0000000001";
@@ -1833,18 +1913,28 @@ public class TestEZShop {
 
 
     @Test
-    void testModifyPointsOnCard() {
+    public void testModifyPointsOnCard() {
 
         try {
 
+            // Admin
+            ezshop.login("admin","password");
 
             Integer id1 = ezshop.defineCustomer("Name1");
             ezshop.attachCardToCustomer("0000000001", id1);
             Boolean modifiedPoints1 = ezshop.modifyPointsOnCard("0000000001", 1);
 
+            // Cashier
+            ezshop.logout();
+            ezshop.login("cashier","password");
+
             Integer id2 = ezshop.defineCustomer("Name2");
             ezshop.attachCardToCustomer("0000000002", id2);
             Boolean modifiedPoints2 = ezshop.modifyPointsOnCard("0000000002", 1);
+
+            // Shop Manager
+            ezshop.logout();
+            ezshop.login("shopmanager","password");
 
             Integer id3 = ezshop.defineCustomer("Name3");
             ezshop.attachCardToCustomer("0000000003", id3);
@@ -1904,5 +1994,5 @@ public class TestEZShop {
             e.printStackTrace();
         }
     }
-    */
+
 }
