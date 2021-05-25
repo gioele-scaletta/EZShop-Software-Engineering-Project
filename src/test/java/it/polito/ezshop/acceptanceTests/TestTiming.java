@@ -146,6 +146,38 @@ public class TestTiming {
         }
     }
 
+    @Test(timeout = 500)
+    public void testTimeRecordBalanceUpdate() {
+        try {
+            ezshop.recordBalanceUpdate(50);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeGetCreditsAndDebits() {
+        try {
+            ezshop.recordBalanceUpdate(50);
+            ezshop.getCreditsAndDebits(null,null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testComputeBalance() {
+        try {
+            ezshop.recordBalanceUpdate(50);
+            ezshop.computeBalance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
 
 
 

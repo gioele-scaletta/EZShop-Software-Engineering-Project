@@ -1995,4 +1995,176 @@ public class TestEZShop {
         }
     }
 
+    @Test
+    public void testRecordBalanceUpdate() {
+        try {
+            //Checking if not user logged in is refused
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.recordBalanceUpdate(50);
+            });
+
+            //Checking if cashier operations are refused
+            ezshop.login("cashier", "password");
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.recordBalanceUpdate(50);
+            });
+
+            ezshop.logout();
+
+            //Check from shopmanager perspective
+            ezshop.login("shopmanager", "password");
+            assertTrue(ezshop.recordBalanceUpdate(50));
+            assertTrue(ezshop.recordBalanceUpdate(20));
+            assertTrue(ezshop.recordBalanceUpdate(-10));
+            assertFalse(ezshop.recordBalanceUpdate(-1000));
+
+            List<BalanceOperation>  l = ezshop.getCreditsAndDebits(null,null);
+            assertTrue(l.size() == 3);
+            assertTrue(l.get(0).getType() == "CREDIT");
+            assertTrue(l.get(1).getType() == "CREDIT");
+            assertTrue(l.get(2).getType() == "DEBIT");
+
+            ezshop.logout();
+
+            setUp();
+
+            //Check from administrator perspective
+            ezshop.login("admin", "password");
+
+            assertTrue(ezshop.recordBalanceUpdate(50));
+            assertTrue(ezshop.recordBalanceUpdate(20));
+            assertTrue(ezshop.recordBalanceUpdate(-10));
+            assertFalse(ezshop.recordBalanceUpdate(-1000));
+
+            List<BalanceOperation>  l2 = ezshop.getCreditsAndDebits(null,null);
+            assertTrue(l2.size() == 3);
+            assertTrue(l2.get(0).getType() == "CREDIT");
+            assertTrue(l2.get(1).getType() == "CREDIT");
+            assertTrue(l2.get(2).getType() == "DEBIT");
+
+
+            ezshop.logout();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    //There's no way to test the date interval since there's no way to set it in a balance update
+    //ID test doesn't pass because balance operations still use autoincrement
+    @Test
+    public void getCreditsAndDebits() {
+        try {
+            //Checking if not user logged in is refused
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.getCreditsAndDebits(null, null);
+            });
+
+            //Checking if cashier operations are refused
+            ezshop.login("cashier", "password");
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.getCreditsAndDebits(null, null);
+            });
+            ezshop.logout();
+
+            //Checking from shopmanager perspective
+            ezshop.login("shopmanager","password");
+
+            //Return empty list
+            assertTrue(ezshop.getCreditsAndDebits(null,null).size() == 0);
+
+            //Adding some manual balanceUpdate
+            ezshop.recordBalanceUpdate(1000);
+            ezshop.recordBalanceUpdate(-10);
+            ezshop.recordBalanceUpdate(-200);
+            ezshop.recordBalanceUpdate(250);
+
+            //Testing if content is coherent
+            List<BalanceOperation> l = ezshop.getCreditsAndDebits(null,null);
+
+            assertTrue(l.size() == 4);
+            assertTrue(l.get(0).getType() == "CREDIT");
+            assertTrue(l.get(1).getType() == "DEBIT");
+            assertTrue(l.get(2).getType() == "DEBIT");
+            assertTrue(l.get(3).getType() == "CREDIT");
+
+            assertTrue(l.get(0).getMoney() == 1000);
+            assertTrue(l.get(1).getMoney() == -10);
+            assertTrue(l.get(2).getMoney() == -200);
+            assertTrue(l.get(3).getMoney() == 250);
+
+            ezshop.logout();
+            setUp();
+
+            //Checking from administrator perspective
+            ezshop.login("admin","password");
+
+            //Return empty list
+            assertTrue(ezshop.getCreditsAndDebits(null,null).size() == 0);
+
+            //Adding some manual balanceUpdate
+            ezshop.recordBalanceUpdate(1000);
+            ezshop.recordBalanceUpdate(-10);
+            ezshop.recordBalanceUpdate(-200);
+            ezshop.recordBalanceUpdate(250);
+
+            //Testing if content is coherent
+            List<BalanceOperation> l2 = ezshop.getCreditsAndDebits(null,null);
+
+            assertTrue(l2.size() == 4);
+            assertTrue(l2.get(0).getType() == "CREDIT");
+            assertTrue(l2.get(1).getType() == "DEBIT");
+            assertTrue(l2.get(2).getType() == "DEBIT");
+            assertTrue(l2.get(3).getType() == "CREDIT");
+
+            assertTrue(l2.get(0).getMoney() == 1000);
+            assertTrue(l2.get(1).getMoney() == -10);
+            assertTrue(l2.get(2).getMoney() == -200);
+            assertTrue(l2.get(3).getMoney() == 250);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void computeBalance() {
+        try {
+            ezshop.login("cashier", "password");
+            assertThrows(UnauthorizedException.class, () -> ezshop.computeBalance());
+            ezshop.logout();
+
+            ezshop.login("shopmanager", "password");
+
+            assertTrue(ezshop.computeBalance() == 0);
+
+            ezshop.recordBalanceUpdate(1000);
+            ezshop.recordBalanceUpdate(-10);
+            ezshop.recordBalanceUpdate(-200);
+            ezshop.recordBalanceUpdate(250);
+
+            assertTrue(ezshop.computeBalance() == 1040);
+
+            ezshop.logout();
+
+            setUp();
+
+            ezshop.login("admin", "password");
+
+            assertTrue(ezshop.computeBalance() == 0);
+
+            ezshop.recordBalanceUpdate(1000);
+            ezshop.recordBalanceUpdate(-10);
+            ezshop.recordBalanceUpdate(-200);
+            ezshop.recordBalanceUpdate(250);
+
+            assertTrue(ezshop.computeBalance() == 1040);
+            ezshop.logout();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
 }

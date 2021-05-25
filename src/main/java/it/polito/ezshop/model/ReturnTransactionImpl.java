@@ -98,7 +98,6 @@ public class ReturnTransactionImpl {
         return balanceOperation;
     }
 
-    //MARCO: Not tested since it refers to another class, so it's more about integration test
     public void setBalanceOperation(BalanceOperationImpl balanceOperation) {
         if (balanceOperation == null) {
             return;
