@@ -35,50 +35,78 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public void reset() {
-        loggedIn=null;
+        loggedIn = null;
+        currentSale = null;
         try {
-            Statement st = conn.createStatement();
+            Statement st = this.conn.createStatement();
             String deleteAllCustomers = "DELETE FROM CUSTOMERS WHERE CustomerId > 0";
             st.executeUpdate(deleteAllCustomers);
-        }
-        catch (Exception e) {
-            System.out.println("Error with db connection");
+        } catch (SQLException e) {
+            System.out.println("Error with db connection deleting customers");
             e.printStackTrace();
         }
         try {
-            Statement st = conn.createStatement();
+            Statement st = this.conn.createStatement();
             String deleteAllusers = "DELETE FROM USERS WHERE Id > 0";
             st.executeUpdate(deleteAllusers);
-        }
-        catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("Error with db connection deleting users");
             e.printStackTrace();
         }
         try {
-            Statement st = conn.createStatement();
+            Statement st = this.conn.createStatement();
             String deleteAllProducts = "DELETE FROM PRODUCTTYPES WHERE productId > 0";
             st.executeUpdate(deleteAllProducts);
-        }
-        catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("Error with db connection deleting products");
             e.printStackTrace();
         }
         try {
-            Statement st = conn.createStatement();
+            Statement st = this.conn.createStatement();
             String deleteAllOrders = "DELETE FROM ORDERS WHERE orderId > 0";
             st.executeUpdate(deleteAllOrders);
-        }
-        catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("Error with db connection deleting orders");
             e.printStackTrace();
         }
         try {
-            Statement st = conn.createStatement();
+            Statement st = this.conn.createStatement();
             String deleteAllBalances = "DELETE FROM BALANCE_OPERATIONS WHERE BalanceId > 0";
             st.executeUpdate(deleteAllBalances);
-        }
-        catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("Error with db connection deleting orders");
+            e.printStackTrace();
+        }
+        try {
+            Statement st = this.conn.createStatement();
+            String deleteAllBalances = "DELETE FROM SALETRANSACTIONS";
+            st.executeUpdate(deleteAllBalances);
+        } catch (SQLException e) {
+            System.out.println("Error with db connection deleting sale transactions");
+            e.printStackTrace();
+        }
+        try {
+            Statement st = this.conn.createStatement();
+            String deleteAllBalances = "DELETE FROM SALESANDPRODUCTS";
+            st.executeUpdate(deleteAllBalances);
+        } catch (SQLException e) {
+            System.out.println("Error with db connection deleting products in sale transactions");
+            e.printStackTrace();
+        }
+        try {
+            Statement st = this.conn.createStatement();
+            String deleteAllBalances = "DELETE FROM RETURN_TRANSACTIONS";
+            st.executeUpdate(deleteAllBalances);
+        } catch (SQLException e) {
+            System.out.println("Error with db connection deleting return transactions");
+            e.printStackTrace();
+        }
+        try {
+            Statement st = this.conn.createStatement();
+            String deleteAllBalances = "DELETE FROM RETURN_PRODUCTS";
+            st.executeUpdate(deleteAllBalances);
+        } catch (SQLException e) {
+            System.out.println("Error with db connection deleting products in return transactions");
             e.printStackTrace();
         }
     }
@@ -1106,7 +1134,7 @@ public class EZShop implements EZShopInterface {
         String sp = "UPDATE PRODUCTTYPES SET Quantity=Quantity+? WHERE BarCode=?";
 
         try (
-                PreparedStatement pstmt = conn.prepareStatement(sp)) {
+                PreparedStatement pstmt = this.conn.prepareStatement(sp)) {
 
             // set the value of the parameter
 
@@ -1182,7 +1210,7 @@ public class EZShop implements EZShopInterface {
 
         try {
 
-            Statement st = conn.createStatement();
+            Statement st = this.conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
             // The customer's name should be unique
@@ -1204,7 +1232,7 @@ public class EZShop implements EZShopInterface {
             while (modified) {
                 modified = false;
 
-                Statement st2 = conn.createStatement();
+                Statement st2 = this.conn.createStatement();
                 ResultSet res2 = st2.executeQuery("SELECT * FROM CUSTOMERS");
 
                 while (res2.next()){
@@ -1219,7 +1247,7 @@ public class EZShop implements EZShopInterface {
             }
 
             // Create a new customer into the customer table
-            Statement st3 = conn.createStatement();
+            Statement st3 = this.conn.createStatement();
             String insertCustomer = "INSERT INTO CUSTOMERS (CustomerId, CustomerName, CustomerCard, Points) VALUES ("+id+",'"+customerName+"','', 0)";
             st3.executeUpdate(insertCustomer);
 
@@ -1266,7 +1294,7 @@ public class EZShop implements EZShopInterface {
         try {
 
             // Update customer name if newCustomerName is unique and the id is found
-            Statement st = conn.createStatement();
+            Statement st = this.conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
             Boolean idFound = false;
@@ -1283,7 +1311,7 @@ public class EZShop implements EZShopInterface {
 
             if (!idFound) { return false;}
 
-            Statement st1 = conn.createStatement();
+            Statement st1 = this.conn.createStatement();
             String updateCustomerName = "UPDATE CUSTOMERS SET CustomerName = '"+newCustomerName+"' WHERE CustomerId="+id+" ";
             st1.executeUpdate(updateCustomerName);
 
@@ -1294,11 +1322,11 @@ public class EZShop implements EZShopInterface {
                 // Detach if newCustomerCard is an empty string
                 if (newCustomerCard.isEmpty()){
 
-                    Statement st3 = conn.createStatement();
+                    Statement st3 = this.conn.createStatement();
                     String detachCustomerCard = "UPDATE CUSTOMERS SET CustomerCard = '' WHERE CustomerId="+id+" ";
                     st3.executeUpdate(detachCustomerCard);
 
-                    Statement st4 = conn.createStatement();
+                    Statement st4 = this.conn.createStatement();
                     String removePoints = "UPDATE CUSTOMERS SET Points = 0 WHERE CustomerId="+id+" ";
                     st4.executeUpdate(removePoints);
 
@@ -1308,7 +1336,7 @@ public class EZShop implements EZShopInterface {
                 // Check if newCustomerCard is already attached
                 else {
 
-                    Statement st5 = conn.createStatement();
+                    Statement st5 = this.conn.createStatement();
                     ResultSet res5 = st5.executeQuery("SELECT * FROM CUSTOMERS");
 
                     while (res5.next()){
@@ -1319,7 +1347,7 @@ public class EZShop implements EZShopInterface {
 
                 }
 
-                Statement st6 = conn.createStatement();
+                Statement st6 = this.conn.createStatement();
                 String modifyCustomerCard = "UPDATE CUSTOMERS SET CustomerCard = '"+newCustomerCard+"' WHERE CustomerId="+id+" ";
                 st6.executeUpdate(modifyCustomerCard);
 
@@ -1352,7 +1380,7 @@ public class EZShop implements EZShopInterface {
         try {
 
             // Delete customer if his id is found
-            Statement st = conn.createStatement();
+            Statement st = this.conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
             Boolean idFound = false;
@@ -1365,7 +1393,7 @@ public class EZShop implements EZShopInterface {
 
             if (!idFound) { return false;}
 
-            Statement st1 = conn.createStatement();
+            Statement st1 = this.conn.createStatement();
             String deleteCustomer = "DELETE FROM CUSTOMERS WHERE CustomerId="+id+"";
             st1.executeUpdate(deleteCustomer);
             return true;
@@ -1398,7 +1426,7 @@ public class EZShop implements EZShopInterface {
 
             CustomerImpl c;
 
-            Statement st = conn.createStatement();
+            Statement st = this.conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
             while (res.next()){
@@ -1434,7 +1462,7 @@ public class EZShop implements EZShopInterface {
 
             Customer c;
 
-            Statement st = conn.createStatement();
+            Statement st = this.conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
             while (res.next()){
@@ -1477,7 +1505,7 @@ public class EZShop implements EZShopInterface {
             while (modified) {
                 modified = false;
 
-                Statement st = conn.createStatement();
+                Statement st = this.conn.createStatement();
                 ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
                 while (res.next()){
@@ -1530,7 +1558,7 @@ public class EZShop implements EZShopInterface {
 
         try {
 
-            Statement st = conn.createStatement();
+            Statement st = this.conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
             // Return false if the card is already assigned to another user
@@ -1547,7 +1575,7 @@ public class EZShop implements EZShopInterface {
             }
 
             // Attach card to customer c
-            Statement st2 = conn.createStatement();
+            Statement st2 = this.conn.createStatement();
             String updateCustomer = "UPDATE CUSTOMERS SET CustomerCard = '"+customerCard+"' WHERE CustomerId="+customerId+" ";
             st2.executeUpdate(updateCustomer);
 
@@ -1582,7 +1610,7 @@ public class EZShop implements EZShopInterface {
         try {
 
             Customer c = null;
-            Statement st = conn.createStatement();
+            Statement st = this.conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
 
@@ -1605,7 +1633,7 @@ public class EZShop implements EZShopInterface {
                 return false;
             }
 
-            Statement st2 = conn.createStatement();
+            Statement st2 = this.conn.createStatement();
             String updatePoints = "UPDATE CUSTOMERS SET Points = '"+totalPoints+"' WHERE CustomerCard='"+customerCard+"'";
             st2.executeUpdate(updatePoints);
 
@@ -2261,23 +2289,20 @@ public class EZShop implements EZShopInterface {
         }
 
         if (commit) {
-            for (TicketEntry entry : returnTransaction.getReturnProducts().values()) {
-                ProductTypeImpl productType = getProductTypeByCode(entry.getBarCode());
+            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
+                ProductTypeImpl productType = entry.getKey();
 
-                // Update the transaction status (decreasing the number of units sold by the number of returned one and decreasing the final price)
-                SaleTransactionImpl saleTransaction = returnTransaction.getSaleTransaction();
-                saleTransaction.updateProductQuantity(productType, -entry.getAmount());
-                if (!updatePersistenceSaleTransactionQuantity(saleTransaction)) {
+                // Increase the product quantity available on the shelves
+                productType.updateProductQuantity(entry.getValue());
+                if (!updatePersistenceProductTypeQuantity(productType)) {
                     System.err.println(methodName + ": There are some problems with the DB");
                     return false;
                 }
 
-                //productType = getProductTypeByCode(entry.getBarCode());
-
-                // Increase the product quantity available on the shelves
-
-                productType.updateProductQuantity(entry.getAmount());
-                if (!updatePersistenceProductTypeQuantity(productType)) {
+                // Update the transaction status (decreasing the number of units sold by the number of returned one and decreasing the final price)
+                SaleTransactionImpl saleTransaction = returnTransaction.getSaleTransaction();
+                saleTransaction.updateProductQuantity(productType, -entry.getValue());
+                if (!updatePersistenceSaleTransactionQuantity(saleTransaction)) {
                     System.err.println(methodName + ": There are some problems with the DB");
                     return false;
                 }
@@ -2337,10 +2362,11 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
-        for (TicketEntry entry : returnTransaction.getReturnProducts().values()) {
+        for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
+            ProductTypeImpl productType = entry.getKey();
+
             // Decrease the product quantity available on the shelves
-            ProductTypeImpl productType = getProductTypeByCode(entry.getBarCode());
-            productType.updateProductQuantity(entry.getAmount());
+            productType.updateProductQuantity(-entry.getValue());
             if (!updatePersistenceProductTypeQuantity(productType)) {
                 System.err.println(methodName + ": There are some problems with the DB");
                 return false;
@@ -2348,7 +2374,7 @@ public class EZShop implements EZShopInterface {
 
             // Update the transaction status (increasing the number of units sold by the number of returned one and increasing the final price)
             SaleTransactionImpl saleTransaction = returnTransaction.getSaleTransaction();
-           saleTransaction.updateProductQuantity(productType, entry.getAmount());
+            saleTransaction.updateProductQuantity(productType, entry.getValue());
             if (!updatePersistenceSaleTransactionQuantity(saleTransaction)) {
                 System.err.println(methodName + ": There are some problems with the DB");
                 return false;
@@ -2736,7 +2762,7 @@ public class EZShop implements EZShopInterface {
 
         String getnewid = "SELECT * FROM CUSTOMERS WHERE CustomerId=?";
         CustomerImpl c=null;
-        try (PreparedStatement pstmt  = conn.prepareStatement(getnewid)){
+        try (PreparedStatement pstmt  = this.conn.prepareStatement(getnewid)){
 
             pstmt.setInt(1, transactionCardId);
             ResultSet rs    = pstmt.executeQuery();
@@ -2892,7 +2918,7 @@ public class EZShop implements EZShopInterface {
         String getnewid = "SELECT COALESCE(MAX(transactionId),0) FROM SALETRANSACTIONS";
 
         try (
-                Statement stmt  = conn.createStatement();
+                Statement stmt  = this.conn.createStatement();
                 ResultSet rs    = stmt.executeQuery(getnewid)){
 
             tid=rs.getInt(1);
@@ -2964,7 +2990,7 @@ public class EZShop implements EZShopInterface {
           String sp = "UPDATE PRODUCTTYPES SET Quantity=Quantity-? WHERE BarCode=?";
 
           try (
-                  PreparedStatement pstmt = conn.prepareStatement(sp)) {
+                  PreparedStatement pstmt = this.conn.prepareStatement(sp)) {
 
               // set the value of the parameter
 
@@ -3049,7 +3075,7 @@ public class EZShop implements EZShopInterface {
     private HashMap<String, TicketEntry> getProdListForSaleDB(int tid) {
         String salesandproductssql = "SELECT BarCode, description, Quantity, discountRate, pricePerUnit FROM SALESANDPRODUCTS WHERE transactionId=?";
         HashMap< String, TicketEntry> map= new HashMap<>();
-        try (PreparedStatement pstmt  = conn.prepareStatement(salesandproductssql)) {
+        try (PreparedStatement pstmt  = this.conn.prepareStatement(salesandproductssql)) {
             // set the value of the parameter
             pstmt.setInt(1,tid);
             //
@@ -3057,7 +3083,7 @@ public class EZShop implements EZShopInterface {
 
             // loop through the result set
             while (rs.next()) {
-                TicketEntry ticket = new TicketEntryImpl(rs.getString("BarCode"),rs.getString("description"), rs.getInt("Quantity"),rs.getDouble("discountRate"),rs.getDouble("pricePerUnit"));
+                TicketEntry ticket = new TicketEntryImpl(rs.getString("BarCode"),rs.getString("description"), rs.getInt("Quantity"),rs.getDouble("pricePerUnit"),rs.getDouble("discountRate"));
 
                 map.put(ticket.getBarCode(), ticket);
             }
@@ -3106,7 +3132,7 @@ public class EZShop implements EZShopInterface {
         String query;
 
         query = "SELECT BarCode, Quantity FROM RETURN_PRODUCTS WHERE ReturnId = ?";
-        Map<String, TicketEntry> returnProducts = new HashMap<>();
+        Map<ProductTypeImpl, Integer> returnProducts = new HashMap<>();
         try (PreparedStatement pstmt  = this.conn.prepareStatement(query)) {
             pstmt.setInt(1, returnId);
 
@@ -3114,9 +3140,7 @@ public class EZShop implements EZShopInterface {
             while (rs.next()) {
                 String barCode = rs.getString("BarCode");
                 Integer quantity = rs.getInt("Quantity");
-                ProductTypeImpl p=getProductTypeByCode(barCode);
-                TicketEntry t=new TicketEntryImpl(p, quantity);
-                returnProducts.put(t.getBarCode(), t);
+                returnProducts.put(getProductTypeByCode(barCode), quantity);
             }
         } catch (SQLException e) {
             System.err.println(methodName + ": " + e.getMessage());
@@ -3183,12 +3207,12 @@ public class EZShop implements EZShopInterface {
 
         if (returnTransaction.getReturnProducts() != null) {
             rowCount = 0;
-            for (TicketEntry entry : returnTransaction.getReturnProducts().values()) {
+            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
                 query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
                 try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
                     pstmt.setInt(1, newId);
-                    pstmt.setString(2, entry.getBarCode());
-                    pstmt.setInt(3, entry.getAmount());
+                    pstmt.setString(2, entry.getKey().getBarCode());
+                    pstmt.setInt(3, entry.getValue());
 
                     rowCount = pstmt.executeUpdate();
                 } catch (SQLException e) {
@@ -3242,12 +3266,12 @@ public class EZShop implements EZShopInterface {
 
         if (returnTransaction.getReturnProducts() != null) {
             rowCount = 0;
-            for (TicketEntry entry : returnTransaction.getReturnProducts().values()) {
+            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
                 query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
                 try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
                     pstmt.setInt(1, returnTransaction.getReturnId());
-                    pstmt.setString(2, entry.getBarCode());
-                    pstmt.setInt(3, entry.getAmount());
+                    pstmt.setString(2, entry.getKey().getBarCode());
+                    pstmt.setInt(3, entry.getValue());
 
                     rowCount = pstmt.executeUpdate();
                 } catch (SQLException e) {
@@ -3310,7 +3334,7 @@ public class EZShop implements EZShopInterface {
             System.err.println(methodName + ": " + e.getMessage());
             return false;
         }
-        System.out.println(methodName + ": updated "+ rowCount +" rows with productCode = "+ productType.getBarCode() +" in PRODUCTTYPES table");
+        System.out.println(methodName + ": updated "+ rowCount +" rows with barCode = "+ productType.getBarCode() +" in PRODUCTTYPES table");
 
         return true;
     }
@@ -3347,15 +3371,15 @@ public class EZShop implements EZShopInterface {
 
         if (saleTransaction.getListOfProductsEntries() != null) {
             rowCount = 0;
-            for ( TicketEntry entry : saleTransaction.getListOfProductsEntries().values()) {
-                query = "INSERT INTO SALESANDPRODUCTS(transactionId, BarCode ,description, Quantity,discountRate, pricePerUnit) VALUES(?, ?, ?,?,?,?)";
+            for (TicketEntry ticketEntry : saleTransaction.getListOfProductsEntries().values()) {
+                query = "INSERT INTO SALESANDPRODUCTS(transactionId, BarCode ,description, Quantity, discountRate, pricePerUnit) VALUES(?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
                     pstmt.setInt(1, saleTransaction.getTicketNumber());
-                    pstmt.setString(2, entry.getBarCode());
-                    pstmt.setString(3,entry.getProductDescription());
-                    pstmt.setInt(4, entry.getAmount());
-                    pstmt.setDouble(5, entry.getDiscountRate());
-                    pstmt.setDouble(6, entry.getPricePerUnit());
+                    pstmt.setString(2, ticketEntry.getBarCode());
+                    pstmt.setString(3,ticketEntry.getProductDescription());
+                    pstmt.setInt(4, ticketEntry.getAmount());
+                    pstmt.setDouble(5, ticketEntry.getDiscountRate());
+                    pstmt.setDouble(6, ticketEntry.getPricePerUnit());
 
                     rowCount = pstmt.executeUpdate();
                 } catch (SQLException e) {

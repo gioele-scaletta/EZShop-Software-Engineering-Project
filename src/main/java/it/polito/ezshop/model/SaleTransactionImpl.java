@@ -4,10 +4,8 @@ import it.polito.ezshop.data.BalanceOperation;
 import it.polito.ezshop.data.SaleTransaction;
 import it.polito.ezshop.data.TicketEntry;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class SaleTransactionImpl implements SaleTransaction {
@@ -15,9 +13,6 @@ public class SaleTransactionImpl implements SaleTransaction {
     Integer transactionId;
     Double amount;
     enum State{PAYED, CLOSED, INPROGRESS};
-    public State getState() {
-        return state;
-    }
     State state;
     enum PaymentType{CARD, CASH};
     PaymentType pay;
@@ -47,13 +42,13 @@ public class SaleTransactionImpl implements SaleTransaction {
 
 
     //constructor for loading data from db
-    public SaleTransactionImpl(int transactionId, String stat, String paymentType, double amount, double discountRate, CustomerImpl transactionCardId, BalanceOperationImpl balanceOperationId, HashMap<String,TicketEntry> listOfProductsEntrie/*, HashMap< ProductTypeImpl, Integer> listofprod*/) {
+    public SaleTransactionImpl(int transactionId, String stat, String paymentType, double amount, double discountRate, CustomerImpl transactionCardId, BalanceOperationImpl balanceOperationId, HashMap<String,TicketEntry> listOfProductsEntries/*, HashMap< ProductTypeImpl, Integer> listofprod*/) {
         this.transactionId = transactionId;
         this.state= State.valueOf(stat);
         this.amount = amount;
 		this.discountRate = discountRate;
 		//this.listOfProductsSale=listofprod;
-        this.listOfProductsEntries=listOfProductsEntrie;
+        this.listOfProductsEntries=listOfProductsEntries;
 
 		this.transactionCard = transactionCardId;
 		this.saleOperationRecord = balanceOperationId;
@@ -140,7 +135,6 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     @Override
     public double getPrice() {
-        this.calculateCurrentAmount();
         return this.amount;
     }
 
@@ -178,7 +172,6 @@ public class SaleTransactionImpl implements SaleTransaction {
 
             return true;
         } else{
-            product.setProductDiscountRate(0.0);//NOT NICE BUT FOR NOW BEST SOL TO BE CONSISTENT WITH GUI -> we need to understand why there is a discount rate attribute in producttype and what it is used for and what is the differencen with the discount rate you add from the GUI
             TicketEntry t=new TicketEntryImpl(product,quantity);
             this.listOfProductsEntries.put(product.getBarCode(), t);
 
