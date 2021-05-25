@@ -2103,7 +2103,7 @@ public class EZShop implements EZShopInterface {
             return null;
         }
 
-        if (!sale.isClosed()) {
+        if (!(sale.isClosed()||sale.isPayed())) {
             System.err.println(methodName + ": The SaleTransaction is not closed yet");
             return null;
         }
