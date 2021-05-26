@@ -2550,4 +2550,672 @@ public class TestEZShop {
         }
     }
 
+
+    @Test
+    public void testStartSaleTransaction() {
+        try {
+            // Invoked before a user with role "Administrator", "ShopManager" or "Cashier" is logged in
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.startSaleTransaction();
+            });
+
+            // Invoked after a user with role "Administrator" is logged in
+            ezshop.login("admin","password");
+            assertTrue(ezshop.startSaleTransaction() >= 0);
+            ezshop.logout();
+
+            // Invoked after a user with role "ShopManager" is logged in
+            ezshop.login("shopmanager","password");
+            assertTrue(ezshop.startSaleTransaction() >= 0);
+            ezshop.logout();
+
+            // Invoked after a user with role "Administrator" is logged in
+            ezshop.login("cashier","password");
+            assertTrue(ezshop.startSaleTransaction() >= 0);
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testAddProductToSale() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionIdClosed = ezshop.startSaleTransaction();
+            ezshop.endSaleTransaction(transactionIdClosed);
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            Integer initialProductQuantity = 10;
+            ezshop.updateQuantity(productId, initialProductQuantity);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.addProductToSale(transactionId, "5701234567899", 1);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.addProductToSale(null, "5701234567899", 1);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.addProductToSale(0, "5701234567899", 1);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.addProductToSale(-1, "5701234567899", 1);
+            });
+            ezshop.logout();
+
+            // Check InvalidProductCodeException
+            ezshop.login("admin","password");
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.addProductToSale(transactionId, null, 1);
+            });
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.addProductToSale(transactionId, "", 1);
+            });
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.addProductToSale(transactionId, "0123", 1);
+            });
+            ezshop.logout();
+
+            // Check InvalidQuantityException
+            ezshop.login("admin","password");
+            assertThrows(InvalidQuantityException.class, () -> {
+                ezshop.addProductToSale(transactionId, "5701234567899", -1);
+            });
+            ezshop.logout();
+
+            // Check if the product code does not exist
+            ezshop.login("admin","password");
+            assertFalse(ezshop.addProductToSale(transactionId, "012345678912", 1));
+            ezshop.logout();
+
+            // Check if the quantity of product cannot satisfy the request
+            ezshop.login("admin","password");
+            assertFalse(ezshop.addProductToSale(transactionId, "5701234567899", initialProductQuantity + 1));
+            assertEquals(initialProductQuantity, ezshop.getProductTypeByBarCode("5701234567899").getQuantity());
+            ezshop.logout();
+
+            // Check if the SaleTransaction does not exist or not identify a started and open transaction
+            ezshop.login("admin","password");
+            assertFalse(ezshop.addProductToSale(transactionId + 1, "5701234567899", 1));
+            assertFalse(ezshop.addProductToSale(transactionIdClosed, "5701234567899", 1));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            assertTrue(ezshop.addProductToSale(transactionId, "5701234567899", 1));
+            assertEquals(Integer.valueOf(initialProductQuantity - 1), ezshop.getProductTypeByBarCode("5701234567899").getQuantity());
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testDeleteProductFromSale() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionIdClosed = ezshop.startSaleTransaction();
+            ezshop.endSaleTransaction(transactionIdClosed);
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            Integer initialProductQuantity = 10;
+            ezshop.updateQuantity(productId, initialProductQuantity);
+            Integer productQuantityInSale = 2;
+            ezshop.addProductToSale(transactionId, "5701234567899", productQuantityInSale);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.deleteProductFromSale(transactionId, "5701234567899", 1);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.deleteProductFromSale(null, "5701234567899", 1);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.deleteProductFromSale(0, "5701234567899", 1);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.deleteProductFromSale(-1, "5701234567899", 1);
+            });
+            ezshop.logout();
+
+            // Check InvalidProductCodeException
+            ezshop.login("admin","password");
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.deleteProductFromSale(transactionId, null, 1);
+            });
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.deleteProductFromSale(transactionId, "", 1);
+            });
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.deleteProductFromSale(transactionId, "0123", 1);
+            });
+            ezshop.logout();
+
+            // Check InvalidQuantityException
+            ezshop.login("admin","password");
+            assertThrows(InvalidQuantityException.class, () -> {
+                ezshop.deleteProductFromSale(transactionId, "5701234567899", -1);
+            });
+            ezshop.logout();
+
+            // Check if the product code does not exist
+            ezshop.login("admin","password");
+            assertFalse(ezshop.deleteProductFromSale(transactionId, "012345678912", 1));
+            ezshop.logout();
+
+            // Check if the quantity of product cannot satisfy the request
+            ezshop.login("admin","password");
+            assertFalse(ezshop.deleteProductFromSale(transactionId, "5701234567899", productQuantityInSale + 1));
+            assertEquals(Integer.valueOf(initialProductQuantity - productQuantityInSale), ezshop.getProductTypeByBarCode("5701234567899").getQuantity());
+            ezshop.logout();
+
+            // Check if the SaleTransaction does not exist or not identify a started and open transaction
+            ezshop.login("admin","password");
+            assertFalse(ezshop.deleteProductFromSale(transactionId + 1, "5701234567899", 1));
+            assertFalse(ezshop.deleteProductFromSale(transactionIdClosed, "5701234567899", 1));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            assertTrue(ezshop.deleteProductFromSale(transactionId, "5701234567899", 1));
+            assertEquals(Integer.valueOf(initialProductQuantity - productQuantityInSale + 1), ezshop.getProductTypeByBarCode("5701234567899").getQuantity());
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testApplyDiscountRateToProduct() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionIdClosed = ezshop.startSaleTransaction();
+            ezshop.endSaleTransaction(transactionIdClosed);
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            Integer initialProductQuantity = 10;
+            ezshop.updateQuantity(productId, initialProductQuantity);
+            Integer productQuantityInSale = 2;
+            ezshop.addProductToSale(transactionId, "5701234567899", productQuantityInSale);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.applyDiscountRateToProduct(transactionId, "5701234567899", 0.10);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.applyDiscountRateToProduct(null, "5701234567899", 0.10);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.applyDiscountRateToProduct(0, "5701234567899", 0.10);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.applyDiscountRateToProduct(-1, "5701234567899", 0.10);
+            });
+            ezshop.logout();
+
+            // Check InvalidProductCodeException
+            ezshop.login("admin","password");
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.applyDiscountRateToProduct(transactionId, null, 0.10);
+            });
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.applyDiscountRateToProduct(transactionId, "", 0.10);
+            });
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.applyDiscountRateToProduct(transactionId, "0123", 0.10);
+            });
+            ezshop.logout();
+
+            // Check InvalidDiscountRateException
+            ezshop.login("admin","password");
+            assertThrows(InvalidDiscountRateException.class, () -> {
+                ezshop.applyDiscountRateToProduct(transactionId, "5701234567899", -0.01);
+            });
+            assertThrows(InvalidDiscountRateException.class, () -> {
+                ezshop.applyDiscountRateToProduct(transactionId, "5701234567899", -100.00);
+            });
+            assertThrows(InvalidDiscountRateException.class, () -> {
+                ezshop.applyDiscountRateToProduct(transactionId, "5701234567899", 1.00);
+            });
+            assertThrows(InvalidDiscountRateException.class, () -> {
+                ezshop.applyDiscountRateToProduct(transactionId, "5701234567899", 100.00);
+            });
+            ezshop.logout();
+
+            // Check if the product code does not exist
+            ezshop.login("admin","password");
+            assertFalse(ezshop.applyDiscountRateToProduct(transactionId, "012345678912", 0.10));
+            ezshop.logout();
+
+            // Check if the SaleTransaction does not exist or not identify a started and open transaction
+            ezshop.login("admin","password");
+            assertFalse(ezshop.applyDiscountRateToProduct(transactionId + 1, "5701234567899", 0.10));
+            assertFalse(ezshop.applyDiscountRateToProduct(transactionIdClosed, "5701234567899", 0.10));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            assertTrue(ezshop.applyDiscountRateToProduct(transactionId, "5701234567899", 0.10));
+            assertEquals(productQuantityInSale * 1.25 * (1 - 0.10), ezshop.getSaleTransaction(transactionId).getPrice(), 0.01);
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testApplyDiscountRateToSale() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionIdPayed = ezshop.startSaleTransaction();
+            ezshop.endSaleTransaction(transactionIdPayed);
+            ezshop.receiveCashPayment(transactionIdPayed, 10.00);
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            Integer initialProductQuantity = 10;
+            ezshop.updateQuantity(productId, initialProductQuantity);
+            Integer productQuantityInSale = 2;
+            ezshop.addProductToSale(transactionId, "5701234567899", productQuantityInSale);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.applyDiscountRateToSale(transactionId, 0.10);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.applyDiscountRateToSale(null, 0.10);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.applyDiscountRateToSale(0, 0.10);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.applyDiscountRateToSale(-1, 0.10);
+            });
+            ezshop.logout();
+
+            // Check InvalidDiscountRateException
+            ezshop.login("admin","password");
+            assertThrows(InvalidDiscountRateException.class, () -> {
+                ezshop.applyDiscountRateToSale(transactionId, -0.01);
+            });
+            assertThrows(InvalidDiscountRateException.class, () -> {
+                ezshop.applyDiscountRateToSale(transactionId, -100.00);
+            });
+            assertThrows(InvalidDiscountRateException.class, () -> {
+                ezshop.applyDiscountRateToSale(transactionId, 1.00);
+            });
+            assertThrows(InvalidDiscountRateException.class, () -> {
+                ezshop.applyDiscountRateToSale(transactionId, 100.00);
+            });
+            ezshop.logout();
+
+            // Check if the SaleTransaction does not exist or identify a started or closed but not already payed transaction
+            ezshop.login("admin","password");
+            assertFalse(ezshop.applyDiscountRateToSale(transactionId + 1, 0.10));
+            assertFalse(ezshop.applyDiscountRateToSale(transactionIdPayed, 0.10));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            assertTrue(ezshop.applyDiscountRateToSale(transactionId, 0.10));
+            assertEquals(0.10, ezshop.getSaleTransaction(transactionId).getDiscountRate(), 0.01);
+            assertEquals(productQuantityInSale * 1.25 * (1 - 0.10), ezshop.getSaleTransaction(transactionId).getPrice(), 0.01);
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testComputePointsForSale() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId1 = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            Integer productId2 = ezshop.createProductType("Fusilli Barilla", "012345678912", 1.50, null);
+            ezshop.updatePosition(productId1,"1-a-1");
+            ezshop.updatePosition(productId1,"1-a-2");
+            ezshop.updateQuantity(productId2, 10);
+            ezshop.updateQuantity(productId2, 20);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.computePointsForSale(transactionId);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.computePointsForSale(null);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.computePointsForSale(0);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.computePointsForSale(-1);
+            });
+            ezshop.logout();
+
+            // Check if the SaleTransaction does not exist
+            ezshop.login("admin","password");
+            assertEquals(-1, ezshop.computePointsForSale(transactionId + 1));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            ezshop.addProductToSale(transactionId, "5701234567899", 5);
+            assertEquals((int)((5 * 1.25) / 10), ezshop.computePointsForSale(transactionId));
+            ezshop.addProductToSale(transactionId, "012345678912", 10);
+            assertEquals((int)((5 * 1.25 + 10 * 1.50) / 10), ezshop.computePointsForSale(transactionId));
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testEndSaleTransaction() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionIdClosed = ezshop.startSaleTransaction();
+            ezshop.endSaleTransaction(transactionIdClosed);
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.endSaleTransaction(transactionId);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.endSaleTransaction(null);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.endSaleTransaction(0);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.endSaleTransaction(-1);
+            });
+            ezshop.logout();
+
+            // Check if the SaleTransaction does not exist or not identify a started transaction
+            ezshop.login("admin","password");
+            assertFalse(ezshop.endSaleTransaction(transactionId + 1));
+            assertFalse(ezshop.endSaleTransaction(transactionIdClosed));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            assertTrue(ezshop.endSaleTransaction(transactionId));
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testDeleteSaleTransaction() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionIdPayed = ezshop.startSaleTransaction();
+            ezshop.endSaleTransaction(transactionIdPayed);
+            ezshop.receiveCashPayment(transactionIdPayed, 10.00);
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.deleteSaleTransaction(transactionId);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.deleteSaleTransaction(null);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.deleteSaleTransaction(0);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.deleteSaleTransaction(-1);
+            });
+            ezshop.logout();
+
+            // Check if the SaleTransaction does not exist or identify a payed transaction
+            ezshop.login("admin","password");
+            assertFalse(ezshop.deleteSaleTransaction(transactionId + 1));
+            assertFalse(ezshop.deleteSaleTransaction(transactionIdPayed));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            assertTrue(ezshop.deleteSaleTransaction(transactionId));
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testGetSaleTransaction() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+            ezshop.endSaleTransaction(transactionId);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.getSaleTransaction(transactionId);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.getSaleTransaction(null);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.getSaleTransaction(0);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.getSaleTransaction(-1);
+            });
+            ezshop.logout();
+
+            // Check if the SaleTransaction does not exist or not identify a closed transaction
+            ezshop.login("admin","password");
+            assertNull(ezshop.getSaleTransaction(transactionId + 1));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            assertNotNull(ezshop.getSaleTransaction(transactionId));
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testReceiveCashPayment() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+            ezshop.endSaleTransaction(transactionId);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.receiveCashPayment(transactionId, 2.50);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.receiveCashPayment(null, 2.50);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.receiveCashPayment(0, 2.50);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.receiveCashPayment(-1, 2.50);
+            });
+            ezshop.logout();
+
+            // Check InvalidPaymentException
+            ezshop.login("admin","password");
+            assertThrows(InvalidPaymentException.class, () -> {
+                ezshop.receiveCashPayment(transactionId, 0.00);
+            });
+            assertThrows(InvalidPaymentException.class, () -> {
+                ezshop.receiveCashPayment(transactionId, -0.01);
+            });
+            ezshop.logout();
+
+            // Check if the SaleTransaction does not exist
+            ezshop.login("admin","password");
+            assertEquals(-1, ezshop.receiveCashPayment(transactionId + 1, 2.50), 0.00);
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            double currentBalance = ezshop.computeBalance();
+            assertEquals(5.01 - ezshop.getSaleTransaction(transactionId).getPrice(), ezshop.receiveCashPayment(transactionId, 5.01), 0.01);
+            assertEquals(currentBalance + 2.50, ezshop.computeBalance(), 0.01);
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testReceiveCreditCardPayment() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+            ezshop.endSaleTransaction(transactionId);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.receiveCreditCardPayment(transactionId, "4485370086510891");
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.receiveCreditCardPayment(null, "4485370086510891");
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.receiveCreditCardPayment(0, "4485370086510891");
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.receiveCreditCardPayment(-1, "4485370086510891");
+            });
+            ezshop.logout();
+
+            // Check InvalidCreditCardException
+            ezshop.login("admin","password");
+            assertThrows(InvalidCreditCardException.class, () -> {
+                ezshop.receiveCreditCardPayment(transactionId, null);
+            });
+            assertThrows(InvalidCreditCardException.class, () -> {
+                ezshop.receiveCreditCardPayment(transactionId, "");
+            });
+            assertThrows(InvalidCreditCardException.class, () -> {
+                ezshop.receiveCreditCardPayment(transactionId, "1234");
+            });
+            ezshop.logout();
+
+            // Check if the SaleTransaction does not exist
+            ezshop.login("admin","password");
+            assertFalse(ezshop.receiveCreditCardPayment(transactionId + 1, "4485370086510891"));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            double currentBalance = ezshop.computeBalance();
+            assertTrue(ezshop.receiveCreditCardPayment(transactionId, "4485370086510891"));
+            assertEquals(currentBalance + 2.50, ezshop.computeBalance(), 0.01);
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
 }
