@@ -90,6 +90,8 @@ package "EZShop"
 }
 
 ```
+
+![DependencyGraph](./images/dependency_graph.png)
      
 # Integration approach
 
@@ -267,6 +269,23 @@ package "EZShop"
 |  9    |  C confirms the sale and prints the sale receipt |
 |  10   |  Balance is updated |
 
+##### Scenario 8-3
+
+| Scenario |  Return of product type X cancelled |
+| ------------- |:-------------:| 
+|  Precondition     | Cashier C exists and is logged in |
+| | Product type X exists and has enough units to complete the return |
+| | Transaction T exists and has at least N units of X
+|  Post condition     | Balance not changed  |
+| | X.quantity not changed |
+| Step#        | Description  |
+|  1    |  C inserts T.transactionId |
+|  2    |  Return transaction starts |  
+|  3    |  C reads bar code of X |
+|  4    |  C adds N units of X to the return transaction |
+|  5    |  X available quantity is increased by N |
+|  6    |  C closes the return transaction |
+|  8    |  Return transaction aborted, no change will be recorded|
 
 ##### Scenario UC9.2
 
@@ -388,6 +407,18 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |7.2|"|TestIntegrationEZShop.testReceiveCreditCardPayment()|
 |7.3|"|TestIntegrationEZShop.testReceiveCreditCardPayment()|
 |7.4|FR7.1|TestIntegrationEZShop.testReceiveCashPayment()|
+|8.1|FR6.12|TestIntegrationEZShop.testStartReturnTransaction()|
+|"|FR6.13|TestIntegrationEZShop.testReturnProduct()|
+|"|FR6.14|TestIntegrationEZShop.testEndReturnTransaction()|
+|"|FR7.4|TestIntegrationEZShop.testReturnCreditCardPayment()|
+|8.2|FR6.12|TestIntegrationEZShop.testStartReturnTransaction()|
+|"|FR6.13|TestIntegrationEZShop.testReturnProduct()|
+|"|FR6.14|TestIntegrationEZShop.testEndReturnTransaction()|
+|"|FR7.3|TestIntegrationEZShop.testReturnCashPayment()|
+|8.3|FR6.12|TestIntegrationEZShop.testStartReturnTransaction()|
+|"|FR6.13|TestIntegrationEZShop.testReturnProduct()|
+|"|FR6.14|TestIntegrationEZShop.testEndReturnTransaction()|
+|"|FR6.15|TestIntegrationEZShop.testDeleteReturnTransaction()|
 |9.1|FR8.3|TestIntegrationEZShop.testGetDebitsAndCredits()|
 |9.2|FR8.2|TestIntegrationEZShop.testRecordBalanceUpdate()|
 |9.3|FR8.1|TestIntegrationEZShop.testRecordBalanceUpdate()|
