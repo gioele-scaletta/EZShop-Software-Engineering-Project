@@ -266,6 +266,36 @@ public class TestNFR {
         }
     }
 
+
+    @Test
+    public void testNF4isValidCode(){
+        ProductTypeImpl prod=null;
+        prod= new ProductTypeImpl (2, "b", "c", 0.3, "ciao");
+        assertTrue(prod.isValidCode("5701234567899"));
+        assertFalse(prod.isValidCode("111111111111"));
+        assertFalse(prod.isValidCode("5701234a67899"));
+        assertFalse(prod.isValidCode("570167899"));
+
+
+        assertFalse(prod.isValidCode(""));
+        assertFalse(prod.isValidCode(null));
+    }
+
+
+    @Test
+    public void testNFR5isValidCreditCard(){
+        assertTrue(ezshop.isValidCreditCard("12345674"));
+        assertTrue(ezshop.isValidCreditCard("4444333322221111"));
+        assertTrue(ezshop.isValidCreditCard("4716258050958645"));
+        assertFalse(ezshop.isValidCreditCard("13245674"));
+        assertFalse(ezshop.isValidCreditCard("4444333322221110"));
+        assertFalse(ezshop.isValidCreditCard(""));
+        assertFalse(ezshop.isValidCreditCard(null));
+
+    }
+
+
+
     @Test
     public void testCustomerCard10digits() {
         try{

@@ -2548,7 +2548,7 @@ public class EZShop implements EZShopInterface {
         }
 
         // Check if the creditCard is null, empty or invalid
-        if (creditCard == null || creditCard.isEmpty() || !isValidCreditCard(creditCard)) {
+        if ( !isValidCreditCard(creditCard)) {
             System.err.println(methodName + ": The creditCard is null, empty or invalid");
             throw new InvalidCreditCardException();
         }
@@ -2660,7 +2660,7 @@ public class EZShop implements EZShopInterface {
         }
 
         // Check if the creditCard is null, empty or invalid
-        if (creditCard == null || creditCard.isEmpty() || !isValidCreditCard(creditCard)) {
+        if ( !isValidCreditCard(creditCard)) {
             System.err.println(methodName + ": The creditCard is null, empty or invalid");
             throw new InvalidCreditCardException();
         }
@@ -3153,6 +3153,12 @@ public class EZShop implements EZShopInterface {
     }
 
     public static boolean isValidCreditCard(String cardNumber) {
+
+
+        if(cardNumber == null  || cardNumber=="" || cardNumber.isEmpty()){
+            return false;
+        }
+
         // int array for processing the cardNumber
         int[] cardIntArray=new int[cardNumber.length()];
 

@@ -457,6 +457,8 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |                            |  TestNFR.testTimeCreateAttachCardToCustomer()   |
 |                            |  TestNFR.testTimeModifyPointsOnCard()   |
 |  NFR6                      |  TestNFR.testCustomerCard10digits()   |
+|  NFR4|TestNFR.testNFR4isValidCode()|
+|  NFR5 | TestNFR.testNFR5isValidCreditCard()|
 
 
 
