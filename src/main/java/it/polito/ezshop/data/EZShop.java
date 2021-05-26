@@ -32,6 +32,20 @@ public class EZShop implements EZShopInterface {
 
     }
 
+    public boolean closeDB() {
+        if (this.conn == null) {
+            return false;
+        }
+        try {
+            this.conn.close();
+        } catch (SQLException e) {
+            System.err.println("Error with db connection");
+            throw new RuntimeException(e);
+        }
+
+        return true;
+    }
+
 
     @Override
     public void reset() {
@@ -2540,9 +2554,9 @@ public class EZShop implements EZShopInterface {
             double newbal=sale.PaySaleAndReturnChange(amount, false);
             if(newbal>=0){
                 // Update the creditCard balance
-                if (!updateCreditCardBalance(creditCard, newbal)) {
-                    return false;
-                }
+                // if (!updateCreditCardBalance(creditCard, newbal)) {
+                //     return false;
+                // }
                 BalanceOperationImpl balanceOperation = newBalanceUpdate(sale.getPrice());
                 if (balanceOperation == null) {
                     System.err.println(methodName + ": There are some problems with the DB");
@@ -2661,9 +2675,9 @@ public class EZShop implements EZShopInterface {
             return -1;
         }
         // Update the creditCard balance
-        if (!updateCreditCardBalance(creditCard, creditCardBalance + amount)) {
-            return -1;
-        }
+        // if (!updateCreditCardBalance(creditCard, creditCardBalance + amount)) {
+        //     return -1;
+        // }
 
         // Create new BalanceOperation
         BalanceOperationImpl balanceOperation = newBalanceUpdate(-amount);
@@ -3119,7 +3133,7 @@ public class EZShop implements EZShopInterface {
         return map;
     }
 
-    public boolean isValidCreditCard(String cardNumber) {
+    public static boolean isValidCreditCard(String cardNumber) {
         // int array for processing the cardNumber
         int[] cardIntArray=new int[cardNumber.length()];
 
@@ -3463,41 +3477,41 @@ public class EZShop implements EZShopInterface {
         return balance;
     }
 
-    private boolean updateCreditCardBalance(String creditCard, Double balance) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        System.out.println("Call "+ methodName +"(creditCard = "+ creditCard +", balance = "+ balance +")");
-
-        boolean find = false;
-        String newContent = "";
-        try (BufferedReader br = new BufferedReader(new FileReader("CreditCards.txt"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.startsWith("#")) {
-                    newContent = newContent.concat(line + "\n");
-                    continue;
-                }
-                String[] s = line.split(";");
-                if (s[0].equals(creditCard)) {
-                    newContent = newContent.concat(s[0] + ";" + balance + "\n");
-                    find  = true;
-                } else {
-                    newContent = newContent.concat(line + "\n");
-                }
-            }
-        } catch (IOException e) {
-            System.err.println(methodName + ": " + e.getMessage());
-            return false;
-        }
-
-        if (find) {
-            try (FileWriter fw = new FileWriter("CreditCards.txt")) {
-                fw.write(newContent);
-            } catch (IOException e) {
-                System.err.println(methodName + ": " + e.getMessage());
-                return false;
-            }
-        }
-
-        return find;
-    }
+//    private boolean updateCreditCardBalance(String creditCard, Double balance) {
+//        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+//        System.out.println("Call "+ methodName +"(creditCard = "+ creditCard +", balance = "+ balance +")");
+//
+//        boolean find = false;
+//        String newContent = "";
+//        try (BufferedReader br = new BufferedReader(new FileReader("CreditCards.txt"))) {
+//            String line;
+//            while ((line = br.readLine()) != null) {
+//                if (line.startsWith("#")) {
+//                    newContent = newContent.concat(line + "\n");
+//                    continue;
+//                }
+//                String[] s = line.split(";");
+//                if (s[0].equals(creditCard)) {
+//                    newContent = newContent.concat(s[0] + ";" + balance + "\n");
+//                    find  = true;
+//                } else {
+//                    newContent = newContent.concat(line + "\n");
+//                }
+//            }
+//        } catch (IOException e) {
+//            System.err.println(methodName + ": " + e.getMessage());
+//            return false;
+//        }
+//
+//        if (find) {
+//            try (FileWriter fw = new FileWriter("CreditCards.txt")) {
+//                fw.write(newContent);
+//            } catch (IOException e) {
+//                System.err.println(methodName + ": " + e.getMessage());
+//                return false;
+//            }
+//        }
+//
+//        return find;
+//    }
 }

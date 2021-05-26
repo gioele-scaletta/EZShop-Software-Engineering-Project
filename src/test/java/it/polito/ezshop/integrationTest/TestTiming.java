@@ -1,4 +1,4 @@
-package it.polito.ezshop.acceptanceTests;
+package it.polito.ezshop.integrationTest;
 
 import it.polito.ezshop.data.*;
 import it.polito.ezshop.model.*;
@@ -23,6 +23,7 @@ public class TestTiming {
     @AfterClass
     public static void cleanUpAfterClass(){
         ezshop.reset();
+        ezshop.closeDB();
     }
 
     @Before

@@ -69,12 +69,6 @@ public class SaleTransactionImpl implements SaleTransaction {
     public String getStateString() {
         return state.toString();
     }
-    public CustomerImpl getTransactionCard() {
-        return transactionCard;
-    }
-    public BalanceOperation getSaleOperationRecord() {
-        return saleOperationRecord;
-    }
 
     @Override
     public Integer getTicketNumber() {
