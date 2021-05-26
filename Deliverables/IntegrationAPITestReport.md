@@ -117,7 +117,7 @@ package "EZShop"
 
 | Classes  | JUnit test cases |
 |--|--|
-|EZShop| TestEzShop|
+|EZShop| TestIntegrationEzShop|
 
 
 
@@ -240,6 +240,27 @@ package "EZShop"
 |  1    |  User selects customer record U |
 |  2    |  User modify points on L |
 
+##### Scenario 6-7
+
+| Scenario |  Remove product type X from sale |
+| ------------- |:-------------:| 
+|  Precondition     | Cashier C exists and is logged in |
+| | Product type X exists and is in the sale |
+|  Post condition     | Balance += N*X.unitPrice  |
+| | X.quantity -= N |
+| Step#        | Description  |
+|  1    |  C starts a new sale transaction |  
+|  2    |  C reads bar code of X |
+|  3    |  C removes N units of X to the sale |
+|  4    |  X available quantity is increased by N |
+|  5    |  C closes the sale transaction |
+|  6    |  System asks payment type |
+|  7    |  Manage  payment (see UC7) |
+|  8    |  Payment successful |
+|  9    |  C confirms the sale and prints the sale receipt |
+|  10   |  Balance is updated |
+
+
 ##### Scenario UC9.2
 
 | Scenario |  Credit operation |
@@ -288,46 +309,84 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 
 | Scenario ID | Functional Requirements covered | JUnit  Test(s) | 
 | ----------- | ------------------------------- | ----------- | 
-|  1.1      | FR3.1                             |  TestEzShop.testCreateProductType()           |        
-|  1.2       | FR4.2                        |   TestEzShop.testUpdatePosition()          |
-|  1.3        | "                          |   TestEzShop.testUpdateProduct()          |             
-| 1.4        |   FR3.2                            |    TestEzShop.testDeeleteProductType()       |             
-| 1.5        |        FR3.3                         |  TestEzShop.testGetAllProductTypes()           |             
-| 1.6        |   FR3.4                              |   TestEzShop.testGetProductTypeByBarCode()          |             
-|   "       |    "                         |   TestEzShop.testGetProductByDescription()          |             
-|2.1|FR1.1|TestEzShop.testCreateUser()|
-|2.2|FR1.2|TestEzShop.testDeleteUser()|
-|2.3|FR1.5|TestEzShop.testUpdateUserRights()|
-|2.4|FR1.3|TestEzShop.testGetAllUsers()|
-|2.5|FR1.4|TestEzShop.testGetUser()|
-|3.1|FR4.3|TestEzShop.testIssueOrder()|
-|3.2|FR4.4|TestEzShop.testPayOrderFor()|
-|"|FR4.5|TestEzShop.testPayOrder()|
-|3.3|FR4.6|TestEzShop.testrecordOrderArrival()|
-|3.4|FR4.1|TestEZShop.testUpdateQuanity()|
-|3.5|FR4.7|TestEZShop.testGetAllOrders()|
-|4.1|FR5.1|TestEZShop.testDefineCustomer()|
-|4.2|FR5.5|TestEZShop.testCreateCard()|
-|"|FR5.6|TestEZShop.testAttachCardToCustomer()|
-|4.3|FR5.3|TestEZShop.testGetCustomer()|
-|"|FR5.1|TestEZShop.testModifyCustomer()|
-|4.4|FR5.3|TestEZShop.testGetCustomer()|
-|"|FR5.1|TestEZShop.testModifyCustomer()|
-|4.5|FR5.2|TestEZShop.testDeleteCustomer()|
-|4.6|FR5.4|TestEZShop.testGetAllCustomers()|
-|4.7|FR5.7|TestEZShop.testModifyPointsOnCard()|
-|5.1|FR1.5|TestEZShop.testLogin()|
-|5.2|"|TestEZShop.testLogout()|
-|7.1|FR7.2|TestEZShop.testReceiveCreditCardPayment()|
-|7.2|"|TestEZShop.testReceiveCreditCardPayment()|
-|7.3|"|TestEZShop.testReceiveCreditCardPayment()|
-|7.4|FR7.1|TestEZShop.testReceiveCashPayment()|
-|9.1|FR8.3|TestEZShop.testGetDebitsAndCredits()|
-|9.2|FR8.2|TestEZShop.testRecordBalanceUpdate()|
-|9.3|FR8.1|TestEZShop.testRecordBalanceUpdate()|
-|9.4|FR8.4|TestEZShop.testRecordBalanceUpdate()|
-|10.1|FR7.4|TestEZShop.testReturnCreditCardPayment()|
-|10.2|FR7.3|TestEZShop.testReturnCashPayment()|
+|1.1|FR3.1|TestIntegrationEZShop.testCreateProductType()|
+|1.2|FR4.2|TestIntegrationEZShop.testUpdatePosition()|
+|1.3|"|TestIntegrationEZShop.testUpdateProduct()|
+|1.4|FR3.2|TestIntegrationEZShop.testDeleteProductType()|
+|1.5|FR3.3|TestIntegrationEZShop.testGetAllProductTypes()|
+|1.6|FR3.4|TestIntegrationEZShop.testGetProductTypeByBarCode()|
+|"|"|TestIntegrationEZShop.testGetProductByDescription()|
+|2.1|FR1.1|TestIntegrationEZShop.testCreateUser()|
+|2.2|FR1.2|TestIntegrationEZShop.testDeleteUser()|
+|2.3|FR1.5|TestIntegrationEZShop.testUpdateUserRights()|
+|2.4|FR1.3|TestIntegrationEZShop.testGetAllUsers()|
+|2.5|FR1.4|TestIntegrationEZShop.testGetUser()|
+|3.1|FR4.3|TestIntegrationEZShop.testIssueOrder()|
+|3.2|FR4.4|TestIntegrationEZShop.testPayOrderFor()|
+|"|FR4.5|TestIntegrationEZShop.testPayOrder()|
+|3.3|FR4.6|TestIntegrationEZShop.testRecordOrderArrival()|
+|3.4|FR4.1|TestIntegrationEZShop.testUpdateQuantity()|
+|3.5|FR4.7|TestIntegrationEZShop.testGetAllOrders()|
+|4.1|FR5.1|TestIntegrationEZShop.testDefineCustomer()|
+|4.2|FR5.5|TestIntegrationEZShop.testCreateCard()|
+|"|FR5.6|TestIntegrationEZShop.testAttachCardToCustomer()|
+|4.3|FR5.3|TestIntegrationEZShop.testGetCustomer()|
+|"|FR5.1|TestIntegrationEZShop.testModifyCustomer()|
+|4.4|FR5.3|TestIntegrationEZShop.testGetCustomer()|
+|"|FR5.1|TestIntegrationEZShop.testModifyCustomer()|
+|4.5|FR5.2|TestIntegrationEZShop.testDeleteCustomer()|
+|4.6|FR5.4|TestIntegrationEZShop.testGetAllCustomers()|
+|4.7|FR5.7|TestIntegrationEZShop.testModifyPointsOnCard()|
+|5.1|FR1.5|TestIntegrationEZShop.testLogin()|
+|5.2|"|TestIntegrationEZShop.testLogout()|
+|6.1|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
+|"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
+|"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
+|"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
+|6.2|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
+|"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
+|"|FR6.5|TestIntegrationEZShop.testApplyDiscountRateToProduct()|
+|"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
+|"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
+|6.3|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
+|"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
+|"|FR6.4|TestIntegrationEZShop.testApplyDiscountRateToSale()|
+|"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
+|"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
+|6.4|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
+|"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
+|"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
+|"|FR6.6|TestIntegrationEZShop.testComputePointsForSale()|
+|"|FR7.2|TestIntegrationEZShop.testReceiveCashPayment()|
+|6.5|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
+|"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
+|"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
+|"|FR6.11|TestIntegrationEZShop.testDeleteSaleTransaction()|
+|6.6|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
+|"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
+|"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
+|"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
+|6.7|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
+|"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testDeleteProductFromSale()|
+|"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
+|"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
+|7.1|FR7.2|TestIntegrationEZShop.testReceiveCreditCardPayment()|
+|7.2|"|TestIntegrationEZShop.testReceiveCreditCardPayment()|
+|7.3|"|TestIntegrationEZShop.testReceiveCreditCardPayment()|
+|7.4|FR7.1|TestIntegrationEZShop.testReceiveCashPayment()|
+|9.1|FR8.3|TestIntegrationEZShop.testGetDebitsAndCredits()|
+|9.2|FR8.2|TestIntegrationEZShop.testRecordBalanceUpdate()|
+|9.3|FR8.1|TestIntegrationEZShop.testRecordBalanceUpdate()|
+|9.4|FR8.4|TestIntegrationEZShop.testRecordBalanceUpdate()|
+|10.1|FR7.4|TestIntegrationEZShop.testReturnCreditCardPayment()|
+|10.2|FR7.3|TestIntegrationEZShop.testReturnCashPayment()|
 
 
 
