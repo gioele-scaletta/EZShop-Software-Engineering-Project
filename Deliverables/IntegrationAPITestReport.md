@@ -24,6 +24,56 @@ Version:
 # Dependency graph 
 
      <report the here the dependency graph of the classes in EzShop, using plantuml>
+
+```plantuml
+
+package "EZShop" 
+{
+
+    package "data"{
+
+        class EZShop
+        interface "EZShopInterface"
+        interface "Customer"
+        interface "BalanceOperation"
+        interface "Order"
+        interface "ProductType"
+        interface "SaleTransaction"
+        interface "TicketEntry"
+        interface "User"
+
+        EZShopInterface  -down-> EZShop
+        EZShop -down-> Customer
+        EZShop -down-> BalanceOperation
+        EZShop -down-> Order
+        EZShop -down-> ProductType
+        EZShop -down-> SaleTransaction
+        EZShop -down-> TicketEntry
+        EZShop -down-> User
+
+    }
+
+    package "model"{
+
+        class "CustomerImpl"
+        class "BalanceOperationImpl"
+        class "OrderImpl"
+        class "ProductTypeImpl"
+        class "SaleTransactionImpl"
+        class "TicketEntryImpl"
+        class "UserImpl"
+
+        Customer -down-> CustomerImpl
+        BalanceOperation -down-> BalanceOperationImpl
+        Order -down-> OrderImpl
+        ProductType -down-> ProductTypeImpl
+        SaleTransaction -down-> SaleTransactionImpl
+        TicketEntry -down-> TicketEntryImpl
+        User -down-> UserImpl
+    }
+}
+
+```
      
 # Integration approach
 
