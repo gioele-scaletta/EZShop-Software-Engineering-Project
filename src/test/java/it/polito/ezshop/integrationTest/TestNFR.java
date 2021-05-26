@@ -7,9 +7,6 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 public class TestNFR {
 
     private static EZShop ezshop;
@@ -169,7 +166,7 @@ public class TestNFR {
     }
 
     @Test(timeout = 500)
-    public void testComputeBalance() {
+    public void testTimeComputeBalance() {
         try {
             ezshop.recordBalanceUpdate(50);
             ezshop.computeBalance();
@@ -266,6 +263,260 @@ public class TestNFR {
         }
     }
 
+    @Test(timeout = 500)
+    public void testTimeStartSaleTransaction() {
+        try {
+            ezshop.startSaleTransaction();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeAddProductToSale() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 1);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeDeleteProductFromSale() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+            ezshop.deleteProductFromSale(transactionId, "5701234567899", 1);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeApplyDiscountRateToProduct() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+            ezshop.applyDiscountRateToProduct(transactionId, "5701234567899", 0.10);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeApplyDiscountRateToSale() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+            ezshop.applyDiscountRateToSale(transactionId, 0.10);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeComputePointsForSale() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId1 = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            Integer productId2 = ezshop.createProductType("Fusilli Barilla", "012345678912", 1.50, null);
+            ezshop.updatePosition(productId1,"1-a-1");
+            ezshop.updatePosition(productId2,"1-a-2");
+            ezshop.updateQuantity(productId1, 10);
+            ezshop.updateQuantity(productId2, 20);
+            ezshop.addProductToSale(transactionId, "5701234567899", 5);
+            ezshop.addProductToSale(transactionId, "012345678912", 10);
+            ezshop.computePointsForSale(transactionId);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeEndSaleTransaction() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+            ezshop.endSaleTransaction(transactionId);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeDeleteSaleTransaction() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+            ezshop.deleteSaleTransaction(transactionId);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeGetSaleTransaction() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+            ezshop.endSaleTransaction(transactionId);
+            ezshop.getSaleTransaction(transactionId);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeReceiveCashPayment() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+            ezshop.endSaleTransaction(transactionId);
+            ezshop.receiveCashPayment(transactionId, 5.01);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeReceiveCreditCardPayment() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 2);
+            ezshop.endSaleTransaction(transactionId);
+            ezshop.receiveCreditCardPayment(transactionId, "4485370086510891");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeStartReturnTransaction() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 4);
+            ezshop.endSaleTransaction(transactionId);
+            ezshop.receiveCashPayment(transactionId, 1.25 * 4);
+            ezshop.startReturnTransaction(transactionId);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeReturnProduct() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 4);
+            ezshop.endSaleTransaction(transactionId);
+            ezshop.receiveCashPayment(transactionId, 1.25 * 4);
+            Integer returnId = ezshop.startReturnTransaction(transactionId);
+            ezshop.returnProduct(returnId, "5701234567899", 1);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeEndReturnTransaction() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 4);
+            ezshop.endSaleTransaction(transactionId);
+            ezshop.receiveCashPayment(transactionId, 1.25 * 4);
+            Integer returnId = ezshop.startReturnTransaction(transactionId);
+            ezshop.returnProduct(returnId, "5701234567899", 1);
+            ezshop.endReturnTransaction(returnId, true);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeDeleteReturnTransaction() {
+        try {
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 4);
+            ezshop.endSaleTransaction(transactionId);
+            ezshop.receiveCashPayment(transactionId, 1.25 * 4);
+            Integer returnId = ezshop.startReturnTransaction(transactionId);
+            ezshop.returnProduct(returnId, "5701234567899", 1);
+            ezshop.endReturnTransaction(returnId, true);
+            ezshop.deleteReturnTransaction(returnId);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
 
     @Test
     public void testNF4isValidCode(){
