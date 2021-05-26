@@ -2162,7 +2162,6 @@ public class TestEZShop {
         }
     }
 
-    //Marco: return value should be the returned amount
     @Test
     public void testReturnCashPayment(){
         try {
@@ -2211,7 +2210,7 @@ public class TestEZShop {
             ezshop.receiveCashPayment(idTransaction2,1);
 
             Integer idReturnTransaction2 = ezshop.startReturnTransaction(idTransaction2);
-            ezshop.returnProduct(idReturnTransaction,"5701234567899",1);
+            ezshop.returnProduct(idReturnTransaction2,"5701234567899",1);
 
             //Check for non ended transaction
             assertTrue(ezshop.returnCashPayment(idReturnTransaction2)==-1);
@@ -2244,7 +2243,7 @@ public class TestEZShop {
             ezshop.receiveCashPayment(idTransaction3,1);
 
             Integer idReturnTransaction3 = ezshop.startReturnTransaction(idTransaction3);
-            ezshop.returnProduct(idReturnTransaction,"5701234567899",1);
+            ezshop.returnProduct(idReturnTransaction3,"5701234567899",1);
 
             //Check for non ended transaction
             assertTrue(ezshop.returnCashPayment(idReturnTransaction3)==-1);
