@@ -1995,6 +1995,389 @@ public class TestEZShop {
         }
     }
 
+    //Marco: this doesn't pass because the change value may be wrong
+    @Test
+    public void testReceiveCashPayment(){
+        try {
+            assertThrows(UnauthorizedException.class,()->ezshop.receiveCashPayment(1,10));
+
+            ezshop.login("admin", "password");
+            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.logout();
+
+            ezshop.login("cashier","password");
+
+            Integer idTransaction = ezshop.startSaleTransaction();
+            ezshop.addProductToSale(idTransaction,"5701234567899",4);
+            ezshop.endSaleTransaction(idTransaction);
+
+            assertTrue(ezshop.receiveCashPayment(42,100)==-1);
+            assertThrows(InvalidPaymentException.class,() ->ezshop.receiveCashPayment(1,-1));
+            assertThrows(InvalidPaymentException.class,() ->ezshop.receiveCashPayment(1,0));
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCashPayment(-1,10));
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCashPayment(null,10));
+
+            assertTrue(ezshop.receiveCashPayment(idTransaction,2)==-1);
+            assertTrue(ezshop.receiveCashPayment(idTransaction,7)==3);
+
+            ezshop.logout();
+            setUp();
+
+            ezshop.login("shopmanager", "password");
+
+            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idTransaction2 = ezshop.startSaleTransaction();
+            ezshop.addProductToSale(idTransaction2,"5701234567899",4);
+            ezshop.endSaleTransaction(idTransaction2);
+
+
+            assertTrue(ezshop.receiveCashPayment(42,100)==-1);
+            assertThrows(InvalidPaymentException.class,() ->ezshop.receiveCashPayment(1,-1));
+            assertThrows(InvalidPaymentException.class,() ->ezshop.receiveCashPayment(1,-0));
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCashPayment(-1,10));
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCashPayment(null,10));
+
+            assertTrue(ezshop.receiveCashPayment(idTransaction,2)==-1);
+            assertTrue(ezshop.receiveCashPayment(idTransaction2,4)==0);
+
+            ezshop.logout();
+            setUp();
+
+            ezshop.login("admin", "password");
+
+            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idTransaction3 = ezshop.startSaleTransaction();
+            ezshop.addProductToSale(idTransaction3,"5701234567899",4);
+            ezshop.endSaleTransaction(idTransaction3);
+
+
+            assertTrue(ezshop.receiveCashPayment(42,100)==-1);
+            assertThrows(InvalidPaymentException.class,() ->ezshop.receiveCashPayment(1,-1));
+            assertThrows(InvalidPaymentException.class,() ->ezshop.receiveCashPayment(1,-0));
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCashPayment(-1,10));
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCashPayment(null,10));
+
+            assertTrue(ezshop.receiveCashPayment(idTransaction,2)==-1);
+            assertTrue(ezshop.receiveCashPayment(idTransaction3,7)==3);
+        } catch(Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+
+    }
+
+    //Marco: Maybe balance of credit card is not returned correctly
+    @Test
+    public void testCreditCardPayment(){
+        try {
+            assertThrows(UnauthorizedException.class,()->ezshop.receiveCashPayment(1,10));
+
+            ezshop.login("admin", "password");
+            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.logout();
+
+            ezshop.login("cashier","password");
+
+            Integer idTransaction = ezshop.startSaleTransaction();
+            ezshop.addProductToSale(idTransaction,"5701234567899",4);
+            ezshop.endSaleTransaction(idTransaction);
+
+            //Transaction not existing
+            assertFalse(ezshop.receiveCreditCardPayment(42,"4485160891"));
+            //This credit card is supposed to have 0 balance
+            assertFalse(ezshop.receiveCreditCardPayment(idTransaction,"4716258050958645"));
+            //This credit card is supposed to be not registered
+            assertFalse(ezshop.receiveCreditCardPayment(idTransaction,"7784937915391288"));
+            //Invalid IdTransaction
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(-1,"4485370086510891"));
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(null,"4485370086510891"));
+            //Invalid Credit Card
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction,""));
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction,null));
+            //Invalid Luhn Algorithm
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction,"4485370086510892"));
+
+            //Finally the valid Payment
+            assertTrue(ezshop.receiveCreditCardPayment(idTransaction,"4485370086510891"));
+
+            ezshop.logout();
+            setUp();
+
+            ezshop.login("shopmanager", "password");
+
+            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idTransaction2 = ezshop.startSaleTransaction();
+            ezshop.addProductToSale(idTransaction2,"5701234567899",4);
+            ezshop.endSaleTransaction(idTransaction2);
+
+            //Transaction not existing
+            assertFalse(ezshop.receiveCreditCardPayment(42,"4485160891"));
+            //This credit card is supposed to have 0 balance
+            assertFalse(ezshop.receiveCreditCardPayment(idTransaction2,"4716258050958645"));
+            //This credit card is supposed to be not registered
+            assertFalse(ezshop.receiveCreditCardPayment(idTransaction2,"7784937915391288"));
+            //Invalid IdTransaction
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(-1,"4485370086510891"));
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(null,"4485370086510891"));
+            //Invalid Credit Card
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction2,""));
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction2,null));
+            //Invalid Luhn Algorithm
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction2,"4485370086510892"));
+
+            //Finally the valid Payment
+            assertTrue(ezshop.receiveCreditCardPayment(idTransaction2,"4485370086510891"));
+
+            ezshop.logout();
+            setUp();
+
+            ezshop.login("admin", "password");
+
+            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idTransaction3 = ezshop.startSaleTransaction();
+            ezshop.addProductToSale(idTransaction3,"5701234567899",4);
+            ezshop.endSaleTransaction(idTransaction3);
+
+            //Transaction not existing
+            assertFalse(ezshop.receiveCreditCardPayment(42,"4485160891"));
+            //This credit card is supposed to have 0 balance
+            assertFalse(ezshop.receiveCreditCardPayment(idTransaction3,"4716258050958645"));
+            //This credit card is supposed to be not registered
+            assertFalse(ezshop.receiveCreditCardPayment(idTransaction3,"7784937915391288"));
+            //Invalid IdTransaction
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(-1,"4485370086510891"));
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(null,"4485370086510891"));
+            //Invalid Credit Card
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction3,""));
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction3,null));
+            //Invalid Luhn Algorithm
+            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction3,"4485370086510892"));
+
+            //Finally the valid Payment
+            assertTrue(ezshop.receiveCreditCardPayment(idTransaction3,"4485370086510891"));
+
+        } catch(Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    //Marco: return value should be the returned amount
+    @Test
+    public void testReturnCashPayment(){
+        try {
+            //Checking for not logged user
+            assertThrows(UnauthorizedException.class,() -> ezshop.returnCashPayment(1));
+
+            //Administrator perspective
+            ezshop.login("admin","password");
+
+            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idTransaction = ezshop.startSaleTransaction();
+            ezshop.addProductToSale(idTransaction,"5701234567899",1);
+            ezshop.endSaleTransaction(idTransaction);
+            ezshop.receiveCashPayment(idTransaction,1);
+
+            Integer idReturnTransaction = ezshop.startReturnTransaction(idTransaction);
+            ezshop.returnProduct(idReturnTransaction,"5701234567899",1);
+
+            //Check for non ended transaction
+            assertTrue(ezshop.returnCashPayment(idReturnTransaction)==-1);
+
+            ezshop.endReturnTransaction(idReturnTransaction,true);
+
+            //Checking for non existing return id
+            assertTrue(ezshop.returnCashPayment(27)==-1);
+            //Checking for id less or equal than 0
+            assertThrows(InvalidTransactionIdException.class,() -> ezshop.returnCashPayment(0));
+            assertThrows(InvalidTransactionIdException.class,() -> ezshop.returnCashPayment(-1));
+            //Here's the real return transaction
+            assertTrue(ezshop.returnCashPayment(idReturnTransaction)==1);
+
+            ezshop.logout();
+            setUp();
+
+            //Shopmanager perspective
+            ezshop.login("shopmanager","password");
+
+            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idTransaction2 = ezshop.startSaleTransaction();
+            ezshop.addProductToSale(idTransaction2,"5701234567899",1);
+            ezshop.endSaleTransaction(idTransaction2);
+            ezshop.receiveCashPayment(idTransaction2,1);
+
+            Integer idReturnTransaction2 = ezshop.startReturnTransaction(idTransaction2);
+            ezshop.returnProduct(idReturnTransaction,"5701234567899",1);
+
+            //Check for non ended transaction
+            assertTrue(ezshop.returnCashPayment(idReturnTransaction2)==-1);
+
+            ezshop.endReturnTransaction(idReturnTransaction2,true);
+
+            //Checking for non existing return id
+            assertTrue(ezshop.returnCashPayment(27)==-1);
+            //Checking for id less or equal than 0
+            assertThrows(InvalidTransactionIdException.class,() -> ezshop.returnCashPayment(0));
+            assertThrows(InvalidTransactionIdException.class,() -> ezshop.returnCashPayment(-1));
+            //Here's the real return transaction
+            assertTrue(ezshop.returnCashPayment(idReturnTransaction2)==1);
+
+            ezshop.logout();
+            setUp();
+
+            ezshop.login("admin","password");
+            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.logout();
+
+            //Cashier perspective
+            ezshop.login("shopmanager","password");
+
+            Integer idTransaction3 = ezshop.startSaleTransaction();
+            ezshop.addProductToSale(idTransaction3,"5701234567899",1);
+            ezshop.endSaleTransaction(idTransaction3);
+            ezshop.receiveCashPayment(idTransaction3,1);
+
+            Integer idReturnTransaction3 = ezshop.startReturnTransaction(idTransaction3);
+            ezshop.returnProduct(idReturnTransaction,"5701234567899",1);
+
+            //Check for non ended transaction
+            assertTrue(ezshop.returnCashPayment(idReturnTransaction3)==-1);
+
+            ezshop.endReturnTransaction(idReturnTransaction3,true);
+
+            //Checking for non existing return id
+            assertTrue(ezshop.returnCashPayment(27)==-1);
+            //Checking for id less or equal than 0
+            assertThrows(InvalidTransactionIdException.class,() -> ezshop.returnCashPayment(0));
+            assertThrows(InvalidTransactionIdException.class,() -> ezshop.returnCashPayment(-1));
+            //Here's the real return transaction
+            assertTrue(ezshop.returnCashPayment(idReturnTransaction3)==1);
+
+            setUp();
+        } catch(Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    //Marco: return value should be the returned amount
+    @Test
+    public void testReturnCreditCardPayment(){
+        try {
+            //Checking for not logged user
+            assertThrows(UnauthorizedException.class,() -> ezshop.returnCashPayment(1));
+
+            //Administrator perspective
+            ezshop.login("admin","password");
+
+            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idTransaction = ezshop.startSaleTransaction();
+            ezshop.addProductToSale(idTransaction,"5701234567899",1);
+            ezshop.endSaleTransaction(idTransaction);
+            ezshop.receiveCashPayment(idTransaction,1);
+
+            Integer idReturnTransaction = ezshop.startReturnTransaction(idTransaction);
+            ezshop.returnProduct(idReturnTransaction,"5701234567899",1);
+
+            //Check for non ended transaction
+            assertTrue(ezshop.returnCreditCardPayment(idReturnTransaction,"4716258050958645")==-1);
+
+            ezshop.endReturnTransaction(idReturnTransaction,true);
+
+            //Checking for non existing return id
+            assertTrue(ezshop.returnCreditCardPayment(27,"4716258050958645")==-1);
+            //Checking for non registered Credit Card
+            assertTrue(ezshop.returnCreditCardPayment(idReturnTransaction,"7784937915391288")==-1);
+            //Checking for id less or equal than 0
+            assertThrows(InvalidTransactionIdException.class,() -> ezshop.returnCreditCardPayment(0,"4716258050958645"));
+            assertThrows(InvalidTransactionIdException.class,() -> ezshop.returnCreditCardPayment(-1,"4716258050958645"));
+            //Checking for null or empty credit Card
+            assertThrows(InvalidCreditCardException.class,()->ezshop.returnCreditCardPayment(idReturnTransaction,null));
+            assertThrows(InvalidCreditCardException.class,()->ezshop.returnCreditCardPayment(idReturnTransaction,""));
+            //Invalid Luhn Algorithm
+            assertThrows(InvalidCreditCardException.class,()->ezshop.returnCreditCardPayment(idReturnTransaction,"4485370086510892"));
+            //Here's the real return transaction
+            assertTrue(ezshop.returnCreditCardPayment(idReturnTransaction,"5100293991053009")==1);
+
+            ezshop.logout();
+            setUp();
+
+            //Shopmanager perspective
+            ezshop.login("shopmanager","password");
+
+            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idTransaction2 = ezshop.startSaleTransaction();
+            ezshop.addProductToSale(idTransaction2,"5701234567899",1);
+            ezshop.endSaleTransaction(idTransaction2);
+            ezshop.receiveCashPayment(idTransaction2,1);
+
+            Integer idReturnTransaction2 = ezshop.startReturnTransaction(idTransaction2);
+            ezshop.returnProduct(idReturnTransaction2,"5701234567899",1);
+
+            //Check for non ended transaction
+            assertTrue(ezshop.returnCreditCardPayment(idReturnTransaction2,"4716258050958645")==-1);
+
+            ezshop.endReturnTransaction(idReturnTransaction2,true);
+
+            //Checking for non existing return id
+            assertTrue(ezshop.returnCreditCardPayment(27,"4716258050958645")==-1);
+            //Checking for non registered Credit Card
+            assertTrue(ezshop.returnCreditCardPayment(idReturnTransaction2,"7784937915391288")==-1);
+            //Checking for id less or equal than 0
+            assertThrows(InvalidTransactionIdException.class,() -> ezshop.returnCreditCardPayment(0,"4716258050958645"));
+            assertThrows(InvalidTransactionIdException.class,() -> ezshop.returnCreditCardPayment(-1,"4716258050958645"));
+            //Checking for null or empty credit Card
+            assertThrows(InvalidCreditCardException.class,()->ezshop.returnCreditCardPayment(idReturnTransaction2,null));
+            assertThrows(InvalidCreditCardException.class,()->ezshop.returnCreditCardPayment(idReturnTransaction2,""));
+            //Invalid Luhn Algorithm
+            assertThrows(InvalidCreditCardException.class,()->ezshop.returnCreditCardPayment(idReturnTransaction2,"4485370086510892"));
+            //Here's the real return transaction
+            assertTrue(ezshop.returnCreditCardPayment(idReturnTransaction2,"5100293991053009")==1);
+
+            ezshop.logout();
+            setUp();
+
+            ezshop.login("admin","password");
+            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.logout();
+
+            //Shopmanager perspective
+            ezshop.login("shopmanager","password");
+
+            Integer idTransaction3 = ezshop.startSaleTransaction();
+            ezshop.addProductToSale(idTransaction3,"5701234567899",1);
+            ezshop.endSaleTransaction(idTransaction3);
+            ezshop.receiveCashPayment(idTransaction3,1);
+
+            Integer idReturnTransaction3 = ezshop.startReturnTransaction(idTransaction3);
+            ezshop.returnProduct(idReturnTransaction3,"5701234567899",1);
+
+            //Check for non ended transaction
+            assertTrue(ezshop.returnCreditCardPayment(idReturnTransaction3,"4716258050958645")==-1);
+
+            ezshop.endReturnTransaction(idReturnTransaction3,true);
+
+            //Checking for non existing return id
+            assertTrue(ezshop.returnCreditCardPayment(27,"4716258050958645")==-1);
+            //Checking for non registered Credit Card
+            assertTrue(ezshop.returnCreditCardPayment(idReturnTransaction3,"7784937915391288")==-1);
+            //Checking for id less or equal than 0
+            assertThrows(InvalidTransactionIdException.class,() -> ezshop.returnCreditCardPayment(0,"4716258050958645"));
+            assertThrows(InvalidTransactionIdException.class,() -> ezshop.returnCreditCardPayment(-1,"4716258050958645"));
+            //Checking for null or empty credit Card
+            assertThrows(InvalidCreditCardException.class,()->ezshop.returnCreditCardPayment(idReturnTransaction3,null));
+            assertThrows(InvalidCreditCardException.class,()->ezshop.returnCreditCardPayment(idReturnTransaction3,""));
+            //Invalid Luhn Algorithm
+            assertThrows(InvalidCreditCardException.class,()->ezshop.returnCreditCardPayment(idReturnTransaction3,"4485370086510892"));
+            //Here's the real return transaction
+            assertTrue(ezshop.returnCreditCardPayment(idReturnTransaction3,"5100293991053009")==1);
+
+        } catch(Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
     @Test
     public void testRecordBalanceUpdate() {
         try {
