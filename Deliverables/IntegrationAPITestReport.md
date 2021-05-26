@@ -342,5 +342,7 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 | Non Functional Requirement | Test name |
 | -------------------------- | --------- |
 |  NFR2                      |  TestTiming   |
+|  NFR6                      |  testCustomerCard10digits()   |
+
 
 
