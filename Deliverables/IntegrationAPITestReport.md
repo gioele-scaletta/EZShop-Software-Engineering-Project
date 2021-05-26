@@ -85,6 +85,8 @@ package "EZShop"
 }
 
 ```
+
+![DependencyGraph](./images/dependency_graph.png)
      
 # Integration approach
 
