@@ -30,7 +30,7 @@ Version:
 package "EZShop" 
 {
 
-    package "data"{
+    package "data-step3"{
 
         class EZShop
         interface "EZShopInterface"
@@ -53,16 +53,21 @@ package "EZShop"
 
     }
 
-    package "model"{
+    package "model-step2"{
 
+        package "model-step1" {
         class "CustomerImpl"
         class "BalanceOperationImpl"
         class "OrderImpl"
-        class "ProductTypeImpl"
-        class "SaleTransactionImpl"
-        class "ReturnTransactionImpl"
+        class "ProductTypeImpl"  
         class "TicketEntryImpl"
         class "UserImpl"
+        
+        
+        
+        }
+         class "SaleTransactionImpl"
+        class "ReturnTransactionImpl"
 
         Customer -down-> CustomerImpl
         BalanceOperation -down-> BalanceOperationImpl
@@ -88,12 +93,10 @@ package "EZShop"
      
 # Integration approach
 
-    <Write here the integration sequence you adopted, in general terms (top down, bottom up, mixed) and as sequence
-    (ex: step1: class A, step 2: class A+B, step 3: class A+B+C, etc)> 
-    <Some steps may  correspond to unit testing (ex step1 in ex above), presented in other document UnitTestReport.md>
-    <One step will  correspond to API testing>
-    
-
+   We adopted a bottom-up integration testing strategy:
+    step 1: Unit testing
+    step 2: Integration testing (always classes in the model package but with dependecies)
+    step 3: API and Integration testing (methpods in EZShop class)
 
 #  Tests
 
@@ -106,18 +109,22 @@ package "EZShop"
 |model.OrderImpl|unitTest.testOrderImpl|
 |model.UserImpl|unitTest.testUserImpl|
 |model.ProductTypeImpl|unitTest.testProductTypeImpl|
+|model.BalanceOperationImpl|unitTest.testBalanceOperationImpl|
+|model.TicketEntryImpl|unitTest.testTicketEntryImpl|
+|model.SaleTransactionImpl|unitTest.testSaleTransactionImpl|
+|model.ReturnTransactionImpl|unitTest.testReturnTransactionImpl|
+|model.testCustomerImpl|unitTest.testCustomerImpl|
 
-## Step 2 - EzShop private low level methods
+## Step 2 - Model classes part of integration testing
 | Classes  | JUnit test cases |
 |--|--|
-|||
-
+|SaleTransactionImpl|integrationTest.TestIntegrationSaleTransactionImpl|
+|ReturnTransactionImpl|integrationTest.testIntegrationReturnTransactionImpl|
 
 ## Step 3 -API test
-
 | Classes  | JUnit test cases |
 |--|--|
-|EZShop| TestIntegrationEzShop|
+|EZShop|integrationTest.TestIntegrationEzShop|
 
 
 
