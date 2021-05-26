@@ -58,6 +58,7 @@ public class EZShop implements EZShopInterface {
         } catch (SQLException e) {
             System.out.println("Error with db connection deleting customers");
             e.printStackTrace();
+
         }
         try {
             Statement st = this.conn.createStatement();
@@ -156,9 +157,8 @@ public class EZShop implements EZShopInterface {
                 return -1;
             }
         } catch (SQLException e) {
-            System.err.println("Error with db connection");
            e.printStackTrace();
-            throw new RuntimeException(e);
+           return -1;
         }
 
         //Calculating new ID
@@ -188,9 +188,7 @@ public class EZShop implements EZShopInterface {
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-            System.err.println("Error with db connection");
-
-            throw new RuntimeException(e);
+            return -1;
         }
         System.out.println("User " + username + " with role " + role + " and id " + id + " has been added to the application");
         return id;
@@ -2548,7 +2546,7 @@ public class EZShop implements EZShopInterface {
         }
 
         // Check if the creditCard is null, empty or invalid
-        if ( !isValidCreditCard(creditCard)) {
+        if (!isValidCreditCard(creditCard)) {
             System.err.println(methodName + ": The creditCard is null, empty or invalid");
             throw new InvalidCreditCardException();
         }
@@ -3154,11 +3152,9 @@ public class EZShop implements EZShopInterface {
 
     public static boolean isValidCreditCard(String cardNumber) {
 
-
-        if(cardNumber == null  || cardNumber=="" || cardNumber.isEmpty()){
+        if(cardNumber == null || cardNumber.isEmpty() || cardNumber==""){
             return false;
         }
-
         // int array for processing the cardNumber
         int[] cardIntArray=new int[cardNumber.length()];
 

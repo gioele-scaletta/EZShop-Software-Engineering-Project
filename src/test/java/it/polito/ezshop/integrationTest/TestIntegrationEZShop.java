@@ -95,16 +95,7 @@ public class TestIntegrationEZShop {
             Assert.fail();
         }
     }
-/*
-    @Test
-    public void testReset(){
-        ezshop.closeDB();
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
-        ezshop.reset();
-        assertTrue(outContent.toString().contains("Error with db"));
-    }
-*/
+
     @Test
     public void testCreateUser (){
         try {
@@ -165,17 +156,6 @@ public class TestIntegrationEZShop {
             assertThrows(InvalidRoleException.class, () -> {
                 ezshop.createUser( "user9", "password", "cashier" );
             });
-
-
-
-
-            ezshop.closeDB();
-
-            assertThrows(RuntimeException.class, () -> {
-                ezshop.createUser( "user9", "password", "Cashier" );
-            });
-
-            ezshop = new EZShop();
 
 
         } catch (Exception e) {
