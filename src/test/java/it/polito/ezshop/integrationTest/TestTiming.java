@@ -31,7 +31,7 @@ public class TestTiming {
         ezshop.reset();
         //ezshop.logout();
         ezshop.createUser("admin","password","Administrator");
-       ezshop.login("admin","password");
+        ezshop.login("admin","password");
     }
 
     @Test(timeout = 500)
@@ -179,9 +179,139 @@ public class TestTiming {
         }
     }
 
+    @Test(timeout = 500)
+    public void testTimeDefineDeleteCustomer(){
+        try {
+
+            Integer id = ezshop.defineCustomer("Name");
+            ezshop.deleteCustomer(id);
+
+        } catch (Exception e){
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeGetCustomer(){
+        try {
+
+            Integer id = ezshop.defineCustomer("Name");
+            ezshop.getCustomer(id);
+
+        } catch (Exception e){
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeGetAllCustomers(){
+        try {
+
+            ezshop.defineCustomer("Name1");
+            ezshop.defineCustomer("Name2");
+            ezshop.defineCustomer("Name3");
+            ezshop.getAllCustomers();
+
+        } catch (Exception e){
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeModifyCustomer(){
+        try {
+
+            Integer id = ezshop.defineCustomer("Name");
+            ezshop.modifyCustomer(id, "Name1","");
+            ezshop.modifyCustomer(id, "Name1","0000000010");
+            ezshop.modifyCustomer(id, "Name","0000000010");
+            ezshop.modifyCustomer(id, "Name","0000000011");
+            ezshop.modifyCustomer(id, "Name2","0000000001");
+            ezshop.modifyCustomer(id, "Name3",null);
+
+        } catch (Exception e){
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeCreateAttachCardToCustomer(){
+        try {
+
+            Integer id = ezshop.defineCustomer("Name");
+            String card = ezshop.createCard();
+            ezshop.attachCardToCustomer(card, id);
+
+        } catch (Exception e){
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test(timeout = 500)
+    public void testTimeModifyPointsOnCard(){
+        try {
+
+            Integer id = ezshop.defineCustomer("Name");
+            ezshop.attachCardToCustomer("0000000001", id);
+            ezshop.modifyPointsOnCard("0000000001", 5);
+
+        } catch (Exception e){
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testCustomerCard10digits() {
+        try{
+
+            String card = ezshop.createCard();
+            Integer lenghtExpected = 10;
+
+            // Check if card is a string of length 10
+            assertTrue(card.length() == lenghtExpected);
+
+            // Check if it is a number. If it is not a number, an error is thrown
+            Integer.parseInt(card);
 
 
+            Integer id = ezshop.defineCustomer("Name");
 
+            assertThrows(InvalidCustomerCardException.class, () -> {
+                ezshop.modifyCustomer(id, "Name", "123456789");
+            });
+
+            assertThrows(InvalidCustomerCardException.class, () -> {
+                ezshop.modifyCustomer(id, "Name", "abcdefghij");
+            });
+
+            assertThrows(InvalidCustomerCardException.class, () -> {
+                ezshop.attachCardToCustomer("123456789", id);
+            });
+
+            assertThrows(InvalidCustomerCardException.class, () -> {
+                ezshop.attachCardToCustomer("abcdefghij", id);
+            });
+
+            assertThrows(InvalidCustomerCardException.class, () -> {
+                ezshop.modifyPointsOnCard("123456789", 5);
+            });
+
+            assertThrows(InvalidCustomerCardException.class, () -> {
+                ezshop.modifyPointsOnCard("abcdefghij", 5);
+            });
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
 
 
 }

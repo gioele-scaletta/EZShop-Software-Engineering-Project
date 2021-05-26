@@ -1565,6 +1565,14 @@ public class EZShop implements EZShopInterface {
             throw new InvalidCustomerCardException("The customer's card is null, empty or it is not in a valid format");
         }
 
+        // Check if customerCard contains only digits
+        try {
+            Integer.parseInt(customerCard);
+        }
+        catch(Exception e) {
+            throw new InvalidCustomerCardException("The customer's card is not in a valid format");
+        }
+
         if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to attach a card to customer");
         }
@@ -1614,6 +1622,14 @@ public class EZShop implements EZShopInterface {
         // Exceptions
         if (customerCard == null || customerCard.length() != 10 || customerCard.isEmpty()) {
             throw new InvalidCustomerCardException("The customer's card is null, empty or it is not in a valid format");
+        }
+
+        // Check if customerCard contains only digits
+        try {
+            Integer.parseInt(customerCard);
+        }
+        catch(Exception e) {
+            throw new InvalidCustomerCardException("The customer's card is not in a valid format");
         }
 
         if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
