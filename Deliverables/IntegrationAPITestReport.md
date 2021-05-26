@@ -409,7 +409,7 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |8.3|FR6.12|TestIntegrationEZShop.testStartReturnTransaction()|
 |"|FR6.13|TestIntegrationEZShop.testReturnProduct()|
 |"|FR6.14|TestIntegrationEZShop.testEndReturnTransaction()|
-|"|FR7.3|TestIntegrationEZShop.testDeleteReturnTransaction()|
+|"|FR6.15|TestIntegrationEZShop.testDeleteReturnTransaction()|
 |9.1|FR8.3|TestIntegrationEZShop.testGetDebitsAndCredits()|
 |9.2|FR8.2|TestIntegrationEZShop.testRecordBalanceUpdate()|
 |9.3|FR8.1|TestIntegrationEZShop.testRecordBalanceUpdate()|
