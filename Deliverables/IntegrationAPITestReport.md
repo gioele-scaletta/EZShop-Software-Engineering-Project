@@ -60,6 +60,7 @@ package "EZShop"
         class "OrderImpl"
         class "ProductTypeImpl"
         class "SaleTransactionImpl"
+        class "ReturnTransactionImpl"
         class "TicketEntryImpl"
         class "UserImpl"
 
@@ -71,6 +72,16 @@ package "EZShop"
         TicketEntry -down-> TicketEntryImpl
         User -down-> UserImpl
     }
+
+    ReturnTransactionImpl -> BalanceOperationImpl
+    ReturnTransactionImpl -> SaleTransactionImpl
+    ReturnTransactionImpl -> ProductTypeImpl
+    SaleTransactionImpl -down-> BalanceOperationImpl
+    SaleTransactionImpl -down-> TicketEntryImpl
+    SaleTransactionImpl -down-> CustomerImpl
+    SaleTransactionImpl -down-> ProductTypeImpl
+    TicketEntryImpl -> ProductTypeImpl
+
 }
 
 ```
