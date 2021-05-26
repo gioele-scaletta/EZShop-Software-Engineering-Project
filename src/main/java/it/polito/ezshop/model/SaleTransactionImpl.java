@@ -4,11 +4,13 @@ import it.polito.ezshop.data.BalanceOperation;
 import it.polito.ezshop.data.SaleTransaction;
 import it.polito.ezshop.data.TicketEntry;
 
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class SaleTransactionImpl implements SaleTransaction {
+
 
     Integer transactionId;
     Double amount;
@@ -48,8 +50,9 @@ public class SaleTransactionImpl implements SaleTransaction {
         this.amount = amount;
 		this.discountRate = discountRate;
 		//this.listOfProductsSale=listofprod;
-        this.listOfProductsEntries=listOfProductsEntries;
-
+        if(listOfProductsEntries!=null) {
+            this.listOfProductsEntries = listOfProductsEntries;
+        }
 		this.transactionCard = transactionCardId;
 		this.saleOperationRecord = balanceOperationId;
     }
