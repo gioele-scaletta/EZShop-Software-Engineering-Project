@@ -179,6 +179,42 @@ Version:
 |  1    |  User selects customer record U |
 |  2    |  User modify points on L |
 
+##### Scenario UC9.2
+
+| Scenario |  Credit operation |
+| ------------- |:-------------:| 
+|  Precondition     | Employee C exists and is logged in |
+|  | Sale operation O has occurred |
+|  Post condition     | A Balance operation has been added to the application |
+| Step#        | Description  |
+|  1    |  The amount T (where T>0) of the operation O is calculated |
+|  2    |  A Balance operation B with amount T is created |
+|  3    |  B is added to the list of balance operations of the application |
+
+##### Scenario UC9.3
+
+| Scenario |  Debit operation |
+| ------------- |:-------------:| 
+|  Precondition     | Employee C exists and is logged in |
+|  | Order/Return operation O has occurred |
+|  Post condition     | A Balance operation has been added to the application |
+| Step#        | Description  |
+|  1    |  The amount T (where T<0)of the operation O is calculated |
+|  2    |  A Balance operation B with amount T is created |
+|  3    |  B is added to the list of balance operations of the application |
+
+##### Scenario UC9.4
+
+| Scenario |  Compute Balance |
+| ------------- |:-------------:| 
+|  Precondition     | Employee C exists and is logged in |
+|  | Sale/Order/Return operation O has occurred |
+|  Post condition     | Total Balance is Computed |
+| Step#        | Description  |
+|  1    |  Retrieve balance operation |
+|  2    |  Retrieve amount of each balance operation and sum |
+|  3    |  Return sum |
+
 
 # Coverage of Scenarios and FR
 
@@ -221,6 +257,17 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |4.7|FR5.7|TestEZShop.testModifyPointsOnCard()|
 |5.1|FR1.5|TestEZShop.testLogin()|
 |5.2|"|TestEZShop.testLogout()|
+|7.1|FR7.2|TestEZShop.testReceiveCreditCardPayment()|
+|7.2|"|TestEZShop.testReceiveCreditCardPayment()|
+|7.3|"|TestEZShop.testReceiveCreditCardPayment()|
+|7.4|FR7.1|TestEZShop.testReceiveCashPayment()|
+|9.1|FR8.3|TestEZShop.testGetDebitsAndCredits()|
+|9.2|FR8.2|TestEZShop.testRecordBalanceUpdate()|
+|9.3|FR8.1|TestEZShop.testRecordBalanceUpdate()|
+|9.4|FR8.4|TestEZShop.testRecordBalanceUpdate()|
+|10.1|FR7.4|TestEZShop.testReturnCreditCardPayment()|
+|10.2|FR7.3|TestEZShop.testReturnCashPayment()|
+
 
 
 # Coverage of Non Functional Requirements
