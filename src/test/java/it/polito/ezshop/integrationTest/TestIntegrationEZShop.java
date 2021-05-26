@@ -19,12 +19,12 @@ public class TestIntegrationEZShop {
 
     private static EZShop ezshop;
 
-/*
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         ezshop = new EZShop();
     }
-*/
+
     @AfterClass
     public static void cleanUpAfterClass(){
         ezshop.reset();
@@ -33,7 +33,7 @@ public class TestIntegrationEZShop {
 
     @Before
     public void setUp() throws Exception {
-        ezshop = new EZShop();
+       // ezshop = new EZShop();
         ezshop.reset();
         //ezshop.logout();
         ezshop.createUser("admin","password","Administrator");
@@ -95,7 +95,7 @@ public class TestIntegrationEZShop {
             Assert.fail();
         }
     }
-
+/*
     @Test
     public void testReset(){
         ezshop.closeDB();
@@ -104,7 +104,7 @@ public class TestIntegrationEZShop {
         ezshop.reset();
         assertTrue(outContent.toString().contains("Error with db"));
     }
-
+*/
     @Test
     public void testCreateUser (){
         try {
@@ -173,13 +173,15 @@ public class TestIntegrationEZShop {
             assertTrue(outContent.toString().contains("Error with db"));
 */
 
+            ezshop.closeDB();
+
             // role is invalid
             assertThrows(RuntimeException.class, () -> {
-                ezshop.closeDB();
+
                 ezshop.createUser( "user9", "password", "Cashier" );
             });
 
-
+            ezshop = new EZShop();
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
