@@ -3080,7 +3080,7 @@ public class EZShop implements EZShopInterface {
               System.out.println(e.getMessage());
           }
 */
-          sale=null;
+          currentSale=null;
     }
 
     private BalanceOperationImpl newBalanceUpdate(Double amount) {

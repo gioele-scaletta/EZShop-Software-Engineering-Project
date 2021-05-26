@@ -3017,6 +3017,7 @@ public class TestIntegrationEZShop {
             // Check if the operation is successful
             ezshop.login("admin","password");
             assertTrue(ezshop.endSaleTransaction(transactionId));
+            assertEquals(Integer.valueOf(8), ezshop.getProductTypeByBarCode("5701234567899").getQuantity());
             ezshop.logout();
         }
         catch (Exception e) {
@@ -3067,6 +3068,7 @@ public class TestIntegrationEZShop {
             // Check if the operation is successful
             ezshop.login("admin","password");
             assertTrue(ezshop.deleteSaleTransaction(transactionId));
+            assertEquals(Integer.valueOf(10), ezshop.getProductTypeByBarCode("5701234567899").getQuantity());
             ezshop.logout();
         }
         catch (Exception e) {
@@ -3173,6 +3175,7 @@ public class TestIntegrationEZShop {
             double currentBalance = ezshop.computeBalance();
             assertEquals(5.01 - ezshop.getSaleTransaction(transactionId).getPrice(), ezshop.receiveCashPayment(transactionId, 5.01), 0.01);
             assertEquals(currentBalance + 2.50, ezshop.computeBalance(), 0.01);
+            assertEquals(Integer.valueOf(8), ezshop.getProductTypeByBarCode("5701234567899").getQuantity());
             ezshop.logout();
         }
         catch (Exception e) {
@@ -3235,6 +3238,280 @@ public class TestIntegrationEZShop {
             double currentBalance = ezshop.computeBalance();
             assertTrue(ezshop.receiveCreditCardPayment(transactionId, "4485370086510891"));
             assertEquals(currentBalance + 2.50, ezshop.computeBalance(), 0.01);
+            assertEquals(Integer.valueOf(8), ezshop.getProductTypeByBarCode("5701234567899").getQuantity());
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testStartReturnTransaction() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionIdInProgress = ezshop.startSaleTransaction();
+            Integer transactionIdClosed = ezshop.startSaleTransaction();
+            ezshop.endSaleTransaction(transactionIdClosed);
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 4);
+            ezshop.endSaleTransaction(transactionId);
+            ezshop.receiveCashPayment(transactionId, 1.25 * 4);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.startReturnTransaction(transactionId);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.startReturnTransaction(null);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.startReturnTransaction(0);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.startReturnTransaction(-1);
+            });
+            ezshop.logout();
+
+            // Check if the SaleTransaction is not available
+            ezshop.login("admin","password");
+            assertEquals(Integer.valueOf(-1), ezshop.startReturnTransaction(transactionId + 1));
+            ezshop.logout();
+
+            // Check if the SaleTransaction has not already been sold and payed
+            ezshop.login("admin","password");
+            assertEquals(Integer.valueOf(-1), ezshop.startReturnTransaction(transactionIdInProgress));
+            assertEquals(Integer.valueOf(-1), ezshop.startReturnTransaction(transactionIdClosed));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            assertTrue(ezshop.startReturnTransaction(transactionId) >= 0);
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testReturnProduct() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId1 = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId1,"1-a-1");
+            ezshop.updateQuantity(productId1, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 4);
+            ezshop.endSaleTransaction(transactionId);
+            ezshop.receiveCashPayment(transactionId, 1.25 * 4);
+            Integer returnId = ezshop.startReturnTransaction(transactionId);
+            Integer productId2 = ezshop.createProductType("Fusilli Barilla", "012345678912", 1.50, null);
+            ezshop.updatePosition(productId2,"1-a-2");
+            ezshop.updateQuantity(productId2, 20);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.returnProduct(returnId, "5701234567899", 1);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.returnProduct(null, "5701234567899", 1);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.returnProduct(0, "5701234567899", 1);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.returnProduct(-1, "5701234567899", 1);
+            });
+            ezshop.logout();
+
+            // Check InvalidProductCodeException
+            ezshop.login("admin","password");
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.returnProduct(returnId, null, 1);
+            });
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.returnProduct(returnId, "", 1);
+            });
+            assertThrows(InvalidProductCodeException.class, () -> {
+                ezshop.returnProduct(returnId, "0123", 1);
+            });
+            ezshop.logout();
+
+            // Check InvalidQuantityException
+            ezshop.login("admin","password");
+            assertThrows(InvalidQuantityException.class, () -> {
+                ezshop.returnProduct(returnId, "5701234567899", 0);
+            });
+            assertThrows(InvalidQuantityException.class, () -> {
+                ezshop.returnProduct(returnId, "5701234567899", -1);
+            });
+            ezshop.logout();
+
+            // Check if the ReturnTransaction does not exist
+            ezshop.login("admin","password");
+            assertFalse(ezshop.returnProduct(returnId + 1, "5701234567899", 1));
+            ezshop.logout();
+
+            // Check if the product to be returned does not exists
+            ezshop.login("admin","password");
+            assertFalse(ezshop.returnProduct(returnId, "3033710074365", 1));
+            ezshop.logout();
+
+            // Check if the product was not in the transaction
+            ezshop.login("admin","password");
+            assertFalse(ezshop.returnProduct(returnId, "012345678912", 1));
+            ezshop.logout();
+
+            // Check if the amount is higher than the one in the sale transaction
+            ezshop.login("admin","password");
+            assertFalse(ezshop.returnProduct(returnId, "5701234567899", 10));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            assertTrue(ezshop.returnProduct(returnId, "5701234567899", 1));
+            assertEquals(Integer.valueOf(6), ezshop.getProductTypeByBarCode("5701234567899").getQuantity());
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testEndReturnTransaction() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 4);
+            ezshop.endSaleTransaction(transactionId);
+            ezshop.receiveCashPayment(transactionId, 1.25 * 4);
+            Integer returnIdClosed = ezshop.startReturnTransaction(transactionId);
+            ezshop.endReturnTransaction(returnIdClosed, true);
+            Integer returnIdPayed = ezshop.startReturnTransaction(transactionId);
+            ezshop.endReturnTransaction(returnIdPayed, true);
+            ezshop.returnCashPayment(returnIdPayed);
+            Integer returnId = ezshop.startReturnTransaction(transactionId);
+            ezshop.returnProduct(returnId, "5701234567899", 1);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.endReturnTransaction(returnId, true);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.endReturnTransaction(null, true);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.endReturnTransaction(0, true);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.endReturnTransaction(-1, true);
+            });
+            ezshop.logout();
+
+            // Check if the ReturnTransaction does not exist
+            ezshop.login("admin","password");
+            assertFalse(ezshop.endReturnTransaction(returnId + 1, true));
+            ezshop.logout();
+
+            // Check if the ReturnTransaction is not in progress
+            ezshop.login("admin","password");
+            assertFalse(ezshop.endReturnTransaction(returnIdClosed, true));
+            assertFalse(ezshop.endReturnTransaction(returnIdPayed, true));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            assertTrue(ezshop.endReturnTransaction(returnId, true));
+            assertEquals(Integer.valueOf(7), ezshop.getProductTypeByBarCode("5701234567899").getQuantity());
+            assertEquals(1.25 * 3, ezshop.getSaleTransaction(transactionId).getPrice(), 0.01);
+            ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testDeleteReturnTransaction() {
+        try {
+            // Setup
+            ezshop.login("admin","password");
+            Integer transactionId = ezshop.startSaleTransaction();
+            Integer productId = ezshop.createProductType("Spaghetti Barilla", "5701234567899", 1.25, null);
+            ezshop.updatePosition(productId,"1-a-1");
+            ezshop.updateQuantity(productId, 10);
+            ezshop.addProductToSale(transactionId, "5701234567899", 4);
+            ezshop.endSaleTransaction(transactionId);
+            ezshop.receiveCashPayment(transactionId, 1.25 * 4);
+            Integer returnIdInProgress = ezshop.startReturnTransaction(transactionId);
+            Integer returnIdPayed = ezshop.startReturnTransaction(transactionId);
+            ezshop.endReturnTransaction(returnIdPayed, true);
+            ezshop.returnCashPayment(returnIdPayed);
+            Integer returnId = ezshop.startReturnTransaction(transactionId);
+            ezshop.returnProduct(returnId, "5701234567899", 1);
+            ezshop.endReturnTransaction(returnId, true);
+
+            // Check UnauthorizedException
+            ezshop.logout();
+            assertThrows(UnauthorizedException.class, () -> {
+                ezshop.deleteReturnTransaction(returnId);
+            });
+
+            // Check InvalidTransactionIdException
+            ezshop.login("admin","password");
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.deleteReturnTransaction(null);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.deleteReturnTransaction(0);
+            });
+            assertThrows(InvalidTransactionIdException.class, () -> {
+                ezshop.deleteReturnTransaction(-1);
+            });
+            ezshop.logout();
+
+            // Check if the ReturnTransaction does not exist
+            ezshop.login("admin","password");
+            assertFalse(ezshop.deleteReturnTransaction(returnId + 1));
+            ezshop.logout();
+
+            // Check if the ReturnTransaction is not in progress
+            ezshop.login("admin","password");
+            assertFalse(ezshop.deleteReturnTransaction(returnIdPayed));
+            assertFalse(ezshop.deleteReturnTransaction(returnIdInProgress));
+            ezshop.logout();
+
+            // Check if the operation is successful
+            ezshop.login("admin","password");
+            assertTrue(ezshop.deleteReturnTransaction(returnId));
+            assertEquals(Integer.valueOf(6), ezshop.getProductTypeByBarCode("5701234567899").getQuantity());
             ezshop.logout();
         }
         catch (Exception e) {
