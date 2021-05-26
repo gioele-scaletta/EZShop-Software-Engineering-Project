@@ -2172,7 +2172,9 @@ public class TestEZShop {
             //Administrator perspective
             ezshop.login("admin","password");
 
-            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idProductType = ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.updatePosition(idProductType, "1-a-1");
+            ezshop.updateQuantity(idProductType, 10);
             Integer idTransaction = ezshop.startSaleTransaction();
             ezshop.addProductToSale(idTransaction,"5701234567899",1);
             ezshop.endSaleTransaction(idTransaction);
@@ -2200,7 +2202,9 @@ public class TestEZShop {
             //Shopmanager perspective
             ezshop.login("shopmanager","password");
 
-            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idProductType2 = ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.updatePosition(idProductType2, "1-a-1");
+            ezshop.updateQuantity(idProductType2, 10);
             Integer idTransaction2 = ezshop.startSaleTransaction();
             ezshop.addProductToSale(idTransaction2,"5701234567899",1);
             ezshop.endSaleTransaction(idTransaction2);
@@ -2226,7 +2230,9 @@ public class TestEZShop {
             setUp();
 
             ezshop.login("admin","password");
-            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idProductType3 = ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.updatePosition(idProductType3, "1-a-1");
+            ezshop.updateQuantity(idProductType3, 10);
             ezshop.logout();
 
             //Cashier perspective
@@ -2260,7 +2266,6 @@ public class TestEZShop {
         }
     }
 
-    //Marco: return value should be the returned amount
     @Test
     public void testReturnCreditCardPayment(){
         try {
@@ -2270,7 +2275,9 @@ public class TestEZShop {
             //Administrator perspective
             ezshop.login("admin","password");
 
-            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idProductType = ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.updatePosition(idProductType, "1-a-1");
+            ezshop.updateQuantity(idProductType, 10);
             Integer idTransaction = ezshop.startSaleTransaction();
             ezshop.addProductToSale(idTransaction,"5701234567899",1);
             ezshop.endSaleTransaction(idTransaction);
@@ -2305,7 +2312,9 @@ public class TestEZShop {
             //Shopmanager perspective
             ezshop.login("shopmanager","password");
 
-            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idProductType2 = ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.updatePosition(idProductType2, "1-a-1");
+            ezshop.updateQuantity(idProductType2, 10);
             Integer idTransaction2 = ezshop.startSaleTransaction();
             ezshop.addProductToSale(idTransaction2,"5701234567899",1);
             ezshop.endSaleTransaction(idTransaction2);
@@ -2338,7 +2347,9 @@ public class TestEZShop {
             setUp();
 
             ezshop.login("admin","password");
-            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idProductType3 = ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.updatePosition(idProductType3, "1-a-1");
+            ezshop.updateQuantity(idProductType3, 10);
             ezshop.logout();
 
             //Shopmanager perspective
