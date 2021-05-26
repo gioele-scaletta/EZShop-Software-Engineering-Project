@@ -2947,6 +2947,11 @@ public class EZShop implements EZShopInterface {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        if(this.currentSale!=null){
+         if(tid<currentSale.getTicketNumber()){
+             tid=currentSale.getTicketNumber();
+         }
+        }
 
         return tid+1;
     }

@@ -237,6 +237,7 @@ public class SaleTransactionImpl implements SaleTransaction {
 
 
     public int PointsForSale() {
+
         Integer tmp=(int) (this.amount/10);
         //this.transactionCard.updatePoints(tmp);
         return tmp;
