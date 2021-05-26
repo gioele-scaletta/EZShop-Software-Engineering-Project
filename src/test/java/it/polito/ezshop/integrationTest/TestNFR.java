@@ -10,7 +10,7 @@ import org.junit.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-public class TestTiming {
+public class TestNFR {
 
     private static EZShop ezshop;
 

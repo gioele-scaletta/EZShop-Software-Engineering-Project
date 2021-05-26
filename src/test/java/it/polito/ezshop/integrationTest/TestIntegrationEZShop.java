@@ -1,4 +1,5 @@
 package it.polito.ezshop.integrationTest;
+import java.io.ByteArrayOutputStream;
 
 import it.polito.ezshop.data.*;
 import it.polito.ezshop.model.*;
@@ -7,6 +8,8 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
+import java.io.PrintStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -16,12 +19,12 @@ public class TestIntegrationEZShop {
 
     private static EZShop ezshop;
 
-
+/*
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         ezshop = new EZShop();
     }
-
+*/
     @AfterClass
     public static void cleanUpAfterClass(){
         ezshop.reset();
@@ -30,6 +33,7 @@ public class TestIntegrationEZShop {
 
     @Before
     public void setUp() throws Exception {
+        ezshop = new EZShop();
         ezshop.reset();
         //ezshop.logout();
         ezshop.createUser("admin","password","Administrator");
@@ -66,6 +70,11 @@ public class TestIntegrationEZShop {
             assertThrows(InvalidPasswordException.class, () -> {
                 ezshop.login( "shopmanager", null );
             });
+
+
+
+
+
         }  catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
@@ -85,6 +94,15 @@ public class TestIntegrationEZShop {
             e.printStackTrace();
             Assert.fail();
         }
+    }
+
+    @Test
+    public void testReset(){
+        ezshop.closeDB();
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
+        ezshop.reset();
+        assertTrue(outContent.toString().contains("Error with db"));
     }
 
     @Test
@@ -147,6 +165,20 @@ public class TestIntegrationEZShop {
             assertThrows(InvalidRoleException.class, () -> {
                 ezshop.createUser( "user9", "password", "cashier" );
             });
+
+           /* ezshop.closeDB();
+            ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+            ezshop.createUser( "user9", "password", "Cashier" );
+            assertTrue(outContent.toString().contains("Error with db"));
+*/
+
+            // role is invalid
+            assertThrows(RuntimeException.class, () -> {
+                ezshop.closeDB();
+                ezshop.createUser( "user9", "password", "Cashier" );
+            });
+
 
         } catch (Exception e) {
             e.printStackTrace();

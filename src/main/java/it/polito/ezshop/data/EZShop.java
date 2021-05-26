@@ -156,8 +156,9 @@ public class EZShop implements EZShopInterface {
                 return -1;
             }
         } catch (SQLException e) {
+            System.err.println("Error with db connection");
            e.printStackTrace();
-           return -1;
+            throw new RuntimeException(e);
         }
 
         //Calculating new ID
@@ -187,7 +188,9 @@ public class EZShop implements EZShopInterface {
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-            return -1;
+            System.err.println("Error with db connection");
+
+            throw new RuntimeException(e);
         }
         System.out.println("User " + username + " with role " + role + " and id " + id + " has been added to the application");
         return id;
