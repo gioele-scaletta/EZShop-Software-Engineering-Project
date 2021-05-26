@@ -166,22 +166,18 @@ public class TestIntegrationEZShop {
                 ezshop.createUser( "user9", "password", "cashier" );
             });
 
-           /* ezshop.closeDB();
-            ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-            System.setOut(new PrintStream(outContent));
-            ezshop.createUser( "user9", "password", "Cashier" );
-            assertTrue(outContent.toString().contains("Error with db"));
-*/
+
+
 
             ezshop.closeDB();
 
-            // role is invalid
             assertThrows(RuntimeException.class, () -> {
-
                 ezshop.createUser( "user9", "password", "Cashier" );
             });
 
             ezshop = new EZShop();
+
+
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
