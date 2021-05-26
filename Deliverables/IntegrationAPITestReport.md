@@ -1,10 +1,10 @@
 # Integration and API Test Documentation
 
-Authors:
+Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scaletta
 
-Date:
+Date: 26/05/2021
 
-Version:
+Version: 1.0
 
 # Contents
 
@@ -456,6 +456,21 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |                            |  TestNFR.testTimeModifyCustomer()   |
 |                            |  TestNFR.testTimeCreateAttachCardToCustomer()   |
 |                            |  TestNFR.testTimeModifyPointsOnCard()   |
+|                            |  TestNFR.testTimeStartSaleTransaction |
+|                            |  TestNFR.testTimeAddProductToSale |
+|                            |  TestNFR.testTimeDeleteProductFromSale |
+|                            |  TestNFR.testTimeApplyDiscountRateToProduct |
+|                            |  TestNFR.testTimeApplyDiscountRateToSale |
+|                            |  TestNFR.testTimeComputePointsForSale |
+|                            |  TestNFR.testTimeEndSaleTransaction |
+|                            |  TestNFR.testTimeDeleteSaleTransaction |
+|                            |  TestNFR.testTimeGetSaleTransaction |
+|                            |  TestNFR.testTimeReceiveCashPayment |
+|                            |  TestNFR.testTimeReceiveCreditCardPayment |
+|                            |  TestNFR.testTimeStartReturnTransaction |
+|                            |  TestNFR.testTimeReturnProduct |
+|                            |  TestNFR.testTimeEndReturnTransaction |
+|                            |  TestNFR.testTimeDeleteReturnTransaction |
 |  NFR6                      |  TestNFR.testCustomerCard10digits()   |
 |  NFR4|TestNFR.testNFR4isValidCode()|
 |  NFR5 | TestNFR.testNFR5isValidCreditCard()|
