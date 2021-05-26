@@ -438,8 +438,25 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 
 | Non Functional Requirement | Test name |
 | -------------------------- | --------- |
-|  NFR2                      |  TestTiming   |
-|  NFR6                      |  testCustomerCard10digits()   |
+|  NFR2                      |  TestNFR.testTimeLogin()   |
+|                            |  TestNFR.testTimeLogout()   |
+|                            |  TestNFR.testTimeCreateDeleteUser()   |
+|                            |  TestNFR.testTimeGetUsers()   |
+|                            |  TestNFR.testTimeUpdateUserRights()   |
+|                            |  TestNFR.testTimeCreateUpdateDeleteProductType()   |
+|                            |  TestNFR.testTimeGetProductTypes()   |
+|                            |  TestNFR.testTimeUpdateProduct()   |
+|                            |  TestNFR.testTimeOrders()   |
+|                            |  TestNFR.testTimeRecordBalanceUpdate()   |
+|                            |  TestNFR.testTimeGetCreditsAndDebits()   |
+|                            |  TestNFR.testComputeBalance()   |
+|                            |  TestNFR.testTimeDefineDeleteCustomer()   |
+|                            |  TestNFR.testTimeGetCustomer()   |
+|                            |  TestNFR.testTimeGetAllCustomers()   |
+|                            |  TestNFR.testTimeModifyCustomer()   |
+|                            |  TestNFR.testTimeCreateAttachCardToCustomer()   |
+|                            |  TestNFR.testTimeModifyPointsOnCard()   |
+|  NFR6                      |  TestNFR.testCustomerCard10digits()   |
 
 
 
