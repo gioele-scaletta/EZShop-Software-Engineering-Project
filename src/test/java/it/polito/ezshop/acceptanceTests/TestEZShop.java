@@ -3099,7 +3099,7 @@ public class TestEZShop {
     }
 
     @Test
-    public void testReceiveCashPayment() {
+    public void testReceiveCashPaymentBis() {
         try {
             // Setup
             ezshop.login("admin","password");

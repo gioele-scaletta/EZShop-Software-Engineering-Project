@@ -1665,7 +1665,7 @@ public class EZShop implements EZShopInterface {
 
 
         if( loggedIn == null || !loggedIn.canManageSaleTransactions()) {
-            System.out.println("User " + loggedIn.getUsername() + " User not authorized");
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
             throw new UnauthorizedException();
             //return -1;
         }
@@ -1731,6 +1731,11 @@ public class EZShop implements EZShopInterface {
         // Check if the SaleTransaction is not available
         if (sale == null) {
             System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
+        // Check if SaleTransaction does not identify a started and open transaction
+        if (!sale.isInProgress()) {
+            System.err.println(methodName + ": The SaleTransaction does not identify a started and open transaction");
             return false;
         }
 
@@ -1807,6 +1812,11 @@ public class EZShop implements EZShopInterface {
         // Check if the SaleTransaction is not available
         if (sale == null) {
             System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
+        // Check if SaleTransaction does not identify a started and open transaction
+        if (!sale.isInProgress()) {
+            System.err.println(methodName + ": The SaleTransaction does not identify a started and open transaction");
             return false;
         }
 
@@ -1890,6 +1900,11 @@ public class EZShop implements EZShopInterface {
             System.err.println(methodName + ": The SaleTransaction is not available");
             return false;
         }
+        // Check if SaleTransaction does not identify a started and open transaction
+        if (!sale.isInProgress()) {
+            System.err.println(methodName + ": The SaleTransaction does not identify a started and open transaction");
+            return false;
+        }
 
         //Get prod
         ProductTypeImpl product= getProductTypeByCode(productCode);
@@ -1946,6 +1961,11 @@ public class EZShop implements EZShopInterface {
         // Check if the SaleTransaction is not available
         if (sale == null) {
             System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
+        // Check if SaleTransaction is already payed
+        if (sale.isPayed()) {
+            System.err.println(methodName + ": The SaleTransaction is already payed");
             return false;
         }
 
