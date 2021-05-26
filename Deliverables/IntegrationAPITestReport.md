@@ -98,7 +98,7 @@ package "EZShop"
    We adopted a bottom-up integration testing strategy:
     step 1: Unit testing
     step 2: Integration testing (always classes in the model package but with dependecies)
-    step 3: API and Integration testing (methpods in EZShop class)
+    step 3: API and Integration testing (methods in EZShop class)
 
 #  Tests
 
