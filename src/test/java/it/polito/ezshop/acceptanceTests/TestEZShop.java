@@ -1995,14 +1995,15 @@ public class TestEZShop {
         }
     }
 
-    //Marco: this doesn't pass because the change value may be wrong
     @Test
     public void testReceiveCashPayment(){
         try {
             assertThrows(UnauthorizedException.class,()->ezshop.receiveCashPayment(1,10));
 
             ezshop.login("admin", "password");
-            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idProductType = ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.updatePosition(idProductType, "1-a-1");
+            ezshop.updateQuantity(idProductType, 10);
             ezshop.logout();
 
             ezshop.login("cashier","password");
@@ -2025,7 +2026,9 @@ public class TestEZShop {
 
             ezshop.login("shopmanager", "password");
 
-            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idProductType2 = ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.updatePosition(idProductType2, "1-a-1");
+            ezshop.updateQuantity(idProductType2, 10);
             Integer idTransaction2 = ezshop.startSaleTransaction();
             ezshop.addProductToSale(idTransaction2,"5701234567899",4);
             ezshop.endSaleTransaction(idTransaction2);
@@ -2037,7 +2040,7 @@ public class TestEZShop {
             assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCashPayment(-1,10));
             assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCashPayment(null,10));
 
-            assertTrue(ezshop.receiveCashPayment(idTransaction,2)==-1);
+            assertTrue(ezshop.receiveCashPayment(idTransaction2,2)==-1);
             assertTrue(ezshop.receiveCashPayment(idTransaction2,4)==0);
 
             ezshop.logout();
@@ -2045,7 +2048,9 @@ public class TestEZShop {
 
             ezshop.login("admin", "password");
 
-            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idProductType3 = ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.updatePosition(idProductType3, "1-a-1");
+            ezshop.updateQuantity(idProductType3, 10);
             Integer idTransaction3 = ezshop.startSaleTransaction();
             ezshop.addProductToSale(idTransaction3,"5701234567899",4);
             ezshop.endSaleTransaction(idTransaction3);
@@ -2057,7 +2062,7 @@ public class TestEZShop {
             assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCashPayment(-1,10));
             assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCashPayment(null,10));
 
-            assertTrue(ezshop.receiveCashPayment(idTransaction,2)==-1);
+            assertTrue(ezshop.receiveCashPayment(idTransaction3,2)==-1);
             assertTrue(ezshop.receiveCashPayment(idTransaction3,7)==3);
         } catch(Exception e) {
             e.printStackTrace();
@@ -2066,14 +2071,15 @@ public class TestEZShop {
 
     }
 
-    //Marco: Maybe balance of credit card is not returned correctly
     @Test
-    public void testCreditCardPayment(){
+    public void testReceiveCreditCardPayment(){
         try {
             assertThrows(UnauthorizedException.class,()->ezshop.receiveCashPayment(1,10));
 
             ezshop.login("admin", "password");
-            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idProductType = ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.updatePosition(idProductType, "1-a-1");
+            ezshop.updateQuantity(idProductType, 10);
             ezshop.logout();
 
             ezshop.login("cashier","password");
@@ -2092,10 +2098,10 @@ public class TestEZShop {
             assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(-1,"4485370086510891"));
             assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(null,"4485370086510891"));
             //Invalid Credit Card
-            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction,""));
-            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction,null));
+            assertThrows(InvalidCreditCardException.class,()->ezshop.receiveCreditCardPayment(idTransaction,""));
+            assertThrows(InvalidCreditCardException.class,()->ezshop.receiveCreditCardPayment(idTransaction,null));
             //Invalid Luhn Algorithm
-            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction,"4485370086510892"));
+            assertThrows(InvalidCreditCardException.class,()->ezshop.receiveCreditCardPayment(idTransaction,"4485370086510892"));
 
             //Finally the valid Payment
             assertTrue(ezshop.receiveCreditCardPayment(idTransaction,"4485370086510891"));
@@ -2105,7 +2111,9 @@ public class TestEZShop {
 
             ezshop.login("shopmanager", "password");
 
-            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idProductType2 = ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.updatePosition(idProductType2, "1-a-1");
+            ezshop.updateQuantity(idProductType2, 10);
             Integer idTransaction2 = ezshop.startSaleTransaction();
             ezshop.addProductToSale(idTransaction2,"5701234567899",4);
             ezshop.endSaleTransaction(idTransaction2);
@@ -2120,10 +2128,10 @@ public class TestEZShop {
             assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(-1,"4485370086510891"));
             assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(null,"4485370086510891"));
             //Invalid Credit Card
-            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction2,""));
-            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction2,null));
+            assertThrows(InvalidCreditCardException.class,()->ezshop.receiveCreditCardPayment(idTransaction2,""));
+            assertThrows(InvalidCreditCardException.class,()->ezshop.receiveCreditCardPayment(idTransaction2,null));
             //Invalid Luhn Algorithm
-            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction2,"4485370086510892"));
+            assertThrows(InvalidCreditCardException.class,()->ezshop.receiveCreditCardPayment(idTransaction2,"4485370086510892"));
 
             //Finally the valid Payment
             assertTrue(ezshop.receiveCreditCardPayment(idTransaction2,"4485370086510891"));
@@ -2133,7 +2141,9 @@ public class TestEZShop {
 
             ezshop.login("admin", "password");
 
-            ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            Integer idProductType3 = ezshop.createProductType("pasta", "5701234567899", 1.0, "none" );
+            ezshop.updatePosition(idProductType3, "1-a-1");
+            ezshop.updateQuantity(idProductType3, 10);
             Integer idTransaction3 = ezshop.startSaleTransaction();
             ezshop.addProductToSale(idTransaction3,"5701234567899",4);
             ezshop.endSaleTransaction(idTransaction3);
@@ -2148,10 +2158,10 @@ public class TestEZShop {
             assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(-1,"4485370086510891"));
             assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(null,"4485370086510891"));
             //Invalid Credit Card
-            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction3,""));
-            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction3,null));
+            assertThrows(InvalidCreditCardException.class,()->ezshop.receiveCreditCardPayment(idTransaction3,""));
+            assertThrows(InvalidCreditCardException.class,()->ezshop.receiveCreditCardPayment(idTransaction3,null));
             //Invalid Luhn Algorithm
-            assertThrows(InvalidTransactionIdException.class,()->ezshop.receiveCreditCardPayment(idTransaction3,"4485370086510892"));
+            assertThrows(InvalidCreditCardException.class,()->ezshop.receiveCreditCardPayment(idTransaction3,"4485370086510892"));
 
             //Finally the valid Payment
             assertTrue(ezshop.receiveCreditCardPayment(idTransaction3,"4485370086510891"));
@@ -3168,7 +3178,7 @@ public class TestEZShop {
     }
 
     @Test
-    public void testReceiveCreditCardPayment() {
+    public void testReceiveCreditCardPaymentBis() {
         try {
             // Setup
             ezshop.login("admin","password");
