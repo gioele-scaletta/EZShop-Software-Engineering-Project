@@ -2481,6 +2481,11 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
 
+        // Check if the cash is less than or equal to 0
+        if(cash <= 0){
+            throw new InvalidPaymentException();
+        }
+
         // Get SaleTransaction
         SaleTransactionImpl sale = getSaleTransactionById(transactionId);
         // Check if the SaleTransaction is not available
@@ -2488,11 +2493,6 @@ public class EZShop implements EZShopInterface {
             System.err.println(methodName + ": The SaleTransaction is not available");
             return -1;
         }
-
-        if(cash<=0){
-            throw new InvalidPaymentException();
-        }
-
 
         double change=sale.PaySaleAndReturnChange(cash, true);
         if(change!=-1) {
