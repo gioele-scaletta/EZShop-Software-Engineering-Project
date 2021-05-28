@@ -1,5 +1,6 @@
 package it.polito.ezshop.model;
 
+import it.polito.ezshop.data.ProductType;
 import it.polito.ezshop.data.TicketEntry;
 
 import java.util.Map;
@@ -120,8 +121,15 @@ public class ReturnTransactionImpl {
 
     //MARCO: Not tested since it refers to another class, so it's more about integration test
     public void addProduct(ProductTypeImpl productType, Integer quantity) {
+        // Retrieve previous quantity, if any
+        ProductTypeImpl previousProductType = this.returnProducts.keySet().stream().filter(pt -> pt.getBarCode().equals(productType.getBarCode())).findFirst().orElse(null);
+        Integer previousQuantity = 0;
+        if (previousProductType != null) {
+            previousQuantity = this.returnProducts.get(previousProductType);
+            this.returnProducts.remove(previousProductType);
+        }
         // Add product to the returnProducts
-        this.returnProducts.put(productType, quantity);
+        this.returnProducts.put(productType, quantity + previousQuantity);
         // Get TicketEntry
         TicketEntry ticketEntry = this.saleTransaction.getListOfProductsEntries().get(productType.getBarCode());
         // Update amount applying the product discount and the sale discount, if any

@@ -2298,7 +2298,8 @@ public class EZShop implements EZShopInterface {
             return false;
         }
         // Check if the amount is higher than the one in the sale transaction
-        if (amount > saleTransaction.getProductQuantity(productType)) {
+        int previousAmount = returnTransaction.getReturnProducts().entrySet().stream().filter(e -> e.getKey().getBarCode().equals(productCode)).mapToInt(Map.Entry::getValue).reduce(0, Integer::sum);
+        if ((amount + previousAmount) > saleTransaction.getProductQuantity(productType)) {
             System.err.println(methodName + ": The amount is higher than the one in the sale transaction");
             return false;
         }
