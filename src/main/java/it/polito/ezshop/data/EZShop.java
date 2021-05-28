@@ -502,20 +502,26 @@ public class EZShop implements EZShopInterface {
             throw new InvalidPricePerUnitException();
         }
 
-        //Checking if product barcode is already present
-        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
+
+        //Checking if product id is already present
+        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.productId=?";
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(sql);
             pstmt.setString(1, newCode);
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() != false) {
-                System.out.println("Product with barcode " + newCode + " is already present");
+                System.out.println("Product with id " + id + " is not present");
                 return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
+
+        if(newNote==null){
+            newNote="";
+        }
+
 
         //Updating product
         String sql2 = "UPDATE PRODUCTTYPES SET Description=?, BarCode=?, SellPrice=?, notes=? WHERE productId=?";
@@ -525,7 +531,7 @@ public class EZShop implements EZShopInterface {
             pstmt.setString(1, newDescription);
             pstmt.setString(2, newCode);
             pstmt.setDouble(3, newPrice);
-            pstmt.setString(4, newNote);
+            pstmt.setString(4, newNote );
             pstmt.setInt(5,id);
             numUpdated = pstmt.executeUpdate();
         } catch (SQLException e) {

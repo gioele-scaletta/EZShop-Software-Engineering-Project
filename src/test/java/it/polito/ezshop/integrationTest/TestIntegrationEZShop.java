@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 
 
-public class TestIntegrationEZShop {
+ public class TestIntegrationEZShop {
 
     private static EZShop ezshop;
 
