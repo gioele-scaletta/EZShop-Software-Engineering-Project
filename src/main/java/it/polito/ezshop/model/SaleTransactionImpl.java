@@ -4,26 +4,23 @@ import it.polito.ezshop.data.BalanceOperation;
 import it.polito.ezshop.data.SaleTransaction;
 import it.polito.ezshop.data.TicketEntry;
 
-import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SaleTransactionImpl implements SaleTransaction {
+
 
     Integer transactionId;
     Double amount;
     enum State{PAYED, CLOSED, INPROGRESS};
-
-    public State getState() {
-        return state;
-    }
-
     State state;
     enum PaymentType{CARD, CASH};
     PaymentType pay;
     Double discountRate;
-    HashMap< ProductTypeImpl, Integer> listOfProductsSale =new HashMap<>();
-
+    //HashMap< ProductTypeImpl, Integer> listOfProductsSale =new HashMap<>();
+    HashMap<String ,TicketEntry> listOfProductsEntries= new HashMap<>();
     CustomerImpl transactionCard;
     BalanceOperation saleOperationRecord;
 
@@ -47,31 +44,33 @@ public class SaleTransactionImpl implements SaleTransaction {
 
 
     //constructor for loading data from db
-    public SaleTransactionImpl(int transactionId, String stat, String paymentType, double amount, double discountRate, CustomerImpl transactionCardId, BalanceOperationImpl balanceOperationId, HashMap< ProductTypeImpl, Integer> listofprod) {
+    public SaleTransactionImpl(int transactionId, String stat, String paymentType, double amount, double discountRate, CustomerImpl transactionCardId, BalanceOperationImpl balanceOperationId, HashMap<String,TicketEntry> listOfProductsEntries/*, HashMap< ProductTypeImpl, Integer> listofprod*/) {
         this.transactionId = transactionId;
         this.state= State.valueOf(stat);
         this.amount = amount;
 		this.discountRate = discountRate;
-		this.listOfProductsSale=listofprod;
-
+		//this.listOfProductsSale=listofprod;
+        if(listOfProductsEntries!=null) {
+            this.listOfProductsEntries = listOfProductsEntries;
+        }
 		this.transactionCard = transactionCardId;
 		this.saleOperationRecord = balanceOperationId;
     }
 
+    /*
     public HashMap<ProductTypeImpl, Integer> getListOfProductsSale() {
         return listOfProductsSale;
     }
+    */
+    public HashMap<String, TicketEntry> getListOfProductsEntries() {
+        return this.listOfProductsEntries;
+    }
+
     public String getPayString() {
         return pay.toString();
     }
     public String getStateString() {
         return state.toString();
-    }
-    public CustomerImpl getTransactionCard() {
-        return transactionCard;
-    }
-    public BalanceOperation getSaleOperationRecord() {
-        return saleOperationRecord;
     }
 
     @Override
@@ -88,6 +87,7 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     @Override
     public List<TicketEntry> getEntries() {
+        /*
         List<TicketEntry> listOfProductsEntries= new ArrayList<>();
 
         this.listOfProductsSale.entrySet().stream().forEach((e)->{
@@ -97,20 +97,26 @@ public class SaleTransactionImpl implements SaleTransaction {
 
             listOfProductsEntries.add(t);
         });
-       return listOfProductsEntries;
+       return listOfProductsEntries;*/
+        return listOfProductsEntries.entrySet().stream().map(e->e.getValue()).collect(Collectors.toList());
     }
 
     @Override
     public void setEntries(List<TicketEntry> entries) {
         if (entries==null) return;
-      this.listOfProductsSale= new HashMap<>();
+      /*this.listOfProductsSale= new HashMap<>();
+        this.listOfProductsEntries=entries;
 
       entries.stream().forEach(t->{
           ProductTypeImpl p= new ProductTypeImpl( t.getBarCode(),t.getProductDescription(), t.getPricePerUnit(), t.getDiscountRate());
 
          this.listOfProductsSale.put(p, t.getAmount());
 
-      });
+      });*/
+        for (TicketEntry e : entries){
+            this.listOfProductsEntries.put(e.getBarCode(),e);
+        }
+
     }
 
     @Override
@@ -144,26 +150,29 @@ public class SaleTransactionImpl implements SaleTransaction {
             //I LEFT THOSE 2 DEBUG PRINTING BECAUSE IN THE ESHOP STRUCTURE THE QUANTITY UPDATES CORRECTLY
             //DEBUG
 
-            this.listOfProductsSale.merge(product, quantity,Integer::sum );
+            //this.listOfProductsSale.merge(product, quantity,Integer::sum );
 
+            TicketEntry t=this.listOfProductsEntries.get(product.getBarCode());
+            t.setAmount(t.getAmount()+quantity);
+            this.listOfProductsEntries.replace(product.getBarCode(), t);
 
             this.amount=this.calculateCurrentAmount();
-            product.updateProductQuantity(-quantity);
+            //product.updateProductQuantity(-quantity);
 
 
 
-            if(this.amount==0) {
-                this.listOfProductsSale.remove(product);
+            if(t.getAmount()==0) {
+                this.listOfProductsEntries.remove(product.getBarCode());
 
                 return true;
             }
 
             return true;
         } else{
-            product.setProductDiscountRate(0.0);//NOT NICE BUT FOR NOW BEST SOL TO BE CONSISTENT WITH GUI -> we need to understand why there is a discount rate attribute in producttype and what it is used for and what is the differencen with the discount rate you add from the GUI
-            this.listOfProductsSale.put(product, quantity);
+            TicketEntry t=new TicketEntryImpl(product,quantity);
+            this.listOfProductsEntries.put(product.getBarCode(), t);
 
-            product.updateProductQuantity(-quantity);
+            //product.updateProductQuantity(-quantity);
             this.amount=this.calculateCurrentAmount();
 
             return true;
@@ -172,21 +181,23 @@ public class SaleTransactionImpl implements SaleTransaction {
     }
 
     public void AbortSaleUpdateProductQuantity() {
-        this.listOfProductsSale.entrySet().stream().forEach(e->e.getKey().updateProductQuantity(-e.getValue()));
-
+       // this.listOfProductsSale.entrySet().stream().forEach(e->e.getKey().updateProductQuantity(-e.getValue()));
+        //this.listOfProductsEntries.entrySet().stream().forEach(e->e.getValue().setAmount(-e.getValue().getAmount()));
+   this.listOfProductsEntries=null;
     }
 
     public boolean isProductInSale(ProductTypeImpl product){
-        return this.listOfProductsSale.keySet().stream().anyMatch(e -> e.getBarCode().equals(product.getBarCode()));
+        return this.listOfProductsEntries.keySet().stream().anyMatch(e -> e.equals(product.getBarCode()));
     }
 
     public boolean ApplyDiscountToSaleProduct(Double disc, ProductTypeImpl product) {
 
-        if(this.listOfProductsSale.containsKey(product)){
+        if(isProductInSale(product)){
 
 
             //LIKE THIS IT WORKS LIKE IN THE GUI: WHEN A DISCOUNT IS APPLIED TO A PRODUCT IT APPLIES TO ALL THE PRODUCT OF THAT TYPES IN THE SALE (EVEN IF INCLUDED BEFORE)
-            this.listOfProductsSale.keySet().stream().filter((k)->k.equals(product)).forEach(k->k.setProductDiscountRate(disc));
+           // this.listOfProductsSale.keySet().stream().filter((k)->k.equals(product)).forEach(k->k.setProductDiscountRate(disc));
+            this.listOfProductsEntries.entrySet().stream().filter((k)->k.getKey().equals(product.getBarCode())).forEach(k->k.getValue().setDiscountRate(disc));
             this.amount=this.calculateCurrentAmount();
 
             return true;
@@ -212,7 +223,8 @@ public class SaleTransactionImpl implements SaleTransaction {
     private Double calculateCurrentAmount() {
         //1. map each product to a double=price*quantity*(1-proddiscount)
         //2. sum all doubles
-        this.amount = this.listOfProductsSale.entrySet().stream().mapToDouble(p->{return p.getValue()*p.getKey().getPricePerUnit()*(1-p.getKey().getProductDiscountRate());}).reduce(0,(a,b)->{return a+b;});
+        //this.amount = this.listOfProductsSale.entrySet().stream().mapToDouble(p->{return p.getValue()*p.getKey().getPricePerUnit()*(1-p.getKey().getProductDiscountRate());}).reduce(0,(a,b)->{return a+b;});
+        this.amount = this.listOfProductsEntries.entrySet().stream().mapToDouble(t->{return t.getValue().getAmount()*t.getValue().getPricePerUnit()*(1-t.getValue().getDiscountRate());}).reduce(0,(a,b)->{return a+b;});
         //apply sale discount
         if(this.discountRate>0 && this.discountRate<=1)
         this.amount=this.amount*(1-this.discountRate);
@@ -222,6 +234,7 @@ public class SaleTransactionImpl implements SaleTransaction {
 
 
     public int PointsForSale() {
+
         Integer tmp=(int) (this.amount/10);
         //this.transactionCard.updatePoints(tmp);
         return tmp;
@@ -258,14 +271,15 @@ public class SaleTransactionImpl implements SaleTransaction {
     }
 
     public boolean isClosed() {
+
         return (this.state == State.CLOSED);
     }
 
     public Integer getProductQuantity(ProductTypeImpl productType) {
         Integer quantity = -1;
-        for (ProductTypeImpl pt : this.listOfProductsSale.keySet()) {
-            if (pt.getBarCode().equals(productType.getBarCode())) {
-                quantity = this.listOfProductsSale.get(pt);
+        for (String pt : this.listOfProductsEntries.keySet()) {
+            if (pt.equals(productType.getBarCode())) {
+                quantity = this.listOfProductsEntries.get(pt).getAmount();
                 break;
             }
         }
@@ -274,9 +288,10 @@ public class SaleTransactionImpl implements SaleTransaction {
     }
 
     public void updateProductQuantity(ProductTypeImpl productType, Integer quantity) {
-        for (HashMap.Entry<ProductTypeImpl, Integer> entry : this.listOfProductsSale.entrySet()) {
-            if (entry.getKey().getBarCode().equals(productType.getBarCode())) {
-                this.listOfProductsSale.put(entry.getKey(), entry.getValue() + quantity);
+        for (HashMap.Entry<String, TicketEntry> entry : this.listOfProductsEntries.entrySet()) {
+            if (entry.getKey().equals(productType.getBarCode())) {
+                TicketEntry t=new TicketEntryImpl(productType, entry.getValue().getAmount()+quantity);
+                this.listOfProductsEntries.replace(t.getBarCode(),t);
                 break;
             }
         }

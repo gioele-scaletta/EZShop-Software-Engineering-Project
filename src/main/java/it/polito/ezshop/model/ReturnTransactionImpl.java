@@ -1,5 +1,7 @@
 package it.polito.ezshop.model;
 
+import it.polito.ezshop.data.TicketEntry;
+
 import java.util.Map;
 
 public class ReturnTransactionImpl {
@@ -96,7 +98,6 @@ public class ReturnTransactionImpl {
         return balanceOperation;
     }
 
-    //MARCO: Not tested since it refers to another class, so it's more about integration test
     public void setBalanceOperation(BalanceOperationImpl balanceOperation) {
         if (balanceOperation == null) {
             return;
@@ -121,7 +122,9 @@ public class ReturnTransactionImpl {
     public void addProduct(ProductTypeImpl productType, Integer quantity) {
         // Add product to the returnProducts
         this.returnProducts.put(productType, quantity);
+        // Get TicketEntry
+        TicketEntry ticketEntry = this.saleTransaction.getListOfProductsEntries().get(productType.getBarCode());
         // Update amount applying the product discount and the sale discount, if any
-        this.amount += quantity * productType.getPricePerUnit() * (1 - productType.getProductDiscountRate()) * (1 - this.saleTransaction.getDiscountRate());
+        this.amount += quantity * ticketEntry.getPricePerUnit() * (1 - ticketEntry.getDiscountRate()) * (1 - this.saleTransaction.getDiscountRate());
     }
 }

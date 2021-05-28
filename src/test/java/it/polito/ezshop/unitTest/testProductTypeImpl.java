@@ -107,7 +107,6 @@ public class testProductTypeImpl {
     @Test
     public void testisValidCode (){
 
-
         assertTrue(prod.isValidCode("5701234567899"));
         assertFalse(prod.isValidCode("111111111111"));
         assertFalse(prod.isValidCode("5701234a67899"));

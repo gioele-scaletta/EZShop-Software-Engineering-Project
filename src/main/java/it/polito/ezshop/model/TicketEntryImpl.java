@@ -19,6 +19,14 @@ public class TicketEntryImpl implements TicketEntry {
         this.discountRate = discountRate;
     }
 
+    public TicketEntryImpl(ProductTypeImpl p, Integer quantity ) {
+        this.barCode = p.getBarCode();
+        this.productDescription = p.getProductDescription();
+        this.amount = quantity;
+        this.pricePerUnit = p.getPricePerUnit();
+        this.discountRate = 0.0;
+    }
+
     public String getBarCode() {
         return this.barCode;
     }
