@@ -20,7 +20,6 @@ public class TestNFR {
     @AfterClass
     public static void cleanUpAfterClass(){
         ezshop.reset();
-        ezshop.closeDB();
     }
 
     @Before

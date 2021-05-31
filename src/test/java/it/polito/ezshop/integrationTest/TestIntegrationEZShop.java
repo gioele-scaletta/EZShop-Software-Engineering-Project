@@ -28,7 +28,6 @@ import java.util.List;
     @AfterClass
     public static void cleanUpAfterClass(){
         ezshop.reset();
-        ezshop.closeDB();
     }
 
     @Before
