@@ -1,11 +1,6 @@
 package it.polito.ezshop.model;
 
 import it.polito.ezshop.data.User;
-import it.polito.ezshop.exceptions.InvalidPasswordException;
-import it.polito.ezshop.exceptions.InvalidRoleException;
-import it.polito.ezshop.exceptions.InvalidUsernameException;
-
-import javax.management.relation.Role;
 
 public class UserImpl implements User {
 

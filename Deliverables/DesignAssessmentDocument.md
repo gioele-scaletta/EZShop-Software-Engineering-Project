@@ -1,64 +1,84 @@
 # Design assessment
 
+Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scaletta
 
-```
-<The goal of this document is to analyse the structure of your project, compare it with the design delivered
-on April 30, discuss whether the design could be improved>
-```
+Date: 02/06/2021
+
+Version: 1.0
 
 # Levelized structure map
-```
-<Applying Structure 101 to your project, version to be delivered on june 4, produce the Levelized structure map,
-with all elements explosed, all dependencies, NO tangles; and report it here as a picture>
-```
+
+
+![LSM](./design_assessment_images/LSM.jpeg)
 
 # Structural over complexity chart
-```
-<Applying Structure 101 to your project, version to be delivered on june 4, produce the structural over complexity chart; and report it here as a picture>
-```
 
+![Structural-over-complexity](./design_assessment_images/structural-over-complexity.jpeg)
 
 
 # Size metrics
 
-```
-<Report here the metrics about the size of your project, collected using Structure 101>
-```
-
-
 
 | Metric                                    | Measure |
 | ----------------------------------------- | ------- |
-| Packages                                  |         |
-| Classes (outer)                           |         |
-| Classes (all)                             |         |
-| NI (number of bytecode instructions)      |         |
-| LOC (non comment non blank lines of code) |         |
+| Packages                                  |    6     |
+| Classes (outer)                           |    37    |
+| Classes (all)                             |    73    |
+| NI (number of bytecode instructions)      |    14K    |
+| LOC (non comment non blank lines of code) |     6K   |
 
 
 
 # Items with XS
 
-```
-<Report here information about code tangles and fat packages>
-```
 
 | Item | Tangled | Fat  | Size | XS   |
 | ---- | ------- | ---- | ---- | ---- |
-|      |         |      |      |      |
-|      |         |      |      |      |
-
+| ezshop.it.polito.ezshop.model.EZShop	| | 	153	| 11490| 	2478| 
+| ezshop.it.polito.ezshop.model.EZShop.reset():void	| | 	82	| 485| 	396| 
+| ezshop.it.polito.ezshop.model.EZShop.recordOrderArrival(java.lang.Integer):boolean	| | 	56| 	388	| 284| 
+| ezshop.it.polito.ezshop.model.EZShop.payOrderFor(java.lang.String, int, double):java.lang.Integer	| | 	43| 	354| 	230| 
+| ezshop.it.polito.ezshop.model.EZShop.createProductType(java.lang.String, java.lang.String, double, java.lang.String):java.lang.Integer	| | 	42	| 311	| 199| 
+| ezshop.it.polito.ezshop.model.EZShop.updatePersistenceReturnTransaction(it.polito.ezshop.model.ReturnTransactionImpl):boolean	| | 	32| 	358| 	190| 
+| ezshop.it.polito.ezshop.model.EZShop.issueOrder(java.lang.String, int, double):java.lang.Integer	| | 	40| 	301	| 188| 
+| ezshop.it.polito.ezshop.model.EZShop.createUser(java.lang.String, java.lang.String, java.lang.String):java.lang.Integer| | 		40	| 287| 	179| 
+| ezshop.it.polito.ezshop.model.EZShop.updatePersistenceSaleTransactionQuantity(it.polito.ezshop.model.SaleTransactionImpl):boolean	| | 	30| 	339| 	169| 
+| ezshop.it.polito.ezshop.model.EZShop.modifyCustomer(java.lang.Integer, java.lang.String, java.lang.String):boolean| | 		36	| 259	| 151| 
+| ezshop.it.polito.ezshop.model.EZShop.updateQuantity(java.lang.Integer, int):boolean	| | 	31	| 290| 	149| 
+| ezshop.it.polito.ezshop.model.EZShop.updateProduct(java.lang.Integer, java.lang.String, java.lang.String, double, java.lang.String):boolean	| | 	35	| 253| 	144| 
+|ezshop.it.polito.ezshop.model.EZShop.payOrder(java.lang.Integer):boolean | |		34	|252	|140|
+|ezshop.it.polito.ezshop.model.EZShop.updatePosition(java.lang.Integer, java.lang.String):boolean| |		32|	253|	134|
+|ezshop.it.polito.ezshop.model.EZShop.insertPersistenceReturnTransaction(it.polito.ezshop.model.ReturnTransactionImpl):java.lang.Integer| |		25|	278|	111|
+|ezshop.it.polito.ezshop.model.EZShop.getReturnTransactionById(java.lang.Integer):it.polito.ezshop.model.ReturnTransactionImpl	| |	21|	229	|65|
+|ezshop.it.polito.ezshop.model.EZShop.login(java.lang.String, java.lang.String):it.polito.ezshop.data.User| |		22|	178|	56|
+| ezshop.it.polito.ezshop.model.EZShop.attachCardToCustomer(java.lang.String, java.lang.Integer):boolean	| | 	23| 	138| 	48| 
+| ezshop.it.polito.ezshop.model.EZShop.modifyPointsOnCard(java.lang.String, int):boolean	| | 	22| 	146| 	46| 
+| ezshop.it.polito.ezshop.model.EZShop.deletePersistenceReturnTransaction(it.polito.ezshop.model.ReturnTransactionImpl):boolean	| | 	19	| 203	| 42| 
+| ezshop.it.polito.ezshop.model.EZShop.getUser(java.lang.Integer):it.polito.ezshop.data.User |	|	20|	150|	37|
+| ezshop.it.polito.ezshop.model.EZShop.getBalanceOperationByDate(java.time.LocalDate, java.time.LocalDate):java.util.List|	|	19|	177|	37|
+| ezshop.it.polito.ezshop.model.EZShop.getProductTypeByCode(java.lang.String):it.polito.ezshop.model.ProductTypeImpl |	|	18|	209|	34|
+| ezshop.it.polito.ezshop.model.EZShop.lambda$SaleConfirmedEnsurePersistence$2(java.lang.Integer, it.polito.ezshop.data.TicketEntry):void|	|	19|	146|	30|
+| ezshop.it.polito.ezshop.model.EZShop.defineCustomer(java.lang.String):java.lang.Integer |	|19	|142	|29|
+| ezshop.it.polito.ezshop.model.EZShop.updateUserRights(java.lang.Integer, java.lang.String):boolean|	|	17|	134|	15|
+| ezshop.it.polito.ezshop.model.EZShop.deleteCustomer(java.lang.Integer):boolean|	|	17|	106|	12|
+| ezshop.it.polito.ezshop.model.EZShop.deleteUser(java.lang.Integer):boolean	|	|16	|122	|7|
+| ezshop.it.polito.ezshop.model.EZShop.getCustomer(java.lang.Integer):it.polito.ezshop.model.CustomerImpl|	|	16|	96|	6|
 
 
 # Package level tangles
 
-```
-<Report screen captures of the package-level tangles by opening the items in the "composition perspective" 
-(double click on the tangle from the Views->Complexity page)>
-```
+![package_structure](./design_assessment_images/package_structure.jpeg)
+
 
 # Summary analysis
-```
-<Discuss here main differences of the current structure of your project vs the design delivered on April 30>
-<Discuss if the current structure shows weaknesses that should be fixed>
-```
+
+Here is a brief summary of the relevant differences between the design document and the actual project structure:
+
+- EZShop class now belongs to the model package. 
+- A small amount of methods has been added to the EZShop class to better manage operations.
+- LoyaltyCard class has been removed and merged with the Customer class to reduce overhead.
+
+The project doesn't present any tangle between its components.
+The major issue that the project actually has is relative to the "fatness" of the EZShop class. A possible solution may be
+refactoring the EZShop class by splitting its functionalities in a DB API in charge of retrieving and updating data with
+the adequate queries, and the logic of the EZShop.

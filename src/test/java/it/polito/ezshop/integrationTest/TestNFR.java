@@ -1,6 +1,5 @@
 package it.polito.ezshop.integrationTest;
 
-import it.polito.ezshop.data.*;
 import it.polito.ezshop.model.*;
 import it.polito.ezshop.exceptions.*;
 import static org.junit.Assert.*;
@@ -28,6 +27,7 @@ public class TestNFR {
         //ezshop.logout();
         ezshop.createUser("admin","password","Administrator");
         ezshop.login("admin","password");
+
     }
 
     @Test(timeout = 500)

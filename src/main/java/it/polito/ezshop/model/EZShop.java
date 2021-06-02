@@ -1,5 +1,6 @@
-package it.polito.ezshop.data;
+package it.polito.ezshop.model;
 
+import it.polito.ezshop.data.*;
 import it.polito.ezshop.exceptions.*;
 import it.polito.ezshop.model.*;
 
@@ -24,7 +25,6 @@ public class EZShop implements EZShopInterface {
 
         this.loggedIn = null;
         this.currentSale = null;
-
     }
 
 
@@ -600,32 +600,6 @@ public class EZShop implements EZShopInterface {
         } else {
             return getAllProductTypes().stream().filter(e -> e.getProductDescription().contains(description)).collect(Collectors.toList());
         }
-    /*
-        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.Description=?";
-        List<ProductType> products = new ArrayList<>();
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
-            pstmt.setString(1,description);
-            ResultSet rs = pstmt.executeQuery();
-            while(rs.next()) {
-                Integer productId = rs.getInt("productId");
-                String barcode = rs.getString("BarCode");
-                Double sellPrice = rs.getDouble("SellPrice");
-                Integer quantity = rs.getInt("Quantity");
-                Double prodDiscountRate = rs.getDouble("prodDiscountRate");
-                String notes = rs.getString("notes");
-                Integer aisleId = rs.getInt("aisleID");
-                String rackId = rs.getString("rackID");
-                Integer levelId = rs.getInt("levelID");
-                products.add(new ProductTypeImpl(productId,barcode,description,sellPrice,quantity,prodDiscountRate,notes,aisleId,rackId,levelId));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return products;
-
-     */
     }
 
     @Override

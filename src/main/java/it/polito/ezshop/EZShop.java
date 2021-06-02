@@ -7,7 +7,7 @@ import it.polito.ezshop.view.EZShopGUI;
 public class EZShop {
 
     public static void main(String[] args) {
-        EZShopInterface ezShop = new it.polito.ezshop.data.EZShop();
+        EZShopInterface ezShop = new it.polito.ezshop.model.EZShop();
         EZShopGUI gui = new EZShopGUI(ezShop);
     }
 

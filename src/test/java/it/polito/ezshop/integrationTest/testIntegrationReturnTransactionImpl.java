@@ -1,8 +1,6 @@
 package it.polito.ezshop.integrationTest;
 
-import it.polito.ezshop.data.*;
 import it.polito.ezshop.model.*;
-import it.polito.ezshop.exceptions.*;
 
 import org.junit.*;
 
