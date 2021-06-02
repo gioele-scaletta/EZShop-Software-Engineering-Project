@@ -103,17 +103,17 @@ public class EZShop implements EZShopInterface {
 
 
         //Check if username is valid
-        if (username==null || username.isBlank()) {
+        if (username==null || username.isEmpty()) {
             System.out.println("Invalid username");
             throw new InvalidUsernameException();
         }
         //Check if password is valid
-        if (password==null || password.isBlank()) {
+        if (password==null || password.isEmpty()) {
             System.out.println("Invalid password");
             throw new InvalidPasswordException();
         }
         //Check if role is valid
-        if(role==null || role.isBlank() || !UserImpl.isAllowedRole(role)) {
+        if(role==null || role.isEmpty() || !UserImpl.isAllowedRole(role)) {
             System.out.println("Invalid role");
             throw new InvalidRoleException();
         }
@@ -280,7 +280,7 @@ public class EZShop implements EZShopInterface {
         }
 
         //Check if role is valid
-        if(role==null || role.isBlank() || !UserImpl.isAllowedRole(role)) {
+        if(role==null || role.isEmpty() || !UserImpl.isAllowedRole(role)) {
             System.out.println("Invalid role");
             throw new InvalidRoleException();
         }
@@ -308,12 +308,12 @@ public class EZShop implements EZShopInterface {
     @Override
     public User login(String username, String password) throws InvalidUsernameException, InvalidPasswordException {
         //Checking if username is null or empty
-        if(username==null || username.isBlank()) {
+        if(username==null || username.isEmpty()) {
             System.out.println("Invalid login username");
             throw new InvalidUsernameException();
         }
         //Checking if password is null or empty
-        if(password ==null || password.isBlank()) {
+        if(password ==null || password.isEmpty()) {
             System.out.println("Invalid login password");
             throw new InvalidPasswordException();
         }
@@ -371,12 +371,12 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
         //Checking if description is null or empty
-        if(description==null || description.isBlank()) {
+        if(description==null || description.isEmpty()) {
             System.out.println("Invalid product description");
             throw new InvalidProductDescriptionException();
         }
         //Checking if barcode is null or empty and if it is valid
-        if(productCode==null || productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
+        if(productCode==null || productCode.isEmpty()||!ProductTypeImpl.isValidCode(productCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -448,12 +448,12 @@ public class EZShop implements EZShopInterface {
             throw new InvalidProductIdException();
         }
         //Checking if description is null or empty
-        if(newDescription==null || newDescription.isBlank()) {
+        if(newDescription==null || newDescription.isEmpty()) {
             System.out.println("Invalid product description");
             throw new InvalidProductDescriptionException();
         }
         //Checking if barcode is null or empty and if it is valid
-        if(newCode==null || newCode.isBlank()||!ProductTypeImpl.isValidCode(newCode)) {
+        if(newCode==null || newCode.isEmpty()||!ProductTypeImpl.isValidCode(newCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -579,7 +579,7 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
         //Checking if barcode is null or empty and if it is valid
-        if(barCode==null || barCode.isBlank()||!ProductTypeImpl.isValidCode(barCode)) {
+        if(barCode==null || barCode.isEmpty()||!ProductTypeImpl.isValidCode(barCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -778,7 +778,7 @@ public class EZShop implements EZShopInterface {
         }
 
         //Checking if barcode is null or empty and if it is valid
-        if(productCode ==null || productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
+        if(productCode ==null || productCode.isEmpty()||!ProductTypeImpl.isValidCode(productCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -851,7 +851,7 @@ public class EZShop implements EZShopInterface {
         }
 
         //Checking if barcode is null or empty and if it is valid
-        if(productCode==null || productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
+        if(productCode==null || productCode.isEmpty()||!ProductTypeImpl.isValidCode(productCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
