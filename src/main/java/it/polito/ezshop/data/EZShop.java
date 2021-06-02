@@ -1225,9 +1225,13 @@ public class EZShop implements EZShopInterface {
     }
 
     @Override
-    public boolean modifyCustomer(Integer id, String newCustomerName, String newCustomerCard) throws InvalidCustomerNameException, InvalidCustomerCardException, UnauthorizedException{
+    public boolean modifyCustomer(Integer id, String newCustomerName, String newCustomerCard) throws InvalidCustomerIdException, InvalidCustomerNameException, InvalidCustomerCardException, UnauthorizedException{
 
         // Exceptions
+        if (id == null  || id <= 0){
+            throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
+        }
+
         if (newCustomerName == null || newCustomerName.isEmpty()){
             throw new InvalidCustomerNameException("The customer's name is empty or null");
         }
@@ -1250,7 +1254,6 @@ public class EZShop implements EZShopInterface {
         if (this.loggedIn == null || !this.loggedIn.canManageCustomers()){
             throw new UnauthorizedException("There is no logged user or this user has not the rights to modify a customer");
         }
-
 
         try (Connection conn = DriverManager.getConnection(JDBC_URL)) {
 
