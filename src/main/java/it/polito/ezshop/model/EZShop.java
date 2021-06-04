@@ -1,5 +1,6 @@
-package it.polito.ezshop.data;
+package it.polito.ezshop.model;
 
+import it.polito.ezshop.data.*;
 import it.polito.ezshop.exceptions.*;
 import it.polito.ezshop.model.*;
 
@@ -15,35 +16,15 @@ import java.util.stream.Collectors;
 
 public class EZShop implements EZShopInterface {
 
+    private static final String JDBC_URL = "jdbc:sqlite:Database.sqlite";
+
     private UserImpl loggedIn;
-    SaleTransactionImpl currentSale;
-    Connection conn;
+    private SaleTransactionImpl currentSale;
 
     public EZShop() {
 
         this.loggedIn = null;
-        try {
-            this.conn = DriverManager.getConnection("jdbc:sqlite:Database.sqlite");
-        } catch (SQLException e) {
-            System.err.println("Error with db connection");
-            throw new RuntimeException(e);
-        }
-        System.out.println("Connection with db ok");
-
-    }
-
-    public boolean closeDB() {
-        if (this.conn == null) {
-            return false;
-        }
-        try {
-            this.conn.close();
-        } catch (SQLException e) {
-            System.err.println("Error with db connection");
-            throw new RuntimeException(e);
-        }
-
-        return true;
+        this.currentSale = null;
     }
 
 
@@ -51,8 +32,7 @@ public class EZShop implements EZShopInterface {
     public void reset() {
         loggedIn = null;
         currentSale = null;
-        try {
-            Statement st = this.conn.createStatement();
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); Statement st = conn.createStatement()) {
             String deleteAllCustomers = "DELETE FROM CUSTOMERS WHERE CustomerId > 0";
             st.executeUpdate(deleteAllCustomers);
         } catch (SQLException e) {
@@ -60,64 +40,56 @@ public class EZShop implements EZShopInterface {
             e.printStackTrace();
 
         }
-        try {
-            Statement st = this.conn.createStatement();
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); Statement st = conn.createStatement()) {
             String deleteAllusers = "DELETE FROM USERS WHERE Id > 0";
             st.executeUpdate(deleteAllusers);
         } catch (SQLException e) {
             System.out.println("Error with db connection deleting users");
             e.printStackTrace();
         }
-        try {
-            Statement st = this.conn.createStatement();
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); Statement st = conn.createStatement()) {
             String deleteAllProducts = "DELETE FROM PRODUCTTYPES WHERE productId > 0";
             st.executeUpdate(deleteAllProducts);
         } catch (SQLException e) {
             System.out.println("Error with db connection deleting products");
             e.printStackTrace();
         }
-        try {
-            Statement st = this.conn.createStatement();
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); Statement st = conn.createStatement()) {
             String deleteAllOrders = "DELETE FROM ORDERS WHERE orderId > 0";
             st.executeUpdate(deleteAllOrders);
         } catch (SQLException e) {
             System.out.println("Error with db connection deleting orders");
             e.printStackTrace();
         }
-        try {
-            Statement st = this.conn.createStatement();
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); Statement st = conn.createStatement()) {
             String deleteAllBalances = "DELETE FROM BALANCE_OPERATIONS WHERE BalanceId > 0";
             st.executeUpdate(deleteAllBalances);
         } catch (SQLException e) {
             System.out.println("Error with db connection deleting orders");
             e.printStackTrace();
         }
-        try {
-            Statement st = this.conn.createStatement();
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); Statement st = conn.createStatement()) {
             String deleteAllBalances = "DELETE FROM SALETRANSACTIONS";
             st.executeUpdate(deleteAllBalances);
         } catch (SQLException e) {
             System.out.println("Error with db connection deleting sale transactions");
             e.printStackTrace();
         }
-        try {
-            Statement st = this.conn.createStatement();
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); Statement st = conn.createStatement()) {
             String deleteAllBalances = "DELETE FROM SALESANDPRODUCTS";
             st.executeUpdate(deleteAllBalances);
         } catch (SQLException e) {
             System.out.println("Error with db connection deleting products in sale transactions");
             e.printStackTrace();
         }
-        try {
-            Statement st = this.conn.createStatement();
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); Statement st = conn.createStatement()) {
             String deleteAllBalances = "DELETE FROM RETURN_TRANSACTIONS";
             st.executeUpdate(deleteAllBalances);
         } catch (SQLException e) {
             System.out.println("Error with db connection deleting return transactions");
             e.printStackTrace();
         }
-        try {
-            Statement st = this.conn.createStatement();
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); Statement st = conn.createStatement()) {
             String deleteAllBalances = "DELETE FROM RETURN_PRODUCTS";
             st.executeUpdate(deleteAllBalances);
         } catch (SQLException e) {
@@ -131,25 +103,24 @@ public class EZShop implements EZShopInterface {
 
 
         //Check if username is valid
-        if (username==null || username.isBlank()) {
+        if (username==null || username.isEmpty()) {
             System.out.println("Invalid username");
             throw new InvalidUsernameException();
         }
         //Check if password is valid
-        if (password==null || password.isBlank()) {
+        if (password==null || password.isEmpty()) {
             System.out.println("Invalid password");
             throw new InvalidPasswordException();
         }
         //Check if role is valid
-        if(role==null || role.isBlank() || !UserImpl.isAllowedRole(role)) {
+        if(role==null || role.isEmpty() || !UserImpl.isAllowedRole(role)) {
             System.out.println("Invalid role");
             throw new InvalidRoleException();
         }
 
         //Checking if username is already present
         String sql = "SELECT * FROM USERS AS U WHERE U.Username=?";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() != false) {
@@ -164,8 +135,7 @@ public class EZShop implements EZShopInterface {
         //Calculating new ID
         Integer id;
         String sql2 = "SELECT MAX(Id) FROM USERS";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql2)) {
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() == false)
                 id = 1;
@@ -179,8 +149,7 @@ public class EZShop implements EZShopInterface {
 
         //Inserting user
         String sql3 = "INSERT INTO USERS(Id,Username,Password,Role) VALUES(?,?,?,?)";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql3);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql3)) {
             pstmt.setInt(1,id);
             pstmt.setString(2, username);
             pstmt.setString(3, password);
@@ -219,8 +188,7 @@ public class EZShop implements EZShopInterface {
         //Deleting user
         String sql = "DELETE FROM USERS WHERE Id=?";
         int numDeleted;
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             numDeleted = pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -245,8 +213,7 @@ public class EZShop implements EZShopInterface {
 
         String sql = "SELECT * FROM USERS";
         List<User> users = new ArrayList<>();
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
             while(rs.next()) {
                 Integer id = rs.getInt("Id");
@@ -278,8 +245,7 @@ public class EZShop implements EZShopInterface {
         //Retrieving user;
         String sql = "SELECT * FROM USERS AS U WHERE U.Id=? ";
         User u;
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1,id);
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() == false) {
@@ -314,7 +280,7 @@ public class EZShop implements EZShopInterface {
         }
 
         //Check if role is valid
-        if(role==null || role.isBlank() || !UserImpl.isAllowedRole(role)) {
+        if(role==null || role.isEmpty() || !UserImpl.isAllowedRole(role)) {
             System.out.println("Invalid role");
             throw new InvalidRoleException();
         }
@@ -322,8 +288,7 @@ public class EZShop implements EZShopInterface {
         //Updating user
         String sql = "UPDATE USERS SET Role=? WHERE Id=?";
         int numUpdated;
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, role);
             pstmt.setInt(2,id);
             numUpdated = pstmt.executeUpdate();
@@ -343,12 +308,12 @@ public class EZShop implements EZShopInterface {
     @Override
     public User login(String username, String password) throws InvalidUsernameException, InvalidPasswordException {
         //Checking if username is null or empty
-        if(username==null || username.isBlank()) {
+        if(username==null || username.isEmpty()) {
             System.out.println("Invalid login username");
             throw new InvalidUsernameException();
         }
         //Checking if password is null or empty
-        if(password ==null || password.isBlank()) {
+        if(password ==null || password.isEmpty()) {
             System.out.println("Invalid login password");
             throw new InvalidPasswordException();
         }
@@ -361,8 +326,7 @@ public class EZShop implements EZShopInterface {
         //Checking if the username is present and retrieving it
         String sql = "SELECT * FROM USERS AS U where U.Username=?";
         UserImpl userObj;
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1,username);
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() == false) {
@@ -407,12 +371,12 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
         //Checking if description is null or empty
-        if(description==null || description.isBlank()) {
+        if(description==null || description.isEmpty()) {
             System.out.println("Invalid product description");
             throw new InvalidProductDescriptionException();
         }
         //Checking if barcode is null or empty and if it is valid
-        if(productCode==null || productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
+        if(productCode==null || productCode.isEmpty()||!ProductTypeImpl.isValidCode(productCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -424,8 +388,7 @@ public class EZShop implements EZShopInterface {
 
         //Checking if product barcode is already present
         String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, productCode);
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() != false) {
@@ -440,8 +403,7 @@ public class EZShop implements EZShopInterface {
         //Calculating new product ID
         Integer id;
         String sql2 = "SELECT MAX(productId) FROM PRODUCTTYPES";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql2)) {
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() == false)
                 id = 1;
@@ -456,8 +418,7 @@ public class EZShop implements EZShopInterface {
 
         //Inserting product
         String sql3 = "INSERT INTO PRODUCTTYPES(productId,BarCode,Description,SellPrice,Quantity,prodDiscountRate,notes,aisleId,rackID,levelID) VALUES(?,?,?,?,0,0,?,0,'empty',0)";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql3);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql3)) {
             pstmt.setInt(1,id);
             pstmt.setString(2, productCode);
             pstmt.setString(3, description);
@@ -487,12 +448,12 @@ public class EZShop implements EZShopInterface {
             throw new InvalidProductIdException();
         }
         //Checking if description is null or empty
-        if(newDescription==null || newDescription.isBlank()) {
+        if(newDescription==null || newDescription.isEmpty()) {
             System.out.println("Invalid product description");
             throw new InvalidProductDescriptionException();
         }
         //Checking if barcode is null or empty and if it is valid
-        if(newCode==null || newCode.isBlank()||!ProductTypeImpl.isValidCode(newCode)) {
+        if(newCode==null || newCode.isEmpty()||!ProductTypeImpl.isValidCode(newCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -502,14 +463,14 @@ public class EZShop implements EZShopInterface {
             throw new InvalidPricePerUnitException();
         }
 
-        //Checking if product barcode is already present
-        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+
+        //Checking if product id is already present
+        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.productId=?";
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, newCode);
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() != false) {
-                System.out.println("Product with barcode " + newCode + " is already present");
+                System.out.println("Product with id " + id + " is not present");
                 return false;
             }
         } catch (SQLException e) {
@@ -517,15 +478,19 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
+        if(newNote==null){
+            newNote="";
+        }
+
+
         //Updating product
         String sql2 = "UPDATE PRODUCTTYPES SET Description=?, BarCode=?, SellPrice=?, notes=? WHERE productId=?";
         int numUpdated;
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql2)) {
             pstmt.setString(1, newDescription);
             pstmt.setString(2, newCode);
             pstmt.setDouble(3, newPrice);
-            pstmt.setString(4, newNote);
+            pstmt.setString(4, newNote );
             pstmt.setInt(5,id);
             numUpdated = pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -558,8 +523,7 @@ public class EZShop implements EZShopInterface {
         //Deleting user
         String sql = "DELETE FROM PRODUCTTYPES WHERE productId=?";
         int numDeleted;
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             numDeleted = pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -585,8 +549,7 @@ public class EZShop implements EZShopInterface {
         //Retrieving products and adding them to a list
         String sql = "SELECT * FROM PRODUCTTYPES";
         List<ProductType> products = new ArrayList<>();
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
             while(rs.next()) {
                 Integer productId = rs.getInt("productId");
@@ -616,7 +579,7 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
         //Checking if barcode is null or empty and if it is valid
-        if(barCode==null || barCode.isBlank()||!ProductTypeImpl.isValidCode(barCode)) {
+        if(barCode==null || barCode.isEmpty()||!ProductTypeImpl.isValidCode(barCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -637,32 +600,6 @@ public class EZShop implements EZShopInterface {
         } else {
             return getAllProductTypes().stream().filter(e -> e.getProductDescription().contains(description)).collect(Collectors.toList());
         }
-    /*
-        String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.Description=?";
-        List<ProductType> products = new ArrayList<>();
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
-            pstmt.setString(1,description);
-            ResultSet rs = pstmt.executeQuery();
-            while(rs.next()) {
-                Integer productId = rs.getInt("productId");
-                String barcode = rs.getString("BarCode");
-                Double sellPrice = rs.getDouble("SellPrice");
-                Integer quantity = rs.getInt("Quantity");
-                Double prodDiscountRate = rs.getDouble("prodDiscountRate");
-                String notes = rs.getString("notes");
-                Integer aisleId = rs.getInt("aisleID");
-                String rackId = rs.getString("rackID");
-                Integer levelId = rs.getInt("levelID");
-                products.add(new ProductTypeImpl(productId,barcode,description,sellPrice,quantity,prodDiscountRate,notes,aisleId,rackId,levelId));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return products;
-
-     */
     }
 
     @Override
@@ -682,8 +619,7 @@ public class EZShop implements EZShopInterface {
         //Check if product exists and retrieving it
         String sql = "SELECT * FROM PRODUCTTYPES WHERE productId=?";
         ProductType p = null;
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1,productId);
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() == false) {
@@ -720,8 +656,7 @@ public class EZShop implements EZShopInterface {
 
         //Updating product
         String sql2 = "UPDATE PRODUCTTYPES SET Quantity=? WHERE productId=?";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql2)) {
             pstmt.setInt(1, newQuantity);
             pstmt.setInt(2, productId);
             pstmt.executeUpdate();
@@ -772,8 +707,7 @@ public class EZShop implements EZShopInterface {
 
         //Checking if location is already occupied
         String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.aisleID=? AND P.rackID=? AND P.levelID=?";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, aisleId);
             pstmt.setString(2, rackId);
             pstmt.setInt(3, levelId);
@@ -790,8 +724,7 @@ public class EZShop implements EZShopInterface {
         //Updating product
         String sql2 = "UPDATE PRODUCTTYPES SET aisleID=?, rackID=?, levelID=? WHERE productId=?";
         int numUpdated;
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql2)) {
             pstmt.setInt(1, aisleId);
             pstmt.setString(2, rackId);
             pstmt.setInt(3, levelId);
@@ -819,7 +752,7 @@ public class EZShop implements EZShopInterface {
         }
 
         //Checking if barcode is null or empty and if it is valid
-        if(productCode ==null || productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
+        if(productCode ==null || productCode.isEmpty()||!ProductTypeImpl.isValidCode(productCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -838,8 +771,7 @@ public class EZShop implements EZShopInterface {
 
         //Checking if product barcode is already present
         String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, productCode);
             ResultSet rs = pstmt.executeQuery();
             if(!rs.isBeforeFirst()) {
@@ -854,8 +786,7 @@ public class EZShop implements EZShopInterface {
         //Calculating new ID
         Integer id;
         String sql2 = "SELECT MAX(orderId) FROM ORDERS";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql2)) {
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() == false)
                 id = 1;
@@ -870,8 +801,7 @@ public class EZShop implements EZShopInterface {
 
         //Inserting order
         String sql3 = "INSERT INTO ORDERS(orderId,productCode,pricePerUnit,quantity,status) VALUES(?,?,?,?,'ISSUED')";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql3);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql3)) {
             pstmt.setInt(1,id);
             pstmt.setString(2, productCode);
             pstmt.setDouble(3, pricePerUnit);
@@ -895,7 +825,7 @@ public class EZShop implements EZShopInterface {
         }
 
         //Checking if barcode is null or empty and if it is valid
-        if(productCode==null || productCode.isBlank()||!ProductTypeImpl.isValidCode(productCode)) {
+        if(productCode==null || productCode.isEmpty()||!ProductTypeImpl.isValidCode(productCode)) {
             System.out.println("Invalid product code");
             throw new InvalidProductCodeException();
         }
@@ -914,8 +844,7 @@ public class EZShop implements EZShopInterface {
 
         //Checking if product barcode is already present
         String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, productCode);
             ResultSet rs = pstmt.executeQuery();
             if(!rs.isBeforeFirst()) {
@@ -962,8 +891,7 @@ public class EZShop implements EZShopInterface {
         //Calculating new ID
         Integer id;
         String sql2 = "SELECT MAX(orderId) FROM ORDERS";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql2)) {
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() == false)
                 id = 1;
@@ -977,8 +905,7 @@ public class EZShop implements EZShopInterface {
 
         //Inserting order
         String sql3 = "INSERT INTO ORDERS(orderId,productCode,pricePerUnit,quantity,status,balanceId) VALUES(?,?,?,?,'PAYED',?)";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql3);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql3)) {
             pstmt.setInt(1,id);
             pstmt.setString(2, productCode);
             pstmt.setDouble(3, pricePerUnit);
@@ -1013,8 +940,7 @@ public class EZShop implements EZShopInterface {
         String actualState;
         Integer quantity;
         double pricePerUnit;
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1,orderId);
             ResultSet rs = pstmt.executeQuery();
             if(!rs.isBeforeFirst()) {
@@ -1059,8 +985,7 @@ public class EZShop implements EZShopInterface {
 
         //Updating order
         String sql2 = "UPDATE ORDERS SET status='PAYED', balanceId=? WHERE orderId=?";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql2)) {
             pstmt.setInt(1, balanceId);
             pstmt.setInt(2, orderId);
             pstmt.executeUpdate();
@@ -1091,8 +1016,7 @@ public class EZShop implements EZShopInterface {
         String actualState;
         String productCode;
         Integer quantity;
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1,orderId);
             ResultSet rs = pstmt.executeQuery();
             if(!rs.isBeforeFirst()) {
@@ -1120,8 +1044,7 @@ public class EZShop implements EZShopInterface {
         String rackId=null;
         Integer levelId=null;
         String sql2 = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql2);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql2)) {
             pstmt.setString(1, productCode);
             ResultSet rs = pstmt.executeQuery();
             if(!rs.isBeforeFirst()) {
@@ -1148,8 +1071,7 @@ public class EZShop implements EZShopInterface {
         //UPDATE INVENTORY
         String sp = "UPDATE PRODUCTTYPES SET Quantity=Quantity+? WHERE BarCode=?";
 
-        try (
-                PreparedStatement pstmt = this.conn.prepareStatement(sp)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sp)) {
 
             // set the value of the parameter
 
@@ -1167,8 +1089,7 @@ public class EZShop implements EZShopInterface {
 
         //Searching for orderId and doing preliminary controls
         String sql3 = "UPDATE ORDERS SET status='COMPLETED' WHERE orderId=?";
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql3);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql3)) {
             pstmt.setInt(1,orderId);
             pstmt.executeUpdate();
 
@@ -1192,8 +1113,7 @@ public class EZShop implements EZShopInterface {
         //Retrieving orders and adding them to a list
         String sql = "SELECT * FROM ORDERS";
         List<Order> orders = new ArrayList<>();
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
             while(rs.next()) {
                 Integer orderId = rs.getInt("orderId");
@@ -1223,9 +1143,9 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException("There is no logged user or this user has not the rights to create a new customer");
         }
 
-        try {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL)) {
 
-            Statement st = this.conn.createStatement();
+            Statement st = conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
             // The customer's name should be unique
@@ -1247,7 +1167,7 @@ public class EZShop implements EZShopInterface {
             while (modified) {
                 modified = false;
 
-                Statement st2 = this.conn.createStatement();
+                Statement st2 = conn.createStatement();
                 ResultSet res2 = st2.executeQuery("SELECT * FROM CUSTOMERS");
 
                 while (res2.next()){
@@ -1262,7 +1182,7 @@ public class EZShop implements EZShopInterface {
             }
 
             // Create a new customer into the customer table
-            Statement st3 = this.conn.createStatement();
+            Statement st3 = conn.createStatement();
             String insertCustomer = "INSERT INTO CUSTOMERS (CustomerId, CustomerName, CustomerCard, Points) VALUES ("+id+",'"+customerName+"','', 0)";
             st3.executeUpdate(insertCustomer);
 
@@ -1279,9 +1199,13 @@ public class EZShop implements EZShopInterface {
     }
 
     @Override
-    public boolean modifyCustomer(Integer id, String newCustomerName, String newCustomerCard) throws InvalidCustomerNameException, InvalidCustomerCardException, UnauthorizedException{
+    public boolean modifyCustomer(Integer id, String newCustomerName, String newCustomerCard) throws InvalidCustomerIdException, InvalidCustomerNameException, InvalidCustomerCardException, UnauthorizedException{
 
         // Exceptions
+        if (id == null  || id <= 0){
+            throw new InvalidCustomerIdException("The customer id is null, less than or equal to 0");
+        }
+
         if (newCustomerName == null || newCustomerName.isEmpty()){
             throw new InvalidCustomerNameException("The customer's name is empty or null");
         }
@@ -1305,11 +1229,10 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException("There is no logged user or this user has not the rights to modify a customer");
         }
 
-
-        try {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL)) {
 
             // Update customer name if newCustomerName is unique and the id is found
-            Statement st = this.conn.createStatement();
+            Statement st = conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
             Boolean idFound = false;
@@ -1326,7 +1249,7 @@ public class EZShop implements EZShopInterface {
 
             if (!idFound) { return false;}
 
-            Statement st1 = this.conn.createStatement();
+            Statement st1 = conn.createStatement();
             String updateCustomerName = "UPDATE CUSTOMERS SET CustomerName = '"+newCustomerName+"' WHERE CustomerId="+id+" ";
             st1.executeUpdate(updateCustomerName);
 
@@ -1337,11 +1260,11 @@ public class EZShop implements EZShopInterface {
                 // Detach if newCustomerCard is an empty string
                 if (newCustomerCard.isEmpty()){
 
-                    Statement st3 = this.conn.createStatement();
+                    Statement st3 = conn.createStatement();
                     String detachCustomerCard = "UPDATE CUSTOMERS SET CustomerCard = '' WHERE CustomerId="+id+" ";
                     st3.executeUpdate(detachCustomerCard);
 
-                    Statement st4 = this.conn.createStatement();
+                    Statement st4 = conn.createStatement();
                     String removePoints = "UPDATE CUSTOMERS SET Points = 0 WHERE CustomerId="+id+" ";
                     st4.executeUpdate(removePoints);
 
@@ -1351,7 +1274,7 @@ public class EZShop implements EZShopInterface {
                 // Check if newCustomerCard is already attached
                 else {
 
-                    Statement st5 = this.conn.createStatement();
+                    Statement st5 = conn.createStatement();
                     ResultSet res5 = st5.executeQuery("SELECT * FROM CUSTOMERS");
 
                     while (res5.next()){
@@ -1362,7 +1285,7 @@ public class EZShop implements EZShopInterface {
 
                 }
 
-                Statement st6 = this.conn.createStatement();
+                Statement st6 = conn.createStatement();
                 String modifyCustomerCard = "UPDATE CUSTOMERS SET CustomerCard = '"+newCustomerCard+"' WHERE CustomerId="+id+" ";
                 st6.executeUpdate(modifyCustomerCard);
 
@@ -1392,10 +1315,10 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException("There is no logged user or this user has not the rights to delete a customer");
         }
 
-        try {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL)) {
 
             // Delete customer if his id is found
-            Statement st = this.conn.createStatement();
+            Statement st = conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
             Boolean idFound = false;
@@ -1408,7 +1331,7 @@ public class EZShop implements EZShopInterface {
 
             if (!idFound) { return false;}
 
-            Statement st1 = this.conn.createStatement();
+            Statement st1 = conn.createStatement();
             String deleteCustomer = "DELETE FROM CUSTOMERS WHERE CustomerId="+id+"";
             st1.executeUpdate(deleteCustomer);
             return true;
@@ -1437,11 +1360,11 @@ public class EZShop implements EZShopInterface {
         }
 
 
-        try {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL)) {
 
             CustomerImpl c;
 
-            Statement st = this.conn.createStatement();
+            Statement st = conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
             while (res.next()){
@@ -1473,11 +1396,11 @@ public class EZShop implements EZShopInterface {
 
         List<Customer> customerList = new ArrayList<Customer>();
 
-        try {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL)) {
 
             Customer c;
 
-            Statement st = this.conn.createStatement();
+            Statement st = conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
             while (res.next()){
@@ -1505,7 +1428,7 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException("There is no logged user or this user has not the rights to create a new card");
         }
 
-        try {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL)) {
 
             // Get an unique customerCard
 
@@ -1520,7 +1443,7 @@ public class EZShop implements EZShopInterface {
             while (modified) {
                 modified = false;
 
-                Statement st = this.conn.createStatement();
+                Statement st = conn.createStatement();
                 ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
                 while (res.next()){
@@ -1579,9 +1502,9 @@ public class EZShop implements EZShopInterface {
         }
 
 
-        try {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL)) {
 
-            Statement st = this.conn.createStatement();
+            Statement st = conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
             // Return false if the card is already assigned to another user
@@ -1598,7 +1521,7 @@ public class EZShop implements EZShopInterface {
             }
 
             // Attach card to customer c
-            Statement st2 = this.conn.createStatement();
+            Statement st2 = conn.createStatement();
             String updateCustomer = "UPDATE CUSTOMERS SET CustomerCard = '"+customerCard+"' WHERE CustomerId="+customerId+" ";
             st2.executeUpdate(updateCustomer);
 
@@ -1638,10 +1561,10 @@ public class EZShop implements EZShopInterface {
         }
 
 
-        try {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL)) {
 
             Customer c = null;
-            Statement st = this.conn.createStatement();
+            Statement st = conn.createStatement();
             ResultSet res = st.executeQuery("SELECT * FROM CUSTOMERS");
 
 
@@ -1664,7 +1587,7 @@ public class EZShop implements EZShopInterface {
                 return false;
             }
 
-            Statement st2 = this.conn.createStatement();
+            Statement st2 = conn.createStatement();
             String updatePoints = "UPDATE CUSTOMERS SET Points = '"+totalPoints+"' WHERE CustomerCard='"+customerCard+"'";
             st2.executeUpdate(updatePoints);
 
@@ -2292,7 +2215,8 @@ public class EZShop implements EZShopInterface {
             return false;
         }
         // Check if the amount is higher than the one in the sale transaction
-        if (amount > saleTransaction.getProductQuantity(productType)) {
+        int previousAmount = returnTransaction.getReturnProducts().entrySet().stream().filter(e -> e.getKey().getBarCode().equals(productCode)).mapToInt(Map.Entry::getValue).reduce(0, Integer::sum);
+        if ((amount + previousAmount) > saleTransaction.getProductQuantity(productType)) {
             System.err.println(methodName + ": The amount is higher than the one in the sale transaction");
             return false;
         }
@@ -2481,6 +2405,11 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         }
 
+        // Check if the cash is less than or equal to 0
+        if(cash <= 0){
+            throw new InvalidPaymentException();
+        }
+
         // Get SaleTransaction
         SaleTransactionImpl sale = getSaleTransactionById(transactionId);
         // Check if the SaleTransaction is not available
@@ -2488,11 +2417,6 @@ public class EZShop implements EZShopInterface {
             System.err.println(methodName + ": The SaleTransaction is not available");
             return -1;
         }
-
-        if(cash<=0){
-            throw new InvalidPaymentException();
-        }
-
 
         double change=sale.PaySaleAndReturnChange(cash, true);
         if(change!=-1) {
@@ -2813,7 +2737,7 @@ public class EZShop implements EZShopInterface {
 
         String getnewid = "SELECT * FROM CUSTOMERS WHERE CustomerId=?";
         CustomerImpl c=null;
-        try (PreparedStatement pstmt  = this.conn.prepareStatement(getnewid)){
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(getnewid)) {
 
             pstmt.setInt(1, transactionCardId);
             ResultSet rs    = pstmt.executeQuery();
@@ -2829,7 +2753,7 @@ public class EZShop implements EZShopInterface {
     private BalanceOperationImpl getBalanceOperationById(int balanceOperationId) {
         String query = "SELECT * FROM BALANCE_OPERATIONS WHERE BalanceId = ?";
         BalanceOperationImpl balanceOperation = null;
-        try (PreparedStatement pstmt  = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, balanceOperationId);
             ResultSet rs = pstmt.executeQuery();
 
@@ -2849,7 +2773,7 @@ public class EZShop implements EZShopInterface {
     private List<BalanceOperation> getBalanceOperationByDate(LocalDate from, LocalDate to) {
         String query = "SELECT BalanceId, Date, Amount, Type FROM BALANCE_OPERATIONS";
         List<BalanceOperation> balanceOperations = new ArrayList<>();
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             ResultSet rs = pstmt.executeQuery();
 
             while(rs.next()) {
@@ -2893,7 +2817,7 @@ public class EZShop implements EZShopInterface {
         String query = "SELECT * FROM SALETRANSACTIONS WHERE transactionId = ?";
         SaleTransactionImpl sale = null;
         System.out.println("getting sale id");
-        try (PreparedStatement pstmt  = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1,transactionId);
             ResultSet rs = pstmt.executeQuery();
 
@@ -2922,8 +2846,7 @@ public class EZShop implements EZShopInterface {
         //Retrieving product
         String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=? ";
 
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1,barCode);
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst() == false) {
@@ -2968,9 +2891,8 @@ public class EZShop implements EZShopInterface {
 
         String getnewid = "SELECT COALESCE(MAX(transactionId),0) FROM SALETRANSACTIONS";
 
-        try (
-                Statement stmt  = this.conn.createStatement();
-                ResultSet rs    = stmt.executeQuery(getnewid)){
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(getnewid)) {
+            ResultSet rs    = pstmt.executeQuery();
 
             tid=rs.getInt(1);
 
@@ -2994,8 +2916,7 @@ public class EZShop implements EZShopInterface {
         //UPDATE SALETRANSACTIONTABLE
         String sql = "INSERT INTO SALETRANSACTIONS(transactionId,State,PaymentType, Amount, discountRate, transactionCardId, BalanceOperationId) VALUES(?,?,?,?,?,?,?)";
 
-        try {
-            PreparedStatement pstmt = this.conn.prepareStatement(sql);
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, sale.getTicketNumber());
             pstmt.setString(2, sale.getStateString());
             pstmt.setString(3, sale.getPayString());
@@ -3022,8 +2943,7 @@ public class EZShop implements EZShopInterface {
 
             String sl = "INSERT INTO SALESANDPRODUCTS(transactionId,BarCode,description,Quantity, discountRate, pricePerUnit) VALUES(?,?,?,?,?,?)";
 
-            try (
-                    PreparedStatement pstmt = this.conn.prepareStatement(sl)) {
+            try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sl)) {
 
                 // set the value of the parameter
 
@@ -3045,8 +2965,7 @@ public class EZShop implements EZShopInterface {
             //UPDATE INVENTORY
           String sp = "UPDATE PRODUCTTYPES SET Quantity=Quantity-? WHERE BarCode=?";
 
-          try (
-                  PreparedStatement pstmt = this.conn.prepareStatement(sp)) {
+          try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sp)) {
 
               // set the value of the parameter
 
@@ -3105,7 +3024,7 @@ public class EZShop implements EZShopInterface {
         int rowCount;
         Integer newId = null;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, dtf.format(balanceOperation.getDate()));
             pstmt.setDouble(2, balanceOperation.getMoney());
             pstmt.setString(3, balanceOperation.getType());
@@ -3131,7 +3050,7 @@ public class EZShop implements EZShopInterface {
     private HashMap<String, TicketEntry> getProdListForSaleDB(int tid) {
         String salesandproductssql = "SELECT BarCode, description, Quantity, discountRate, pricePerUnit FROM SALESANDPRODUCTS WHERE transactionId=?";
         HashMap< String, TicketEntry> map= new HashMap<>();
-        try (PreparedStatement pstmt  = this.conn.prepareStatement(salesandproductssql)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(salesandproductssql)) {
             // set the value of the parameter
             pstmt.setInt(1,tid);
             //
@@ -3193,7 +3112,7 @@ public class EZShop implements EZShopInterface {
 
         query = "SELECT BarCode, Quantity FROM RETURN_PRODUCTS WHERE ReturnId = ?";
         Map<ProductTypeImpl, Integer> returnProducts = new HashMap<>();
-        try (PreparedStatement pstmt  = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, returnId);
 
             ResultSet rs = pstmt.executeQuery();
@@ -3209,7 +3128,7 @@ public class EZShop implements EZShopInterface {
 
         query = "SELECT * FROM RETURN_TRANSACTIONS WHERE ReturnId = ?";
         ReturnTransactionImpl returnTransaction = null;
-        try (PreparedStatement pstmt  = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, returnId);
 
             ResultSet rs = pstmt.executeQuery();
@@ -3239,7 +3158,7 @@ public class EZShop implements EZShopInterface {
 
         query = "INSERT INTO RETURN_TRANSACTIONS(TransactionId, State, Amount, PaymentType, BalanceId) VALUES(?, ?, ?, ?, ?)";
         Integer newId = null;
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, returnTransaction.getSaleTransaction().getTicketNumber());
             pstmt.setString(2, returnTransaction.getState());
             pstmt.setDouble(3, returnTransaction.getAmount());
@@ -3269,7 +3188,7 @@ public class EZShop implements EZShopInterface {
             rowCount = 0;
             for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
                 query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
-                try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+                try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
                     pstmt.setInt(1, newId);
                     pstmt.setString(2, entry.getKey().getBarCode());
                     pstmt.setInt(3, entry.getValue());
@@ -3294,7 +3213,7 @@ public class EZShop implements EZShopInterface {
         int rowCount;
 
         query = "UPDATE RETURN_TRANSACTIONS SET TransactionId = ?, State = ?, Amount = ?, PaymentType = ?, BalanceId = ? WHERE ReturnId = ?";
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, returnTransaction.getSaleTransaction().getTicketNumber());
             pstmt.setString(2, returnTransaction.getState());
             pstmt.setDouble(3, returnTransaction.getAmount());
@@ -3314,7 +3233,7 @@ public class EZShop implements EZShopInterface {
         System.out.println(methodName + ": updated "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" in RETURN_TRANSACTIONS table");
 
         query = "DELETE FROM RETURN_PRODUCTS WHERE ReturnId = ?";
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, returnTransaction.getReturnId());
 
             rowCount = pstmt.executeUpdate();
@@ -3328,7 +3247,7 @@ public class EZShop implements EZShopInterface {
             rowCount = 0;
             for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
                 query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
-                try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+                try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
                     pstmt.setInt(1, returnTransaction.getReturnId());
                     pstmt.setString(2, entry.getKey().getBarCode());
                     pstmt.setInt(3, entry.getValue());
@@ -3353,7 +3272,7 @@ public class EZShop implements EZShopInterface {
         int rowCount;
 
         query = "DELETE FROM RETURN_PRODUCTS WHERE ReturnId = ?";
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, returnTransaction.getReturnId());
 
             rowCount = pstmt.executeUpdate();
@@ -3364,7 +3283,7 @@ public class EZShop implements EZShopInterface {
         System.out.println(methodName + ": deleted "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" in RETURN_PRODUCTS table");
 
         query = "DELETE FROM RETURN_TRANSACTIONS WHERE ReturnId = ?";
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, returnTransaction.getReturnId());
 
             rowCount = pstmt.executeUpdate();
@@ -3385,7 +3304,7 @@ public class EZShop implements EZShopInterface {
         int rowCount;
 
         query = "UPDATE PRODUCTTYPES SET Quantity = ? WHERE BarCode = ?";
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, productType.getQuantity());
             pstmt.setString(2, productType.getBarCode());
 
@@ -3407,7 +3326,7 @@ public class EZShop implements EZShopInterface {
         int rowCount;
 
         query = "UPDATE SALETRANSACTIONS SET Amount = ? WHERE transactionId = ?";
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setDouble(1, saleTransaction.getPrice());
             pstmt.setInt(2, saleTransaction.getTicketNumber());
 
@@ -3419,7 +3338,7 @@ public class EZShop implements EZShopInterface {
         System.out.println(methodName + ": updated "+ rowCount +" rows with transactionId = "+ saleTransaction.getTicketNumber() +" in SALETRANSACTIONS table");
 
         query = "DELETE FROM SALESANDPRODUCTS WHERE transactionId = ?";
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, saleTransaction.getTicketNumber());
 
             rowCount = pstmt.executeUpdate();
@@ -3433,7 +3352,7 @@ public class EZShop implements EZShopInterface {
             rowCount = 0;
             for (TicketEntry ticketEntry : saleTransaction.getListOfProductsEntries().values()) {
                 query = "INSERT INTO SALESANDPRODUCTS(transactionId, BarCode ,description, Quantity, discountRate, pricePerUnit) VALUES(?, ?, ?, ?, ?, ?)";
-                try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+                try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
                     pstmt.setInt(1, saleTransaction.getTicketNumber());
                     pstmt.setString(2, ticketEntry.getBarCode());
                     pstmt.setString(3,ticketEntry.getProductDescription());
@@ -3459,7 +3378,7 @@ public class EZShop implements EZShopInterface {
 
         String query = "SELECT SUM(Amount) AS CurrentBalance FROM BALANCE_OPERATIONS";
         Double currentBalance = null;
-        try (PreparedStatement pstmt = this.conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
             ResultSet rs = pstmt.executeQuery();
             if(rs.isBeforeFirst()) {
                 currentBalance = rs.getDouble("CurrentBalance");

@@ -3,6 +3,8 @@ package it.polito.ezshop.acceptanceTests;
 import it.polito.ezshop.data.*;
 import it.polito.ezshop.data.EZShopInterface;
 import it.polito.ezshop.exceptions.*;
+import it.polito.ezshop.data.User;
+import it.polito.ezshop.model.EZShop;
 import org.junit.*;
 
 import java.time.LocalDate;

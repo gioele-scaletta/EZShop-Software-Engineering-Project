@@ -1,5 +1,4 @@
 package it.polito.ezshop.integrationTest;
-import java.io.ByteArrayOutputStream;
 
 import it.polito.ezshop.data.*;
 import it.polito.ezshop.model.*;
@@ -8,14 +7,12 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
-import java.io.PrintStream;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 
-public class TestIntegrationEZShop {
+ public class TestIntegrationEZShop {
 
     private static EZShop ezshop;
 
@@ -28,7 +25,6 @@ public class TestIntegrationEZShop {
     @AfterClass
     public static void cleanUpAfterClass(){
         ezshop.reset();
-        ezshop.closeDB();
     }
 
     @Before
