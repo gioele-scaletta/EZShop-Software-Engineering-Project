@@ -1103,6 +1103,11 @@ public class EZShop implements EZShopInterface {
     }
 
     @Override
+    public boolean recordOrderArrivalRFID(Integer orderId, String RFIDfrom) throws InvalidOrderIdException, UnauthorizedException, InvalidLocationException, InvalidRFIDException {
+        return false;
+    }
+
+    @Override
     public List<Order> getAllOrders() throws UnauthorizedException {
         //User authentication
         if(loggedIn == null || !loggedIn.canManageInventory()) {
@@ -1712,6 +1717,91 @@ public class EZShop implements EZShopInterface {
         }
 
     }
+    /**
+     * This method adds a product to a sale transaction receiving  its RFID, decreasing the temporary amount of product available on the
+     * shelves for other customers.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param transactionId the id of the Sale transaction
+     * @param RFID the RFID of the product to be added
+     * @return  true if the operation is successful
+     *          false   if the RFID does not exist,
+     *                  if the transaction id does not identify a started and open transaction.
+     *
+     * @throws InvalidTransactionIdException if the transaction id less than or equal to 0 or if it is null
+     * @throws InvalidRFIDException if the RFID code is empty, null or invalid
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
+    @Override
+    public boolean addProductToSaleRFID(Integer transactionId, String RFID) throws InvalidTransactionIdException, InvalidRFIDException, InvalidQuantityException, UnauthorizedException{
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(transactionId = "+ transactionId + "RFID ="+ RFID+")");
+
+        // Check if the transactionId is null or it is less than or equal to 0
+        if (transactionId == null || transactionId <= 0) {
+            System.err.println(methodName + ": The transactionId is null or it is less than or equal to 0");
+            throw new InvalidTransactionIdException();
+        }
+
+        // Check if the rfid is null, empty or invalid
+        if (RFID == null || RFID.isEmpty() || !ProductImpl.isValidRFID(RFID)/*|| !ProductTypeImpl.isValidCode(productCode)*/) { //positive, 10 digits, unique to be checked in method
+            System.err.println(methodName + ": The rfid is null, empty or invalid");
+            throw new InvalidRFIDException();
+        }
+
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
+            throw new UnauthorizedException();
+        }
+
+        /* Check if the quantity is less than or equal to 0
+        //IT LLOKS LIKE IT CAN BE ADDED ONLY ONE PRODUCT
+        if (amount <= 0) {
+            System.err.println(methodName + ": The quantity is less than or equal to 0");
+            throw new InvalidQuantityException();
+        }*/
+
+        // Get SaleTransaction
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        // Check if the SaleTransaction is not available
+        if (sale == null) {
+            System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
+        // Check if SaleTransaction does not identify a started and open transaction
+        if (!sale.isInProgress()) {
+            System.err.println(methodName + ": The SaleTransaction does not identify a started and open transaction");
+            return false;
+        }
+
+
+        //DO I HAVE TO CHECK IF IT IS UNIQUE?
+        //Check if rfid exits and retrieve product
+
+
+        //Get prod
+        ProductTypeImpl product= getProductTypeByRFID(RFID);
+
+        if (product == null) {
+            System.err.println(methodName + ": The RFID does not exist");
+            return false;
+        }
+
+        //Not specified in the API but needed since productType quantity cannot be negative
+        if ((product.getQuantity() <= 0)){
+            return false;
+        }
+
+        if(sale.EditProductInSale(product, 1)) {
+            return true;
+        } else{
+            return false;
+        }
+
+    }
+
+
 
     /**
      * This method deletes a product from a sale transaction increasing the temporary amount of product available on the
@@ -1797,7 +1887,87 @@ public class EZShop implements EZShopInterface {
 
          //return false;
     }
+    /**
+     * This method deletes a product from a sale transaction , receiving its RFID, increasing the temporary amount of product available on the
+     * shelves for other customers.
+     * It can be invoked only after a user with role "Administrator", "ShopManager" or "Cashier" is logged in.
+     *
+     * @param transactionId the id of the Sale transaction
+     * @param RFID the RFID of the product to be deleted
+     *
+     * @return  true if the operation is successful
+     *          false   if the product code does not exist,
+     *                  if the transaction id does not identify a started and open transaction.
+     *
+     * @throws InvalidTransactionIdException if the transaction id less than or equal to 0 or if it is null
+     * @throws InvalidRFIDException if the RFID is empty, null or invalid
+     * @throws UnauthorizedException if there is no logged user or if it has not the rights to perform the operation
+     */
+    @Override
+    public boolean deleteProductFromSaleRFID(Integer transactionId, String RFID) throws InvalidTransactionIdException, InvalidRFIDException, InvalidQuantityException, UnauthorizedException{
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(transactionId = "+ transactionId + "RFID ="+ RFID+")");
 
+        // Check if the transactionId is null or it is less than or equal to 0
+        if (transactionId == null || transactionId <= 0) {
+            System.err.println(methodName + ": The transactionId is null or it is less than or equal to 0");
+            throw new InvalidTransactionIdException();
+        }
+
+        // Check if the rfid is null, empty or invalid
+        if (RFID == null || RFID.isEmpty() || !ProductImpl.isValidRFID(RFID)/*|| !ProductTypeImpl.isValidCode(productCode)*/) { //positive, 10 digits, unique to be checked in method
+            System.err.println(methodName + ": The RFID is null, empty or invalid");
+            throw new InvalidRFIDException();
+        }
+
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
+            throw new UnauthorizedException();
+        }
+
+        /* Check if the quantity is less than or equal to 0
+        if (amount <= 0) {
+            System.err.println(methodName + ": The quantity is less than or equal to 0");
+            throw new InvalidQuantityException();
+        }*/
+
+        // Get SaleTransaction
+        SaleTransactionImpl sale = getSaleTransactionById(transactionId);
+        // Check if the SaleTransaction is not available
+        if (sale == null) {
+            System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
+        // Check if SaleTransaction does not identify a started and open transaction
+        if (!sale.isInProgress()) {
+            System.err.println(methodName + ": The SaleTransaction does not identify a started and open transaction");
+            return false;
+        }
+
+        //Get prod
+        ProductTypeImpl product= getProductTypeByRFID(RFID);
+        if (product == null) {
+            System.err.println(methodName + ": The rfid does not exist");
+            return false;
+        }
+
+        if ((currentSale.getListOfProductsEntries().get(product.getBarCode()).getAmount()<1 )){
+            return false;
+        }
+
+        //AMOUNT IN DB UPDATED ONLY AT THE END
+
+
+        if(sale.EditProductInSale(product, -1)) {
+
+            return true;
+        } else{
+            return false;
+        }
+
+
+    }
 
     /**
      * This method applies a discount rate to all units of a product type with given type in a sale transaction. The
@@ -2231,6 +2401,11 @@ public class EZShop implements EZShopInterface {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean returnProductRFID(Integer returnId, String RFID) throws InvalidTransactionIdException, InvalidRFIDException, UnauthorizedException {
+        return false;
     }
 
     @Override
@@ -2838,6 +3013,71 @@ public class EZShop implements EZShopInterface {
         return sale;
     }
 
+    private ProductTypeImpl getProductTypeByRFID(String rfid) {
+        TicketEntry prodl=null;
+        ProductTypeImpl p=null;
+        Integer productId=-1;
+
+        String sql = "SELECT ProductID FROM PRODUCS WHERE PRODUCTS.RFID=? ";
+
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, rfid);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.isBeforeFirst() == false) {
+                System.out.println("rfid " + rfid + " does not exist (not associated with a barcode");
+                return null;
+            }
+            productId = rs.getInt("productId");
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+
+        //NOW THAT I HAVE ID I RETRIEVE PRODUCTTYPE
+
+        String sql_ = "SELECT * FROM PRODUCTTYPES AS P WHERE P.productId=? ";
+
+
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql_)) {
+            pstmt.setInt(1, productId);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.isBeforeFirst() == false) {
+                System.out.println("Product with id " + productId + " is not present");
+                return null;
+            }
+            Integer productid = rs.getInt("productId");
+            String barcode = rs.getString("BarCode");
+            String description = rs.getString("Description");
+            Double sellPrice = rs.getDouble("SellPrice");
+            Integer quantity = rs.getInt("Quantity");
+            Double prodDiscountRate = rs.getDouble("prodDiscountRate");
+            String notes = rs.getString("notes");
+            Integer aisleId = rs.getInt("aisleID");
+            String rackId = rs.getString("rackID");
+            Integer levelId = rs.getInt("levelID");
+            if (currentSale != null) {
+                prodl= currentSale.getListOfProductsEntries().get(barcode);
+                if(prodl!=null){
+                    p = new ProductTypeImpl(productId,barcode,description,sellPrice,quantity-prodl.getAmount(),prodDiscountRate,notes,aisleId,rackId,levelId);
+                } else{
+                    p = new ProductTypeImpl(productId, barcode, description, sellPrice, quantity, prodDiscountRate, notes, aisleId, rackId, levelId);
+                }
+            } else {
+                p = new ProductTypeImpl(productId, barcode, description, sellPrice, quantity, prodDiscountRate, notes, aisleId, rackId, levelId);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        System.out.println("Data for product with id" + productId + " has been retrieved with success");
+
+        return p;
+
+    }
+
     private ProductTypeImpl getProductTypeByCode(String barCode){
 
         //IF PRODUCT IS INVOLVED IN CURRENT SALE THE UP TO DATE INFORMATION ARE STORED ONLY IN RAM AT THE MOMENT
@@ -2845,6 +3085,7 @@ public class EZShop implements EZShopInterface {
         ProductTypeImpl p=null;
         //Retrieving product
         String sql = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=? ";
+
 
         try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1,barCode);
