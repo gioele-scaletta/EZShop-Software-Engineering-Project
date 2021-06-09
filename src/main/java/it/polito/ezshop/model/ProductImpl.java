@@ -25,4 +25,25 @@ public class ProductImpl {
         }
         return true;
     }
+
+    public static String nextRFID(String rfid){
+        //Checking if parameter is a valid RFID
+        if(!isValidRFID(rfid))
+            return null;
+
+        //If is latest RFID, return first RFID
+        if(rfid.equals("999999999999"))
+            return "000000000000";
+
+        //Actual increment of RFID
+        Long p = Long.parseLong(rfid);
+        p = p+1;
+        String s = Long.toString(p);
+
+        //Padding RFID string
+        while(s.length() != 12)
+            s = "0" + s;
+
+        return s;
+    }
 }

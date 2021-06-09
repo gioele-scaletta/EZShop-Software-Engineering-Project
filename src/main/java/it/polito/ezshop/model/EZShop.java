@@ -370,6 +370,7 @@ public class EZShop implements EZShopInterface {
         return true;
     }
 
+    //Marco: maybe check also in products table if barcode is already present
     @Override
     public Integer createProductType(String description, String productCode, double pricePerUnit, String note) throws InvalidProductDescriptionException, InvalidProductCodeException, InvalidPricePerUnitException, UnauthorizedException {
         //User authentication
@@ -441,6 +442,7 @@ public class EZShop implements EZShopInterface {
         return id;
     }
 
+    //Marco: should this also update the barcodes in the procduct table linked to rfids?
     @Override
     public boolean updateProduct(Integer id, String newDescription, String newCode, double newPrice, String newNote) throws InvalidProductIdException, InvalidProductDescriptionException, InvalidProductCodeException, InvalidPricePerUnitException, UnauthorizedException {
         //User authentication
@@ -513,6 +515,7 @@ public class EZShop implements EZShopInterface {
         return true;
     }
 
+    //Marco: should this also delete every other product in product table?
     @Override
     public boolean deleteProductType(Integer id) throws InvalidProductIdException, UnauthorizedException {
         //User authentication
@@ -609,6 +612,7 @@ public class EZShop implements EZShopInterface {
         }
     }
 
+    //Marco: maybe this is deprecated?
     @Override
     public boolean updateQuantity(Integer productId, int toBeAdded) throws InvalidProductIdException, UnauthorizedException {
         //User authentication
@@ -750,6 +754,7 @@ public class EZShop implements EZShopInterface {
         return true;
     }
 
+    //Marco: 99% deprecated
     @Override
     public Integer issueOrder(String productCode, int quantity, double pricePerUnit) throws InvalidProductCodeException, InvalidQuantityException, InvalidPricePerUnitException, UnauthorizedException {
         //User authentication
@@ -1093,8 +1098,7 @@ public class EZShop implements EZShopInterface {
             System.out.println(e.getMessage());
         }
 
-
-        //Searching for orderId and doing preliminary controls
+        //Setting the order status to COMPLETED
         String sql3 = "UPDATE ORDERS SET status='COMPLETED' WHERE orderId=?";
         try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql3)) {
             pstmt.setInt(1,orderId);
@@ -1111,7 +1115,133 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public boolean recordOrderArrivalRFID(Integer orderId, String RFIDfrom) throws InvalidOrderIdException, UnauthorizedException, InvalidLocationException, InvalidRFIDException {
-        return false;
+        //User authentication
+        if(loggedIn == null || !loggedIn.canManageInventory()) {
+            System.out.println("Unauthorized access");
+            throw new UnauthorizedException();
+        }
+
+        //Checking if orderId is valid
+        if(orderId == null || orderId<=0) {
+            System.out.println("Order id not valid");
+            throw new InvalidOrderIdException();
+        }
+
+        //Checking if RFID is valid
+        if(!ProductImpl.isValidRFID(RFIDfrom)) {
+            System.out.println("Invalid RFID");
+            throw new InvalidRFIDException();
+        }
+
+        //Searching for orderId
+        String sql = "SELECT * FROM ORDERS WHERE orderId=?";
+        String actualState;
+        String productCode;
+        Integer quantity;
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1,orderId);
+            ResultSet rs = pstmt.executeQuery();
+            if(!rs.isBeforeFirst()) {
+                System.out.println("There's no order with orderId " + orderId);
+                return false;
+            }
+            actualState = rs.getString("status");
+            productCode = rs.getString("productCode");
+            quantity= rs.getInt("quantity");
+        } catch (SQLException e) {
+            System.err.println("Error with the db connection");
+            e.printStackTrace();
+            return false;
+        }
+
+        //Checking if order has been payed
+        if(!actualState.equals("COMPLETED") && !actualState.equals("PAYED")){
+            System.out.println("Order is not payed nor completed");
+            return false;
+        }
+
+        //Checking if location for product is set;
+        Integer aisleId=null;
+        String rackId=null;
+        Integer levelId=null;
+        String sql3 = "SELECT * FROM PRODUCTTYPES AS P WHERE P.BarCode=?";
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql3)) {
+            pstmt.setString(1, productCode);
+            ResultSet rs = pstmt.executeQuery();
+            if(!rs.isBeforeFirst()) {
+                System.err.println("ERROR: It's impossible to record a product arrival since it's not present anymore");
+                return false;
+            }
+            aisleId = rs.getInt("aisleID");
+            rackId = rs.getString("rackID");
+            levelId = rs.getInt("levelID");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        if(rackId == null)
+            rackId="empty";
+
+        if(aisleId == 0 && rackId.equals("empty") && levelId == 0) {
+            System.out.println("Location for product is not set. Set location first");
+            throw new InvalidLocationException();
+        }
+
+        //Inserting RFIDs. If a duplicate RFID is found, db is rolled back
+        String sql4 = "INSERT INTO PRODUCTS (RFID,ProductID) VALUES (?,?)";
+        String toInsertRFID = RFIDfrom;
+        try(Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql4)){
+            conn.setAutoCommit(false);
+            Savepoint sv = conn.setSavepoint();
+            for(int i=0; i<quantity; i++) {
+                pstmt.setString(1,toInsertRFID);
+                pstmt.setString(2,productCode);
+                //If something goes wrong in the update, everything is rolled back to before the first RFID is inserted
+                try {
+                    pstmt.executeUpdate();
+                } catch(SQLException e) {
+                    if(e.getMessage().contains("[SQLITE_CONSTRAINT_PRIMARYKEY]")) {
+                        conn.rollback(sv);
+                        System.out.println("Cannot insert duplicated RFID");
+                        throw new InvalidRFIDException();
+                    } else {
+                        throw e;
+                    }
+                }
+                toInsertRFID = ProductImpl.nextRFID(toInsertRFID);
+            }
+            conn.commit();
+        } catch(SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+
+        //Update productQuantity in ProductType
+        String sql5 = "UPDATE PRODUCTTYPES SET Quantity=Quantity+? WHERE BarCode=?";
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql5)) {
+            pstmt.setInt(1, quantity);
+            pstmt.setString(2, productCode);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+
+        //Setting the order status to COMPLETED
+        String sql2 = "UPDATE ORDERS SET status='COMPLETED' WHERE orderId=?";
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql2)) {
+            pstmt.setInt(1,orderId);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Error with the db connection");
+            e.printStackTrace();
+            return false;
+        }
+
+        System.out.println("Order " + orderId + " has been completed");
+        return true;
     }
 
     @Override
@@ -1174,6 +1304,8 @@ public class EZShop implements EZShopInterface {
 
             // Boolean to know if the value of the id was found in the db
             Boolean modified = true;
+
+            //Marco: This can be optimized, like similar functions that follow
 
             // If the id value has not been modified, it means that it is unique and the while loop ends
             while (modified) {
