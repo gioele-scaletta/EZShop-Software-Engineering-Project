@@ -91,7 +91,9 @@ interface EZShopInterface {
     .. FR6 ..
     + startSaleTransaction(): Integer
     + addProductToSale(Integer transactionId, String productCode, int amount): boolean
+    + addProductToSaleRFID(Integer transactionId, String RFID): boolean
     + deleteProductFromSale(Integer transactionId, String productCode, int amount): boolean
+    + deleteProductFromSaleRFID(Integer transactionId, String RFID): boolean
     + applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate): boolean
     + applyDiscountRateToSale(Integer transactionId, double discountRate): boolean
     + computePointsForSale(Integer transactionId): Integer
@@ -290,15 +292,15 @@ end note
 
 # Verification traceability matrix
 
-|FR ID|EZShop|Customer|LoyaltyCard|SaleTransaction|BalanceOperation|Order|ProductType|User|ReturnTransaction|
-|-------------| :-------------: | :-------------: | :-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
-| FR1 | X |   |   |   |   |   |   | X |   |
-| FR3 | X |   |   |   |   |   | X |   |   |
-| FR4 | X |   |   |   |   | X | X |   |   |
-| FR5 | X | X | X |   |   |   |   |   |   |
-| FR6 | X |   | X | X | X |   | X | X | X |
-| FR7 | X |   |   | X | X |   |   | X | X |
-| FR8 | X |   |   |   | X |   |   | X |   |
+|FR ID|EZShop|Customer|SaleTransaction|BalanceOperation|Order|ProductType|Product|User|ReturnTransaction|
+|-------------| :-------------: | :-------------: | :-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| FR1 | X |   |   |   |   |   | | X |   |
+| FR3 | X |   |   |   |   | X | |   |   |
+| FR4 | X |   |   |   | X | X |X|   |   |
+| FR5 | X | X | X |   |   |   | |   |   |
+| FR6 | X |   | X | X |   | X |X| X | X |
+| FR7 | X |   |   | X |   |   | | X | X |
+| FR8 | X |   |   | X |   |   | | X |   |
 
 # Verification sequence diagrams
 
@@ -514,12 +516,12 @@ user <-- EZShop : Integer
 deactivate EZShop
 
 loop forEach product
-    user -> EZShop : addProductToSale()
+    user -> EZShop : addProductToSaleRFID()
     activate  EZShop
     'EZShop -> User : canManageSalesAndCustomers()
     'EZShop <-- User : Boolean
     EZShop -> EZShop : getSaleTransactionById()
-    EZShop-> EZShop : getProductTypeByCode()
+    EZShop-> EZShop : getProductTypeByRFID()
     EZShop -> SaleTransaction : EditProductInSale()
     SaleTransaction -> SaleTransaction : isProductInSale()
     SaleTransaction -> ProductType : getSellPrice()
