@@ -96,6 +96,13 @@ public class EZShop implements EZShopInterface {
             System.out.println("Error with db connection deleting products in return transactions");
             e.printStackTrace();
         }
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); Statement st = conn.createStatement()) {
+            String deleteAllBalances = "DELETE FROM PRODUCTS";
+            st.executeUpdate(deleteAllBalances);
+        } catch (SQLException e) {
+            System.out.println("Error with db connection deleting products");
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -2405,7 +2412,66 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public boolean returnProductRFID(Integer returnId, String RFID) throws InvalidTransactionIdException, InvalidRFIDException, UnauthorizedException {
-        return false;
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(returnId = "+ returnId +", RFID = "+ RFID +")");
+
+        // Check if the returnId is null or less than or equal to 0
+        if (returnId == null || returnId <= 0) {
+            System.err.println(methodName + ": The returnId is null or less than or equal to 0");
+            throw new InvalidTransactionIdException();
+        }
+
+        // Check if the RFID is null, empty or invalid
+        if (RFID == null || RFID.isEmpty() || !ProductImpl.isValidRFID(RFID)) {
+            System.err.println(methodName + ": The RFID is null, empty or invalid");
+            throw new InvalidRFIDException();
+        }
+
+        // Check if there is no logged user or if it has not the rights to perform the operation
+        if (loggedIn == null || !loggedIn.canManageSaleTransactions()) {
+            System.err.println(methodName + ": There is no logged user or if it has not the rights to perform the operation");
+            throw new UnauthorizedException();
+        }
+
+        // Get ReturnTransaction
+        ReturnTransactionImpl returnTransaction = getReturnTransactionById(returnId);
+        // Check if the ReturnTransaction does not exist
+        if (returnTransaction == null) {
+            System.err.println(methodName + ": The ReturnTransaction does not exist");
+            return false;
+        }
+
+        // Get SaleTransaction
+        SaleTransactionImpl saleTransaction = returnTransaction.getSaleTransaction();
+        // Check if the SaleTransaction is not available
+        if (saleTransaction == null) {
+            System.err.println(methodName + ": The SaleTransaction is not available");
+            return false;
+        }
+
+        // Get ProductType
+        ProductTypeImpl productType = getProductTypeByRFID(RFID);
+        // Check if the product to be returned does not exists
+        if (productType == null) {
+            System.err.println(methodName + ": The product to be returned does not exists");
+            return false;
+        }
+        // Check if the product was not in the transaction
+        if (!saleTransaction.isProductInSale(productType)) {
+            System.err.println(methodName + ": The product was not in the transaction");
+            return false;
+        }
+
+        // Add product to ReturnTransaction
+        returnTransaction.addProduct(productType, 1);
+
+        // Write ReturnTransaction in persistence
+        if (!updatePersistenceReturnTransaction(returnTransaction)) {
+            System.err.println(methodName + ": There are some problems with the DB");
+            return false;
+        }
+
+        return true;
     }
 
     @Override
