@@ -620,12 +620,12 @@ user <-- EZShop : Integer
 deactivate EZShop
 
 loop forEach product
-    user -> EZShop : addProductToSale()
+    user -> EZShop : addProductToSaleRFID()
     activate  EZShop
     'EZShop -> User : canManageSalesAndCustomers()
     'EZShop <-- User : Boolean
     EZShop -> EZShop : getSaleTransactionById()
-    EZShop-> EZShop : getProductTypeByCode()
+    EZShop-> EZShop : getProductTypeByRFID()
     EZShop -> SaleTransaction : EditProductInSale()
     SaleTransaction -> SaleTransaction : isProductInSale()
     SaleTransaction -> ProductType : getSellPrice()
