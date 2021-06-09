@@ -10,7 +10,7 @@ public class ProductImpl {
 
         Long p;
         //Checking if length is correct
-        if(rfid.length()!=10)
+        if(rfid.length()!=12)
             return false;
 
         //Checking if string contains an integer
