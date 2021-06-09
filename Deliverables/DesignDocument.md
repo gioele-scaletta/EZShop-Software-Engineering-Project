@@ -400,7 +400,7 @@ EZShop->Order : setOrderState()
 EZShop->EZShop : getProductTypeByID()
 EZShop->ProductType : updateProductQuantity()
 loop forEach product in order
-    EZShop->EZshop : addProduct()
+    EZShop->EZShop : addProduct()
 end
 EZShop --> user: boolean
 deactivate EZShop
