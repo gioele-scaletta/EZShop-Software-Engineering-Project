@@ -3348,4 +3348,287 @@ import java.util.List;
             fail();
         }
     }
+
+     @Test
+     public void testRecordOrderArrivalRFID(){
+         try{
+
+             ezshop.login("admin","password");
+
+             // The operation was successful
+             boolean recorded1 = ezshop.recordOrderArrivalRFID(1,"000000000010");
+
+             ezshop.logout();
+             ezshop.login("shopmanager","password");
+
+             // The order does not exist
+             boolean recorded2 = ezshop.recordOrderArrivalRFID(2,"000000000020");
+
+             // The order was not in an ORDERED/COMPLETE state
+             boolean recorded3 = ezshop.recordOrderArrivalRFID(3,"000000000030");
+
+             // Asserts
+             assertTrue(recorded1);
+             assertFalse(recorded2);
+             assertFalse(recorded3);
+
+             // Check InvalidOrderIdException for orderId equal to 0
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.recordOrderArrivalRFID(0,"123456789012");
+             });
+
+             // Check InvalidOrderIdException for orderId less than 0
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.recordOrderArrivalRFID(-1,"123456789012");
+             });
+
+             // Check InvalidOrderIdException for orderId equal to null
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.recordOrderArrivalRFID(null,"123456789012");
+             });
+
+             // Check InvalidLocationException
+
+             // Check InvalidRFIDException
+
+             // Check UnauthorizedException
+             ezshop.logout();
+             assertThrows(UnauthorizedException.class, () -> {
+                 ezshop.recordOrderArrivalRFID(1,"123456789012");
+             });
+
+             ezshop.login("cashier", "password");
+             assertThrows(UnauthorizedException.class, () -> {
+                 ezshop.recordOrderArrivalRFID(1,"123456789012");
+             });
+
+         }
+         catch (Exception e) {
+             e.printStackTrace();
+             fail();
+         }
+     }
+
+
+     @Test
+     public void testAddProductToSaleRFID(){
+         try{
+
+             ezshop.login("admin","password");
+
+             // The operation is successful
+             boolean added1 = ezshop.addProductToSaleRFID(1,"000000000010");
+
+             ezshop.logout();
+             ezshop.login("shopmanager","password");
+
+             // The RFID does not exist
+             boolean added2 = ezshop.addProductToSaleRFID(2,"000000000020");
+
+             ezshop.logout();
+             ezshop.login("cashier","password");
+
+             // The transaction id does not identify a started and open transaction
+             boolean added3 = ezshop.addProductToSaleRFID(3,"000000000030");
+
+
+             // Asserts
+             assertTrue(added1);
+             assertFalse(added2);
+             assertFalse(added3);
+
+             // Check InvalidTransactionIdException for transactionId equal to 0
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.addProductToSaleRFID(0,"123456789012");
+             });
+
+             // Check InvalidTransactionIdException for transactionId less than 0
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.addProductToSaleRFID(-1,"123456789012");
+             });
+
+             // Check InvalidTransactionIdException for transactionId equal to null
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.addProductToSaleRFID(null,"123456789012");
+             });
+
+             // Check InvalidRFIDException for empty RFID code
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.addProductToSaleRFID(1,"");
+             });
+
+             // Check InvalidRFIDException for null RFID code
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.addProductToSaleRFID(1,null);
+             });
+
+             // Check InvalidRFIDException for invalid RFID code
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.addProductToSaleRFID(1,"12345678901");
+             });
+
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.addProductToSaleRFID(1,"abcdefghijkl");
+             });
+
+             // Check UnauthorizedException
+             ezshop.logout();
+             assertThrows(UnauthorizedException.class, () -> {
+                 ezshop.addProductToSaleRFID(1,"123456789012");
+             });
+
+         }
+         catch (Exception e) {
+             e.printStackTrace();
+             fail();
+         }
+     }
+
+     @Test
+     public void testDeleteProductFromSaleRFID(){
+         try{
+
+             ezshop.login("admin","password");
+
+             // The operation was successful
+             boolean deleted1 = ezshop.deleteProductFromSaleRFID(1,"000000000010");
+
+             ezshop.logout();
+             ezshop.login("shopmanager","password");
+
+             // The product code does not exist
+             boolean deleted2 = ezshop.deleteProductFromSaleRFID(2,"000000000020");
+
+             ezshop.logout();
+             ezshop.login("cashier","password");
+
+             // The transaction id does not identify a started and open transaction
+             boolean deleted3 = ezshop.deleteProductFromSaleRFID(3,"000000000030");
+
+             // Asserts
+             assertTrue(deleted1);
+             assertFalse(deleted2);
+             assertFalse(deleted3);
+
+             // Check InvalidTransactionIdException for transactionId equal to 0
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.deleteProductFromSaleRFID(0,"123456789012");
+             });
+
+             // Check InvalidTransactionIdException for transactionId less than 0
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.deleteProductFromSaleRFID(-1,"123456789012");
+             });
+
+             // Check InvalidTransactionIdException for transactionId equal to null
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.deleteProductFromSaleRFID(null,"123456789012");
+             });
+
+             // Check InvalidRFIDException for empty RFID code
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.deleteProductFromSaleRFID(1,"");
+             });
+
+             // Check InvalidRFIDException for null RFID code
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.deleteProductFromSaleRFID(1,null);
+             });
+
+             // Check InvalidRFIDException for invalid RFID code
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.deleteProductFromSaleRFID(1,"12345678901");
+             });
+
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.deleteProductFromSaleRFID(1,"abcdefghijkl");
+             });
+
+             // Check UnauthorizedException
+             ezshop.logout();
+             assertThrows(UnauthorizedException.class, () -> {
+                 ezshop.deleteProductFromSaleRFID(1,"123456789012");
+             });
+
+         }
+         catch (Exception e) {
+             e.printStackTrace();
+             fail();
+         }
+     }
+
+
+     @Test
+     public void testReturnProductRFID(){
+         try{
+
+             ezshop.login("admin","password");
+
+             // The operation is successful
+             boolean returned1 = ezshop.returnProductRFID(1,"000000000010");
+
+             ezshop.logout();
+             ezshop.login("shopmanager","password");
+
+             // The product to be returned does not exist
+             boolean returned2 = ezshop.returnProductRFID(2,"000000000020");
+
+             // The product was not in the transaction
+             boolean returned3 = ezshop.returnProductRFID(3,"000000000030");
+
+             // The transaction does not exist
+             boolean returned4 = ezshop.returnProductRFID(4,"000000000040");
+
+             // Asserts
+             assertTrue(returned1);
+             assertFalse(returned2);
+             assertFalse(returned3);
+             assertFalse(returned4);
+
+             // Check InvalidTransactionIdException for transactionId equal to 0
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.returnProductRFID(0,"123456789012");
+             });
+
+             // Check InvalidTransactionIdException for transactionId less than 0
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.returnProductRFID(-1,"123456789012");
+             });
+
+             // Check InvalidTransactionIdException for transactionId equal to null
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.returnProductRFID(null,"123456789012");
+             });
+
+             // Check InvalidRFIDException for empty RFID code
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.returnProductRFID(1,"");
+             });
+
+             // Check InvalidRFIDException for null RFID code
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.returnProductRFID(1,null);
+             });
+
+             // Check InvalidRFIDException for invalid RFID code
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.returnProductRFID(1,"12345678901");
+             });
+
+             assertThrows(InvalidRFIDException.class, () -> {
+                 ezshop.returnProductRFID(1,"abcdefghijkl");
+             });
+
+             // Check UnauthorizedException
+             ezshop.logout();
+             assertThrows(UnauthorizedException.class, () -> {
+                 ezshop.returnProductRFID(1,"123456789012");
+             });
+
+         }
+         catch (Exception e) {
+             e.printStackTrace();
+             fail();
+         }
+     }
 }
