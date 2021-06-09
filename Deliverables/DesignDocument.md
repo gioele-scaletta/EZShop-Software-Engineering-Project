@@ -102,6 +102,7 @@ interface EZShopInterface {
     + getSaleTransaction(Integer transactionId): SaleTransaction
     + startReturnTransaction(Integer transactionId): Integer
     + returnProduct(Integer returnId, String productCode, int amount): boolean
+    + returnProductRFID(Integer returnId, String RFID): boolean
     + endReturnTransaction(Integer returnId, boolean commit): boolean
     + deleteReturnTransaction(Integer returnId): boolean
     .. FR7 ..
@@ -117,7 +118,6 @@ interface EZShopInterface {
 
 class EZShop{
     - customersList: Map<String, Customer>
-    - loyaltyCardsList: Map<String, LoyaltyCard>
     - ordersList: Map<Integer, Order>
     - salesList: Map<Integer, SaleTransaction>
     - returnsList: Map<Integer, ReturnTransaction>
@@ -169,16 +169,7 @@ class User{
 class Customer{
     - customerName: String
     - customerId: Integer
-
-    - customerCard: LoyaltyCard
-}
-
-class LoyaltyCard{
-    - cardId: String
-    - cardPoints: Integer
-    - isAttached: boolean
-
-    + updatePoints(Integer points) : boolean
+    - customerCard: String
 }
 
 class SaleTransaction {
@@ -188,7 +179,6 @@ class SaleTransaction {
     - amount: Double
     - salediscountRate: Double
 
-    - transactionCard: LoyaltyCard
     - saleOperationRecord: BalanceOperation
     - listOfProductsSale: Map<ProductType, Integer>
 
@@ -733,12 +723,12 @@ EZShop <-- ReturnTransaction : ReturnTransaction
 user <-- EZShop : Integer
 deactivate EZShop
 
-user -> EZShop : returnProduct()
+user -> EZShop : returnProductRFID()
 activate EZShop
 EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : boolean
 EZShop -> EZShop : getSaleTransactionById()
-EZShop -> EZShop : getProductTypeByCode()
+EZShop -> EZShop : getProductTypeByRFID()
 EZShop -> TransactionSale : isProductInSale()
 EZShop <-- TransactionSale : boolean
 EZShop -> ReturnTransaction : addProductToReturn()
