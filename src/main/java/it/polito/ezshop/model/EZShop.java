@@ -3018,7 +3018,7 @@ public class EZShop implements EZShopInterface {
         ProductTypeImpl p=null;
         Integer productId=-1;
 
-        String sql = "SELECT ProductID FROM PRODUCS WHERE PRODUCTS.RFID=? ";
+        String sql = "SELECT ProductID FROM PRODUCTS WHERE PRODUCTS.RFID=? ";
 
         try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, rfid);
