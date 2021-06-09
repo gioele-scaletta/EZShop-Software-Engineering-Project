@@ -77,6 +77,7 @@ interface EZShopInterface {
     + payOrderFor(String productCode, int quantity, double pricePerUnit): Integer
     + payOrder(Integer orderId): boolean
     + recordOrderArrival(Integer orderId): boolean
+    + recordOrderArrivalRFID(Integer orderId, String RFID): boolean
     + getAllOrders(): List<Order>
     .. FR5 ..
     + defineCustomer(String customerName): Integer
@@ -247,6 +248,14 @@ class ProductType{
     + updateProductQuantity(Integer quantityDiff): boolean
 }
 
+class Product{
+    - productId: Integer
+    - RFID: String
+
+    + isValidRFID(String rfid): static boolean
+    + nextRFID(String rfid): static String
+}
+
 EZShop -|> EZShopInterface : <<implements>>
 
 User "*" <- EZShop
@@ -256,10 +265,7 @@ EZShop --> "*" ReturnTransaction
 EZShop --> "*" Order
 EZShop --> "*" ProductType
 EZShop --> "*" BalanceOperation
-EZShop --> "*" LoyaltyCard
-
-Customer --> "0..1" LoyaltyCard
-SaleTransaction "1..*" --> "0..1" LoyaltyCard
+EZShop --> "*" Product
 
 SaleTransaction "1" <- "0..*" ReturnTransaction
 
@@ -267,6 +273,7 @@ SaleTransaction "*" --> "*" ProductType
 ReturnTransaction "0..*" --> "1..*" ProductType
 Order "*" --> ProductType
 
+ProductType ---> "0..*" Product
 SaleTransaction ---> BalanceOperation
 ReturnTransaction ---> BalanceOperation
 Order ---> BalanceOperation
@@ -368,7 +375,7 @@ deactivate EZShop
 
 ## Use Case 3
 
-### Scenario 3.1 - Order od Product Type Issued
+### Scenario 3.1 - Order of Product Type Issued
 
 ```plantuml
 actor "Administrator\nShop Manager" as user
@@ -392,7 +399,7 @@ deactivate EZShop
 actor "Administrator\nShop Manager" as user
 autonumber
 
-user->EZShop : recordOrderArrival()
+user->EZShop : recordOrderArrivalRFID()
 activate EZShop
 EZShop->User : canManageInventory()
 User --> EZShop : Boolean
@@ -400,6 +407,9 @@ EZShop->EZShop : getOrderByID()
 EZShop->Order : setOrderState()
 EZShop->EZShop : getProductTypeByID()
 EZShop->ProductType : updateProductQuantity()
+loop forEach product in order
+    EZShop->EZshop : addProduct()
+end
 EZShop --> user: boolean
 deactivate EZShop
 ```

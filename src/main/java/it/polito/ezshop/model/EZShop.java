@@ -107,8 +107,6 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public Integer createUser(String username, String password, String role) throws InvalidUsernameException, InvalidPasswordException, InvalidRoleException {
-
-
         //Check if username is valid
         if (username==null || username.isEmpty()) {
             System.out.println("Invalid username");
@@ -169,8 +167,6 @@ public class EZShop implements EZShopInterface {
         System.out.println("User " + username + " with role " + role + " and id " + id + " has been added to the application");
         return id;
     }
-
-
 
     @Override
     public boolean deleteUser(Integer id) throws InvalidUserIdException, UnauthorizedException {
