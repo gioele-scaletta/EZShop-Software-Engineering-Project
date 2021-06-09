@@ -3772,28 +3772,14 @@ public class EZShop implements EZShopInterface {
         }
         System.out.println(methodName + ": updated "+ rowCount +" rows with transactionId = "+ saleTransaction.getTicketNumber() +" in SALETRANSACTIONS table");
 
-        query = "DELETE FROM SALESANDPRODUCTS WHERE transactionId = ?";
-        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, saleTransaction.getTicketNumber());
-
-            rowCount = pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println(methodName + ": " + e.getMessage());
-            return false;
-        }
-        System.out.println(methodName + ": deleted "+ rowCount +" rows with transactionId = "+ saleTransaction.getTicketNumber() +" in SALESANDPRODUCTS table");
-
         if (saleTransaction.getListOfProductsEntries() != null) {
             rowCount = 0;
             for (TicketEntry ticketEntry : saleTransaction.getListOfProductsEntries().values()) {
-                query = "INSERT INTO SALESANDPRODUCTS(transactionId, BarCode ,description, Quantity, discountRate, pricePerUnit) VALUES(?, ?, ?, ?, ?, ?)";
+                query = "UPDATE SALESANDPRODUCTS SET Quantity = ? WHERE transactionId = ? AND BarCode = ?";
                 try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
-                    pstmt.setInt(1, saleTransaction.getTicketNumber());
-                    pstmt.setString(2, ticketEntry.getBarCode());
-                    pstmt.setString(3,ticketEntry.getProductDescription());
-                    pstmt.setInt(4, ticketEntry.getAmount());
-                    pstmt.setDouble(5, ticketEntry.getDiscountRate());
-                    pstmt.setDouble(6, ticketEntry.getPricePerUnit());
+                    pstmt.setInt(1, ticketEntry.getAmount());
+                    pstmt.setInt(2, saleTransaction.getTicketNumber());
+                    pstmt.setString(3, ticketEntry.getBarCode());
 
                     rowCount = pstmt.executeUpdate();
                 } catch (SQLException e) {
