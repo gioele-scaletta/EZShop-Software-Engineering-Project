@@ -2597,8 +2597,11 @@ public class EZShop implements EZShopInterface {
             System.err.println(methodName + ": The product to be returned does not exists");
             return false;
         }
+
+        // Get SaleTransaction from RFID
+        SaleTransactionImpl saleTransactionRFID = getSaleTransactionByRFID(RFID);
         // Check if the product was not in the transaction
-        if (!saleTransaction.isProductInSale(productType)) {
+        if (saleTransactionRFID == null || !saleTransactionRFID.getTicketNumber().equals(saleTransaction.getTicketNumber())) {
             System.err.println(methodName + ": The product was not in the transaction");
             return false;
         }
@@ -3283,6 +3286,55 @@ public class EZShop implements EZShopInterface {
 
         return p;
 
+    }
+
+    private SaleTransactionImpl getSaleTransactionByRFID(String RFID) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(RFID = "+ RFID +")");
+
+        String query;
+
+        query = "SELECT TransactionId FROM PRODUCTS WHERE PRODUCTS.RFID = ?";
+        Integer transactionId;
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, RFID);
+            ResultSet rs = pstmt.executeQuery();
+            if (!rs.isBeforeFirst()) {
+                System.out.println("RFID " + RFID + " does not exist");
+                return null;
+            }
+            transactionId = rs.getInt("TransactionId");
+            if (transactionId == 0 || transactionId == -1) {
+                System.out.println("RFID " + RFID + " has no associated sale transaction");
+                return null;
+            }
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return null;
+        }
+
+        query = "SELECT * FROM SALETRANSACTIONS WHERE transactionId = ?";
+        SaleTransactionImpl saleTransaction = null;
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, transactionId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if(rs.isBeforeFirst()) {
+                String state = rs.getString("State");
+                String paymentType = rs.getString("PaymentType");
+                Double amount = rs.getDouble("Amount");
+                Double discountRate = rs.getDouble("discountRate");
+                CustomerImpl customer = getCustomerById(rs.getInt("transactionCardId"));
+                BalanceOperationImpl balanceOperation = getBalanceOperationById(rs.getInt("BalanceOperationId"));
+                HashMap<String, TicketEntry> listOfProductsEntries = getProdListForSaleDB(transactionId);
+                saleTransaction = new SaleTransactionImpl(transactionId, state, paymentType, amount, discountRate, customer, balanceOperation, listOfProductsEntries);
+            }
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return null;
+        }
+
+        return saleTransaction;
     }
 
     private ProductTypeImpl getProductTypeByCode(String barCode){
