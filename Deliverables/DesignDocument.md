@@ -121,7 +121,8 @@ class EZShop{
     - ordersList: Map<Integer, Order>
     - salesList: Map<Integer, SaleTransaction>
     - returnsList: Map<Integer, ReturnTransaction>
-    - productsList: Map<Integer,ProductType>
+    - productTypesList: Map<Integer,ProductType>
+    - productsList: Map<Integer, String>
     - balanceOperationsList: Map<Integer, BalanceOperation>
     - usersList: Map<Integer, User>
     - loggedIn: User
