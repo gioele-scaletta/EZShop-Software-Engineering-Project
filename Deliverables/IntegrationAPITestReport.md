@@ -367,40 +367,47 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |5.2|"|TestIntegrationEZShop.testLogout()|
 |6.1|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSaleRFID()|
 |"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
 |6.2|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSaleRFID()|
 |"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
 |"|FR6.5|TestIntegrationEZShop.testApplyDiscountRateToProduct()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
 |6.3|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSaleRFID()|
 |"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
 |"|FR6.4|TestIntegrationEZShop.testApplyDiscountRateToSale()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
 |6.4|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSaleRFID()|
 |"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR6.6|TestIntegrationEZShop.testComputePointsForSale()|
 |"|FR7.2|TestIntegrationEZShop.testReceiveCashPayment()|
 |6.5|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSaleRFID()|
 |"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR6.11|TestIntegrationEZShop.testDeleteSaleTransaction()|
 |6.6|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSaleRFID()|
 |"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
 |6.7|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
 |"|FR6.2|TestIntegrationEZShop.testDeleteProductFromSale()|
+|"|FR6.2|TestIntegrationEZShop.testDeleteProductFromSaleRFID()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
 |7.1|FR7.2|TestIntegrationEZShop.testReceiveCreditCardPayment()|
@@ -458,7 +465,9 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |                            |  TestNFR.testTimeModifyPointsOnCard()   |
 |                            |  TestNFR.testTimeStartSaleTransaction |
 |                            |  TestNFR.testTimeAddProductToSale |
+|                            |  TestNFR.testTimeAddProductToSaleRFID |
 |                            |  TestNFR.testTimeDeleteProductFromSale |
+|                            |  TestNFR.testTimeDeleteProductFromSaleRFID |
 |                            |  TestNFR.testTimeApplyDiscountRateToProduct |
 |                            |  TestNFR.testTimeApplyDiscountRateToSale |
 |                            |  TestNFR.testTimeComputePointsForSale |
