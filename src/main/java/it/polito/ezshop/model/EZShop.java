@@ -1198,7 +1198,7 @@ public class EZShop implements EZShopInterface {
 
 
         //Inserting RFIDs. If a duplicate RFID is found, db is rolled back
-        String sql4 = "INSERT INTO PRODUCTS (RFID,ProductID) VALUES (?,?)";
+        String sql4 = "INSERT INTO PRODUCTS (RFID,ProductID, TransactionId) VALUES (?,?,?)";
         String toInsertRFID = RFIDfrom;
         try(Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql4)){
             conn.setAutoCommit(false);
@@ -1206,6 +1206,7 @@ public class EZShop implements EZShopInterface {
             for(int i=0; i<quantity; i++) {
                 pstmt.setString(1,toInsertRFID);
                 pstmt.setString(2,productId);
+                pstmt.setInt(3,-1);
                 //If something goes wrong in the update, everything is rolled back to before the first RFID is inserted
                 try {
                     pstmt.executeUpdate();
@@ -1942,6 +1943,7 @@ public class EZShop implements EZShopInterface {
         }
 
         if(sale.EditProductInSale(product, 1)) {
+            sale.addRFID(RFID);
             return true;
         } else{
             return false;
@@ -2027,7 +2029,6 @@ public class EZShop implements EZShopInterface {
 
 
         if(sale.EditProductInSale(product, -amount)) {
-
             return true;
         } else{
             return false;
@@ -2108,7 +2109,7 @@ public class EZShop implements EZShopInterface {
 
 
         if(sale.EditProductInSale(product, -1)) {
-
+            sale.removeRFID(RFID);
             return true;
         } else{
             return false;
@@ -3479,10 +3480,28 @@ public class EZShop implements EZShopInterface {
           } catch (SQLException e) {
               System.out.println(e.getMessage());
           }
-
-
       });
 
+      sale.getListOfRFIDs().stream().forEach((el)-> {
+
+          String slq = "UPDATE PRODUCTS SET TransactionId=? WHERE RFID=? ";
+
+          try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(slq)) {
+
+              // set the value of the parameter
+
+
+              pstmt.setString(2, el);
+              pstmt.setInt(1,tid);
+
+              //
+              pstmt.executeUpdate();
+
+          } catch (SQLException e) {
+              System.out.println(e.getMessage());
+          }
+
+      });
          /* !!!!PROBABLY NOT NEEDED SINCE POINTS ARE UPDATED THROUGH MODIFYPOINTS ON CARD AND NOT IN MY PART
             //UPDATE CUSTOMER POINTS
 
@@ -3500,6 +3519,7 @@ public class EZShop implements EZShopInterface {
               System.out.println(e.getMessage());
           }
 */
+
           currentSale=null;
     }
 
