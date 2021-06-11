@@ -26,6 +26,7 @@ public class ProductImpl {
         return true;
     }
 
+    //Given an rfid, it computes the following one
     public static String nextRFID(String rfid){
         //Checking if parameter is a valid RFID
         if(!isValidRFID(rfid))

@@ -366,7 +366,6 @@ public class EZShop implements EZShopInterface {
         return true;
     }
 
-    //Marco: maybe check also in products table if barcode is already present
     @Override
     public Integer createProductType(String description, String productCode, double pricePerUnit, String note) throws InvalidProductDescriptionException, InvalidProductCodeException, InvalidPricePerUnitException, UnauthorizedException {
         //User authentication
@@ -438,7 +437,6 @@ public class EZShop implements EZShopInterface {
         return id;
     }
 
-    //Marco: should this also update the barcodes in the procduct table linked to rfids?
     @Override
     public boolean updateProduct(Integer id, String newDescription, String newCode, double newPrice, String newNote) throws InvalidProductIdException, InvalidProductDescriptionException, InvalidProductCodeException, InvalidPricePerUnitException, UnauthorizedException {
         //User authentication
@@ -511,7 +509,6 @@ public class EZShop implements EZShopInterface {
         return true;
     }
 
-    //Marco: should this also delete every other product in product table?
     @Override
     public boolean deleteProductType(Integer id) throws InvalidProductIdException, UnauthorizedException {
         //User authentication
@@ -608,7 +605,6 @@ public class EZShop implements EZShopInterface {
         }
     }
 
-    //Marco: maybe this is deprecated?
     @Override
     public boolean updateQuantity(Integer productId, int toBeAdded) throws InvalidProductIdException, UnauthorizedException {
         //User authentication
@@ -750,7 +746,7 @@ public class EZShop implements EZShopInterface {
         return true;
     }
 
-    //Marco: 99% deprecated
+
     @Override
     public Integer issueOrder(String productCode, int quantity, double pricePerUnit) throws InvalidProductCodeException, InvalidQuantityException, InvalidPricePerUnitException, UnauthorizedException {
         //User authentication
@@ -1184,6 +1180,23 @@ public class EZShop implements EZShopInterface {
             throw new InvalidLocationException();
         }
 
+        //Retrieve internal productId from Barcode
+        String sql6 = "SELECT productId FROM PRODUCTTYPES WHERE BarCode=?";
+        String productId = null;
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql6)) {
+            pstmt.setString(1, productCode);
+            ResultSet rs = pstmt.executeQuery();
+            if(!rs.isBeforeFirst()) {
+                System.err.println("ERROR: It's impossible to record a product arrival since it's not present anymore");
+                return false;
+            }
+            productId = rs.getString("productId");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+
         //Inserting RFIDs. If a duplicate RFID is found, db is rolled back
         String sql4 = "INSERT INTO PRODUCTS (RFID,ProductID) VALUES (?,?)";
         String toInsertRFID = RFIDfrom;
@@ -1192,7 +1205,7 @@ public class EZShop implements EZShopInterface {
             Savepoint sv = conn.setSavepoint();
             for(int i=0; i<quantity; i++) {
                 pstmt.setString(1,toInsertRFID);
-                pstmt.setString(2,productCode);
+                pstmt.setString(2,productId);
                 //If something goes wrong in the update, everything is rolled back to before the first RFID is inserted
                 try {
                     pstmt.executeUpdate();
