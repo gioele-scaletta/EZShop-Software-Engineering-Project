@@ -374,9 +374,9 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |3.2|FR4.4|TestIntegrationEZShop.testPayOrderFor()|
 |"|FR4.5|TestIntegrationEZShop.testPayOrder()|
 |3.3|FR4.6|TestIntegrationEZShop.testRecordOrderArrival()|
-|"|FR4.6|TestIntegrationEZShop.testRecordOrderArrivalRFID()|
 |3.4|FR4.1|TestIntegrationEZShop.testUpdateQuantity()|
 |3.5|FR4.7|TestIntegrationEZShop.testGetAllOrders()|
+|3.6|FR4.6|TestIntegrationEZShop.testRecordOrderArrivalRFID()|
 |4.1|FR5.1|TestIntegrationEZShop.testDefineCustomer()|
 |4.2|FR5.5|TestIntegrationEZShop.testCreateCard()|
 |"|FR5.6|TestIntegrationEZShop.testAttachCardToCustomer()|
