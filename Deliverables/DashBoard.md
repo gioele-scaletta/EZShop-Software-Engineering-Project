@@ -22,9 +22,9 @@ Report effort figures from the timesheet or timesheetCR document, compute size f
 
 | Measure | Value|
 |---|---|
-| effort for non-quality ENQ (effort for release 1, or effort to fix defects found when running official acceptance tests) |4|
-| effort for non quality, relative = ENQ / E |0.02|
+| effort for non-quality ENQ (effort for release 1, or effort to fix defects found when running official acceptance tests) |10|
+| effort for non quality, relative = ENQ / E |0.05|
 |defects after release D (number of defects found running official acceptance tests and  fixed in release 1) |3|
 | defects before release vs defects after release = D/D_before |0.15|
 |defect density = D/S|0.0006|
-|overall productivity = S/(E + ENQ)|23|
+|overall productivity = S/(E + ENQ)|22.34|
