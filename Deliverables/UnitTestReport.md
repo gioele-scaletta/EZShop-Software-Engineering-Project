@@ -266,7 +266,7 @@ Version: 1.1
 | Valid                             | V               | setQuantity(10)<br/>getQuantity().equals(10)<br/><br/>-> true | TestProductTypeImpl.testSetQuantity() |
 | NULL                              | I               | setQuantity(10)<br/>setQuantity(null)<br/>getQuantity().equals(10)<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetQuantity() |
 
-# Method setNote
+## Method setNote
 
 **Criteria for method *setNote*:**
 
@@ -286,7 +286,7 @@ Version: 1.1
 | Valid                             | V               | setNote("barilla")<br/>getNote().equals("barilla")<br/><br/>-> true | TestProductTypeImpl.testSetNote() |
 | NULL                              | I               | setNote("barilla")<br/>setNote(null)<br/>getNote().equals("barilla")<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetNote() |
 
-# Method setLocation
+## Method setLocation
 
 **Criteria for method *setLocation*:**
 
