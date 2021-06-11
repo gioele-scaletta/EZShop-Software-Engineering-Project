@@ -5,6 +5,7 @@ import it.polito.ezshop.data.SaleTransaction;
 import it.polito.ezshop.data.TicketEntry;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,6 +15,9 @@ public class SaleTransactionImpl implements SaleTransaction {
 
     Integer transactionId;
     Double amount;
+
+
+
     enum State{PAYED, CLOSED, INPROGRESS};
     State state;
     enum PaymentType{CARD, CASH};
@@ -21,6 +25,7 @@ public class SaleTransactionImpl implements SaleTransaction {
     Double discountRate;
     //HashMap< ProductTypeImpl, Integer> listOfProductsSale =new HashMap<>();
     HashMap<String ,TicketEntry> listOfProductsEntries= new HashMap<>();
+    List<String> listRFID=new ArrayList<>();
     CustomerImpl transactionCard;
     BalanceOperation saleOperationRecord;
 
@@ -62,6 +67,15 @@ public class SaleTransactionImpl implements SaleTransaction {
         return listOfProductsSale;
     }
     */
+    public List<String> getListOfRFIDs(){
+        return this.listRFID;
+    }
+    public void addRFID (String id){
+        this.listRFID.add(id);
+    }
+    public void removeRFID(String rfid) {
+        this.listRFID.remove(rfid);
+    }
     public HashMap<String, TicketEntry> getListOfProductsEntries() {
         return this.listOfProductsEntries;
     }

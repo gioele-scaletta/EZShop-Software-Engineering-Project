@@ -1198,7 +1198,7 @@ public class EZShop implements EZShopInterface {
 
 
         //Inserting RFIDs. If a duplicate RFID is found, db is rolled back
-        String sql4 = "INSERT INTO PRODUCTS (RFID,ProductID) VALUES (?,?)";
+        String sql4 = "INSERT INTO PRODUCTS (RFID,ProductID, TransactionId) VALUES (?,?,?)";
         String toInsertRFID = RFIDfrom;
         try(Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(sql4)){
             conn.setAutoCommit(false);
@@ -1206,6 +1206,7 @@ public class EZShop implements EZShopInterface {
             for(int i=0; i<quantity; i++) {
                 pstmt.setString(1,toInsertRFID);
                 pstmt.setString(2,productId);
+                pstmt.setInt(3,-1);
                 //If something goes wrong in the update, everything is rolled back to before the first RFID is inserted
                 try {
                     pstmt.executeUpdate();
@@ -1942,6 +1943,7 @@ public class EZShop implements EZShopInterface {
         }
 
         if(sale.EditProductInSale(product, 1)) {
+            sale.addRFID(RFID);
             return true;
         } else{
             return false;
@@ -2027,7 +2029,6 @@ public class EZShop implements EZShopInterface {
 
 
         if(sale.EditProductInSale(product, -amount)) {
-
             return true;
         } else{
             return false;
@@ -2108,7 +2109,7 @@ public class EZShop implements EZShopInterface {
 
 
         if(sale.EditProductInSale(product, -1)) {
-
+            sale.removeRFID(RFID);
             return true;
         } else{
             return false;
@@ -2547,6 +2548,17 @@ public class EZShop implements EZShopInterface {
             System.err.println(methodName + ": There are some problems with the DB");
             return false;
         }
+        if (previousAmount == 0) {
+            if (!insertPersistenceReturnTransactionProduct(returnTransaction, productType)) {
+                System.err.println(methodName + ": There are some problems with the DB");
+                return false;
+            }
+        } else {
+            if (!updatePersistenceReturnTransactionProduct(returnTransaction, productType)) {
+                System.err.println(methodName + ": There are some problems with the DB");
+                return false;
+            }
+        }
 
         return true;
     }
@@ -2597,8 +2609,11 @@ public class EZShop implements EZShopInterface {
             System.err.println(methodName + ": The product to be returned does not exists");
             return false;
         }
+
+        // Get SaleTransaction from RFID
+        SaleTransactionImpl saleTransactionRFID = getSaleTransactionByRFID(RFID);
         // Check if the product was not in the transaction
-        if (!saleTransaction.isProductInSale(productType)) {
+        if (saleTransactionRFID == null || !saleTransactionRFID.getTicketNumber().equals(saleTransaction.getTicketNumber())) {
             System.err.println(methodName + ": The product was not in the transaction");
             return false;
         }
@@ -2608,6 +2623,10 @@ public class EZShop implements EZShopInterface {
 
         // Write ReturnTransaction in persistence
         if (!updatePersistenceReturnTransaction(returnTransaction)) {
+            System.err.println(methodName + ": There are some problems with the DB");
+            return false;
+        }
+        if (!insertPersistenceReturnTransactionProduct(returnTransaction, productType)) {
             System.err.println(methodName + ": There are some problems with the DB");
             return false;
         }
@@ -3285,6 +3304,55 @@ public class EZShop implements EZShopInterface {
 
     }
 
+    private SaleTransactionImpl getSaleTransactionByRFID(String RFID) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(RFID = "+ RFID +")");
+
+        String query;
+
+        query = "SELECT TransactionId FROM PRODUCTS WHERE PRODUCTS.RFID = ?";
+        Integer transactionId;
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, RFID);
+            ResultSet rs = pstmt.executeQuery();
+            if (!rs.isBeforeFirst()) {
+                System.out.println("RFID " + RFID + " does not exist");
+                return null;
+            }
+            transactionId = rs.getInt("TransactionId");
+            if (transactionId == 0 || transactionId == -1) {
+                System.out.println("RFID " + RFID + " has no associated sale transaction");
+                return null;
+            }
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return null;
+        }
+
+        query = "SELECT * FROM SALETRANSACTIONS WHERE transactionId = ?";
+        SaleTransactionImpl saleTransaction = null;
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, transactionId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if(rs.isBeforeFirst()) {
+                String state = rs.getString("State");
+                String paymentType = rs.getString("PaymentType");
+                Double amount = rs.getDouble("Amount");
+                Double discountRate = rs.getDouble("discountRate");
+                CustomerImpl customer = getCustomerById(rs.getInt("transactionCardId"));
+                BalanceOperationImpl balanceOperation = getBalanceOperationById(rs.getInt("BalanceOperationId"));
+                HashMap<String, TicketEntry> listOfProductsEntries = getProdListForSaleDB(transactionId);
+                saleTransaction = new SaleTransactionImpl(transactionId, state, paymentType, amount, discountRate, customer, balanceOperation, listOfProductsEntries);
+            }
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return null;
+        }
+
+        return saleTransaction;
+    }
+
     private ProductTypeImpl getProductTypeByCode(String barCode){
 
         //IF PRODUCT IS INVOLVED IN CURRENT SALE THE UP TO DATE INFORMATION ARE STORED ONLY IN RAM AT THE MOMENT
@@ -3427,10 +3495,28 @@ public class EZShop implements EZShopInterface {
           } catch (SQLException e) {
               System.out.println(e.getMessage());
           }
-
-
       });
 
+      sale.getListOfRFIDs().stream().forEach((el)-> {
+
+          String slq = "UPDATE PRODUCTS SET TransactionId=? WHERE RFID=? ";
+
+          try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(slq)) {
+
+              // set the value of the parameter
+
+
+              pstmt.setString(2, el);
+              pstmt.setInt(1,tid);
+
+              //
+              pstmt.executeUpdate();
+
+          } catch (SQLException e) {
+              System.out.println(e.getMessage());
+          }
+
+      });
          /* !!!!PROBABLY NOT NEEDED SINCE POINTS ARE UPDATED THROUGH MODIFYPOINTS ON CARD AND NOT IN MY PART
             //UPDATE CUSTOMER POINTS
 
@@ -3448,6 +3534,7 @@ public class EZShop implements EZShopInterface {
               System.out.println(e.getMessage());
           }
 */
+
           currentSale=null;
     }
 
@@ -3632,24 +3719,6 @@ public class EZShop implements EZShopInterface {
         }
         System.out.println(methodName + ": inserted "+ rowCount +" rows with ReturnId = "+ newId +" in RETURN_TRANSACTIONS");
 
-        if (returnTransaction.getReturnProducts() != null) {
-            rowCount = 0;
-            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
-                query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
-                try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
-                    pstmt.setInt(1, newId);
-                    pstmt.setString(2, entry.getKey().getBarCode());
-                    pstmt.setInt(3, entry.getValue());
-
-                    rowCount = pstmt.executeUpdate();
-                } catch (SQLException e) {
-                    System.err.println(methodName + ": " + e.getMessage());
-                    return null;
-                }
-            }
-            System.out.println(methodName + ": inserted "+ rowCount +" rows with ReturnId = "+ newId +" in RETURN_PRODUCTS");
-        }
-
         return newId;
     }
 
@@ -3679,35 +3748,6 @@ public class EZShop implements EZShopInterface {
             return false;
         }
         System.out.println(methodName + ": updated "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" in RETURN_TRANSACTIONS table");
-
-        query = "DELETE FROM RETURN_PRODUCTS WHERE ReturnId = ?";
-        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, returnTransaction.getReturnId());
-
-            rowCount = pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println(methodName + ": " + e.getMessage());
-            return false;
-        }
-        System.out.println(methodName + ": deleted "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" in RETURN_PRODUCTS table");
-
-        if (returnTransaction.getReturnProducts() != null) {
-            rowCount = 0;
-            for (Map.Entry<ProductTypeImpl, Integer> entry : returnTransaction.getReturnProducts().entrySet()) {
-                query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
-                try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
-                    pstmt.setInt(1, returnTransaction.getReturnId());
-                    pstmt.setString(2, entry.getKey().getBarCode());
-                    pstmt.setInt(3, entry.getValue());
-
-                    rowCount = pstmt.executeUpdate();
-                } catch (SQLException e) {
-                    System.err.println(methodName + ": " + e.getMessage());
-                    return false;
-                }
-            }
-            System.out.println(methodName + ": inserted "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" in RETURN_PRODUCTS");
-        }
 
         return true;
     }
@@ -3740,6 +3780,52 @@ public class EZShop implements EZShopInterface {
             return false;
         }
         System.out.println(methodName + ": deleted "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" in RETURN_TRANSACTIONS table");
+
+        return true;
+    }
+
+    private boolean insertPersistenceReturnTransactionProduct(ReturnTransactionImpl returnTransaction, ProductTypeImpl productType) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(ReturnTransactionImpl = "+ returnTransaction +", ProductTypeImpl = "+ productType +")");
+
+        String query;
+        int rowCount;
+
+        query = "INSERT INTO RETURN_PRODUCTS(ReturnId, BarCode, Quantity) VALUES(?, ?, ?)";
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, returnTransaction.getReturnId());
+            pstmt.setString(2, productType.getBarCode());
+            pstmt.setInt(3, returnTransaction.getReturnProducts().entrySet().stream().filter(e -> e.getKey().getBarCode().equals(productType.getBarCode())).mapToInt(Map.Entry::getValue).reduce(0, Integer::sum));
+
+            rowCount = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return false;
+        }
+        System.out.println(methodName + ": inserted "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" in RETURN_PRODUCTS");
+
+        return true;
+    }
+
+    private boolean updatePersistenceReturnTransactionProduct(ReturnTransactionImpl returnTransaction, ProductTypeImpl productType) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        System.out.println("Call "+ methodName +"(ReturnTransactionImpl = "+ returnTransaction +", ProductTypeImpl = "+ productType +")");
+
+        String query;
+        int rowCount;
+
+        query = "UPDATE RETURN_PRODUCTS SET Quantity = ? WHERE  ReturnId = ? AND BarCode = ?";
+        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, returnTransaction.getReturnProducts().entrySet().stream().filter(e -> e.getKey().getBarCode().equals(productType.getBarCode())).mapToInt(Map.Entry::getValue).reduce(0, Integer::sum));
+            pstmt.setInt(2, returnTransaction.getReturnId());
+            pstmt.setString(3, productType.getBarCode());
+
+            rowCount = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(methodName + ": " + e.getMessage());
+            return false;
+        }
+        System.out.println(methodName + ": updated "+ rowCount +" rows with ReturnId = "+ returnTransaction.getReturnId() +" and BarCode = "+ productType.getBarCode() +" in RETURN_PRODUCTS");
 
         return true;
     }
@@ -3785,28 +3871,14 @@ public class EZShop implements EZShopInterface {
         }
         System.out.println(methodName + ": updated "+ rowCount +" rows with transactionId = "+ saleTransaction.getTicketNumber() +" in SALETRANSACTIONS table");
 
-        query = "DELETE FROM SALESANDPRODUCTS WHERE transactionId = ?";
-        try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, saleTransaction.getTicketNumber());
-
-            rowCount = pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println(methodName + ": " + e.getMessage());
-            return false;
-        }
-        System.out.println(methodName + ": deleted "+ rowCount +" rows with transactionId = "+ saleTransaction.getTicketNumber() +" in SALESANDPRODUCTS table");
-
         if (saleTransaction.getListOfProductsEntries() != null) {
             rowCount = 0;
             for (TicketEntry ticketEntry : saleTransaction.getListOfProductsEntries().values()) {
-                query = "INSERT INTO SALESANDPRODUCTS(transactionId, BarCode ,description, Quantity, discountRate, pricePerUnit) VALUES(?, ?, ?, ?, ?, ?)";
+                query = "UPDATE SALESANDPRODUCTS SET Quantity = ? WHERE transactionId = ? AND BarCode = ?";
                 try (Connection conn = DriverManager.getConnection(JDBC_URL); PreparedStatement pstmt = conn.prepareStatement(query)) {
-                    pstmt.setInt(1, saleTransaction.getTicketNumber());
-                    pstmt.setString(2, ticketEntry.getBarCode());
-                    pstmt.setString(3,ticketEntry.getProductDescription());
-                    pstmt.setInt(4, ticketEntry.getAmount());
-                    pstmt.setDouble(5, ticketEntry.getDiscountRate());
-                    pstmt.setDouble(6, ticketEntry.getPricePerUnit());
+                    pstmt.setInt(1, ticketEntry.getAmount());
+                    pstmt.setInt(2, saleTransaction.getTicketNumber());
+                    pstmt.setString(3, ticketEntry.getBarCode());
 
                     rowCount = pstmt.executeUpdate();
                 } catch (SQLException e) {

@@ -288,6 +288,72 @@ public class TestNFR {
     }
 
     @Test
+    public void testTimeAddProductToSaleRFID() {
+        try {
+            // Setup
+            //ezshop.login("admin","password");
+
+            Integer productId= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+            ezshop.updatePosition(productId,"1-a-1");
+           // Integer initialProductQuantity = 10;
+           // ezshop.updateQuantity(productId, initialProductQuantity);
+
+            ezshop.recordBalanceUpdate(200);
+
+            Integer oid1= ezshop.payOrderFor("5701234567899",5,4);
+            ezshop.recordOrderArrivalRFID(oid1,"000000001100");
+
+            Integer transactionId = ezshop.startSaleTransaction();
+
+            // The operation is successful
+
+            long start = System.currentTimeMillis();
+             boolean added1 = ezshop.addProductToSaleRFID(transactionId,"000000001100");
+            long end = System.currentTimeMillis();
+            System.out.println("DEBUG: Test took " + (end - start) + " ms");
+            assertTrue("Test took more than 500 ms", (end - start) <= 500);
+           // ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testTimeDeleteProductToSaleRFID() {
+        try {
+            // Setup
+            //ezshop.login("admin","password");
+
+            Integer productId= ezshop.createProductType("spaghetti", "5701234567899", 5.0, "nota" );
+            ezshop.updatePosition(productId,"1-a-1");
+            // Integer initialProductQuantity = 10;
+            // ezshop.updateQuantity(productId, initialProductQuantity);
+
+            ezshop.recordBalanceUpdate(200);
+
+            Integer oid1= ezshop.payOrderFor("5701234567899",5,4);
+            ezshop.recordOrderArrivalRFID(oid1,"000000001100");
+
+            Integer transactionId = ezshop.startSaleTransaction();
+
+            // The operation is successful
+
+            ezshop.addProductToSaleRFID(transactionId,"000000001100");
+            long start = System.currentTimeMillis();
+            ezshop.deleteProductFromSaleRFID(transactionId,"000000001100");
+            long end = System.currentTimeMillis();
+            System.out.println("DEBUG: Test took " + (end - start) + " ms");
+            assertTrue("Test took more than 500 ms", (end - start) <= 500);
+            // ezshop.logout();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+    @Test
     public void testTimeDeleteProductFromSale() {
         try {
             Integer transactionId = ezshop.startSaleTransaction();

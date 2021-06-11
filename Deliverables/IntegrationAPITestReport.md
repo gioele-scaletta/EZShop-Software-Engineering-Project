@@ -116,6 +116,7 @@ package "EZShop"
 |model.SaleTransactionImpl|unitTest.testSaleTransactionImpl|
 |model.ReturnTransactionImpl|unitTest.testReturnTransactionImpl|
 |model.testCustomerImpl|unitTest.testCustomerImpl|
+|model.testProductImpl|unitTest.testProductImpl|
 
 ## Step 2 - Model classes part of integration testing
 | Classes  | JUnit test cases |
@@ -218,6 +219,28 @@ package "EZShop"
 |  1    |  C requests list of orders|
 |  2    |  C receives list of orders |
 
+##### Scenario UC3.6 Record Order Arrival with RFID
+
+| Scenario |  List Orders |
+| ------------- |:-------------:| 
+|  Precondition     | Employee C exists and is logged in |
+|  | Orders is present in orders list |
+|  Post condition     | Products in the orders are registered in the application |
+| Step#        | Description  |
+|  1    |  The order arrives to the shop|
+|  2    |  An orderId and an initialRFID are set |
+|  3    |  It is verified that the orderId is existing for a COMPLETED/PAYED order |
+|  4    |  It is verified that the initialRFID is valid and that is not already present in the products list |
+|  5    |  A product is insert in the products list with its internal productID and RFID |
+|  6    |  RFID is incremented by 1 |
+|      |  Return to step 5 until all products are registered |
+|  7    |  The quantity of the corresponding product type is incremented |
+
+
+
+
+
+
 ##### Scenario UC4.5
 
 | Scenario |  Delete customer record |
@@ -249,7 +272,7 @@ package "EZShop"
 |  1    |  User selects customer record U |
 |  2    |  User modify points on L |
 
-##### Scenario 6-7
+##### Scenario 6.7
 
 | Scenario |  Remove product type X from sale |
 | ------------- |:-------------:| 
@@ -269,7 +292,7 @@ package "EZShop"
 |  9    |  C confirms the sale and prints the sale receipt |
 |  10   |  Balance is updated |
 
-##### Scenario 8-3
+##### Scenario 8.3
 
 | Scenario |  Return of product type X cancelled |
 | ------------- |:-------------:| 
@@ -353,6 +376,7 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |3.3|FR4.6|TestIntegrationEZShop.testRecordOrderArrival()|
 |3.4|FR4.1|TestIntegrationEZShop.testUpdateQuantity()|
 |3.5|FR4.7|TestIntegrationEZShop.testGetAllOrders()|
+|3.6|FR4.6|TestIntegrationEZShop.testRecordOrderArrivalRFID()|
 |4.1|FR5.1|TestIntegrationEZShop.testDefineCustomer()|
 |4.2|FR5.5|TestIntegrationEZShop.testCreateCard()|
 |"|FR5.6|TestIntegrationEZShop.testAttachCardToCustomer()|
@@ -367,40 +391,47 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |5.2|"|TestIntegrationEZShop.testLogout()|
 |6.1|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSaleRFID()|
 |"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
 |6.2|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSaleRFID()|
 |"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
 |"|FR6.5|TestIntegrationEZShop.testApplyDiscountRateToProduct()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
 |6.3|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSaleRFID()|
 |"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
 |"|FR6.4|TestIntegrationEZShop.testApplyDiscountRateToSale()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
 |6.4|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSaleRFID()|
 |"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR6.6|TestIntegrationEZShop.testComputePointsForSale()|
 |"|FR7.2|TestIntegrationEZShop.testReceiveCashPayment()|
 |6.5|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSaleRFID()|
 |"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR6.11|TestIntegrationEZShop.testDeleteSaleTransaction()|
 |6.6|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
+|"|FR6.2|TestIntegrationEZShop.testAddProductToSaleRFID()|
 |"|FR6.2|TestIntegrationEZShop.testAddProductToSale()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
 |6.7|FR6.1|TestIntegrationEZShop.testStartSaleTransaction()|
 |"|FR6.7|TestIntegrationEZShop.getProductTypeByBarCode()|
 |"|FR6.2|TestIntegrationEZShop.testDeleteProductFromSale()|
+|"|FR6.2|TestIntegrationEZShop.testDeleteProductFromSaleRFID()|
 |"|FR6.10|TestIntegrationEZShop.testEndSaleTransaction()|
 |"|FR7.1/FR7.2|TestIntegrationEZShop.testReceiveCashPayment()/testReceiveCreditCardPayment|
 |7.1|FR7.2|TestIntegrationEZShop.testReceiveCreditCardPayment()|
@@ -458,7 +489,9 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |                            |  TestNFR.testTimeModifyPointsOnCard()   |
 |                            |  TestNFR.testTimeStartSaleTransaction |
 |                            |  TestNFR.testTimeAddProductToSale |
+|                            |  TestNFR.testTimeAddProductToSaleRFID |
 |                            |  TestNFR.testTimeDeleteProductFromSale |
+|                            |  TestNFR.testTimeDeleteProductFromSaleRFID |
 |                            |  TestNFR.testTimeApplyDiscountRateToProduct |
 |                            |  TestNFR.testTimeApplyDiscountRateToSale |
 |                            |  TestNFR.testTimeComputePointsForSale |
