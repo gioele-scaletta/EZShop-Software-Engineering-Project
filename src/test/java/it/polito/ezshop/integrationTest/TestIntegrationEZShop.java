@@ -3431,6 +3431,11 @@ import java.util.List;
                  ezshop.recordOrderArrivalRFID(oid3,"abcdefghijkl");
              });
 
+             //Check for duplicate value of RFID
+             assertThrows(InvalidRFIDException.class, ()-> {
+                 ezshop.recordOrderArrivalRFID(oid3,"000000000100");
+             });
+
              // Check UnauthorizedException
              ezshop.logout();
              assertThrows(UnauthorizedException.class, () -> {
