@@ -3662,6 +3662,7 @@ import java.util.List;
 
              Integer transactionId = ezshop.startSaleTransaction();
              ezshop.addProductToSaleRFID(transactionId, "000000002100");
+             ezshop.addProductToSaleRFID(transactionId, "000000002101");
              ezshop.endSaleTransaction(transactionId);
              ezshop.receiveCashPayment(transactionId, 1.25 * 4);
              Integer returnId = ezshop.startReturnTransaction(transactionId);
@@ -3670,24 +3671,28 @@ import java.util.List;
 
              // The operation is successful
              boolean returned1 = ezshop.returnProductRFID(returnId,"000000002100");
+             boolean returned2 = ezshop.returnProductRFID(returnId,"000000002101");
 
              ezshop.logout();
              ezshop.login("shopmanager","password");
 
              // The product to be returned does not exist
-             boolean returned2 = ezshop.returnProductRFID(returnId,"000000007100");
+             boolean returned3 = ezshop.returnProductRFID(returnId,"000000007100");
 
              // The product was not in the transaction
-             boolean returned3 = ezshop.returnProductRFID(returnId,"000000003100");
+             boolean returned4 = ezshop.returnProductRFID(returnId,"000000003100");
+             boolean returned5 = ezshop.returnProductRFID(returnId,"000000002102");
 
              // The transaction does not exist
-             boolean returned4 = ezshop.returnProductRFID(returnId+1,"000000002100");
+             boolean returned6 = ezshop.returnProductRFID(returnId+1,"000000002100");
 
              // Asserts
              assertTrue(returned1);
-             assertFalse(returned2);
+             assertTrue(returned2);
              assertFalse(returned3);
              assertFalse(returned4);
+             assertFalse(returned5);
+             assertFalse(returned6);
 
              // Check InvalidTransactionIdException for transactionId equal to 0
              assertThrows(InvalidTransactionIdException.class, () -> {

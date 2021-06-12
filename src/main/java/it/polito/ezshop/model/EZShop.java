@@ -2618,6 +2618,13 @@ public class EZShop implements EZShopInterface {
             return false;
         }
 
+        // Check if the amount is higher than the one in the sale transaction
+        int previousAmount = returnTransaction.getReturnProducts().entrySet().stream().filter(e -> e.getKey().getBarCode().equals(productType.getBarCode())).mapToInt(Map.Entry::getValue).reduce(0, Integer::sum);
+        if ((1 + previousAmount) > saleTransaction.getProductQuantity(productType)) {
+            System.err.println(methodName + ": The amount is higher than the one in the sale transaction");
+            return false;
+        }
+
         // Add product to ReturnTransaction
         returnTransaction.addProduct(productType, 1);
 
@@ -2626,9 +2633,16 @@ public class EZShop implements EZShopInterface {
             System.err.println(methodName + ": There are some problems with the DB");
             return false;
         }
-        if (!insertPersistenceReturnTransactionProduct(returnTransaction, productType)) {
-            System.err.println(methodName + ": There are some problems with the DB");
-            return false;
+        if (previousAmount == 0) {
+            if (!insertPersistenceReturnTransactionProduct(returnTransaction, productType)) {
+                System.err.println(methodName + ": There are some problems with the DB");
+                return false;
+            }
+        } else {
+            if (!updatePersistenceReturnTransactionProduct(returnTransaction, productType)) {
+                System.err.println(methodName + ": There are some problems with the DB");
+                return false;
+            }
         }
 
         return true;
