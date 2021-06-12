@@ -2,9 +2,9 @@
 
 Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scaletta
 
-Date: 26/05/2021
+Date: 12/06/2021
 
-Version: 1.0
+Version: 1.1
 
 # Contents
 
@@ -439,15 +439,15 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 |7.3|"|TestIntegrationEZShop.testReceiveCreditCardPayment()|
 |7.4|FR7.1|TestIntegrationEZShop.testReceiveCashPayment()|
 |8.1|FR6.12|TestIntegrationEZShop.testStartReturnTransaction()|
-|"|FR6.13|TestIntegrationEZShop.testReturnProduct()|
+|"|FR6.13|TestIntegrationEZShop.testReturnProduct()/TestIntegrationEZShop.testReturnProductRFID()|
 |"|FR6.14|TestIntegrationEZShop.testEndReturnTransaction()|
 |"|FR7.4|TestIntegrationEZShop.testReturnCreditCardPayment()|
 |8.2|FR6.12|TestIntegrationEZShop.testStartReturnTransaction()|
-|"|FR6.13|TestIntegrationEZShop.testReturnProduct()|
+|"|FR6.13|TestIntegrationEZShop.testReturnProduct()/TestIntegrationEZShop.testReturnProductRFID()|
 |"|FR6.14|TestIntegrationEZShop.testEndReturnTransaction()|
 |"|FR7.3|TestIntegrationEZShop.testReturnCashPayment()|
 |8.3|FR6.12|TestIntegrationEZShop.testStartReturnTransaction()|
-|"|FR6.13|TestIntegrationEZShop.testReturnProduct()|
+|"|FR6.13|TestIntegrationEZShop.testReturnProduct()/TestIntegrationEZShop.testReturnProductRFID()|
 |"|FR6.14|TestIntegrationEZShop.testEndReturnTransaction()|
 |"|FR6.15|TestIntegrationEZShop.testDeleteReturnTransaction()|
 |9.1|FR8.3|TestIntegrationEZShop.testGetDebitsAndCredits()|
