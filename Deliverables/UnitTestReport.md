@@ -2,9 +2,9 @@
 
 Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scaletta
 
-Date: 19/05/2021
+Date: 11/06/2021
 
-Version: 1.0
+Version: 1.1
 
 # Contents
 
@@ -266,7 +266,7 @@ Version: 1.0
 | Valid                             | V               | setQuantity(10)<br/>getQuantity().equals(10)<br/><br/>-> true | TestProductTypeImpl.testSetQuantity() |
 | NULL                              | I               | setQuantity(10)<br/>setQuantity(null)<br/>getQuantity().equals(10)<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetQuantity() |
 
-# Method setNote
+## Method setNote
 
 **Criteria for method *setNote*:**
 
@@ -286,7 +286,7 @@ Version: 1.0
 | Valid                             | V               | setNote("barilla")<br/>getNote().equals("barilla")<br/><br/>-> true | TestProductTypeImpl.testSetNote() |
 | NULL                              | I               | setNote("barilla")<br/>setNote(null)<br/>getNote().equals("barilla")<br/><br/>-> true (not modified) | TestProductTypeImpl.testSetNote() |
 
-# Method setLocation
+## Method setLocation
 
 **Criteria for method *setLocation*:**
 
@@ -901,6 +901,7 @@ Version: 1.0
 |-----------------------------------|-----------------|------------------------------|-----------------|
 |Valid                              |V                | setMoney(23.50)<br/>getMoney( ).equals(23.50)<br/><br/>-> true|testBalanceOperationImpl.testSetMoney( )|
 
+
 ## Method setType
 
 **Criteria for method *setType*:**
@@ -921,6 +922,68 @@ Version: 1.0
 |-----------------------------------|-----------------|------------------------------|-----------------|
 |Valid                              |V                |setType("CREDIT")<br/>getType( ).equals("CREDIT")<br/><br/>-> true|testBalanceOperationImpl.testSetType( )|
 |NULL                               |I                |setType("CREDIT")<br/>setType(null)<br/>getType( ).equals("CREDIT")<br/><br/>-> true (not modified)|testBalanceOperationImpl.testSetType( )|
+
+# Class ProductImpl
+
+## Method isValidRFID
+
+**Criteria for method *isValidRFID*:**
+
+- Validity of length String parameter RFID
+- Validity of digits type of String parameter RFID
+- Validity of String parameter
+
+
+**Predicates for method *isValidRFID*:**
+
+| Criterion                        | Predicate         |
+| -------------------------------- | ----------------- |
+| Validity of String parameter     | Valid             |
+|                                  | NULL              |
+|                                  | Empty             |
+| Validity of length               | Equal to 12       |
+|                                  | Not equal to 12   |
+| Validity of digits type          | Is parsable Long  |
+|                                  | Not parsable Long |
+
+
+**Combination of predicates**:
+
+
+|  Validity of the String parameter |  Validity of length| Validity of digits type | Valid / Invalid | Description of the test case                      | JUnit test case   |
+|-----------------------------------|--------------------|-------------------------|-----------------|---------------------------------------------------|-------------------|
+| Valid                             |   Equal to 12      |  Is parsable Long       |  V              | isValidRFID("000000001000")  <br /><br />-> true  | TestProductImpl.testIsValidRFID() |
+| *                                 |   *                |  Not parsable Long      |  I              | isValidRFID("00000000100a") <br /><br />-> false  | TestProductImpl.testIsValidRFID() |
+| *                                 |   Not equal to 12  |  *                      |  I              | isValidRFID("00000000100") <br /><br />-> false   | TestProductImpl.testIsValidRFID() |
+| NULL                              |   *                |  *                      |  I              | isValidRFID(null)  <br /><br />-> false           | TestProductImpl.testIsValidRFID() |
+| Empty                             |   *                |  *                      |  I              | isValidRFID("")   <br /><br />-> false            | TestProductImpl.testIsValidRFID() |
+
+
+
+
+## Method nextRFID
+
+**Criteria for method *nextRFID*:**
+
+- Validity of String parameter RFID
+
+
+**Predicates for method *nextRFID*:**
+
+| Criterion                            | Predicate         |
+| ------------------------------------ | ----------------- |
+| Validity of String parameter RFID    | Valid RFID        |
+|                                      | Invalid RFID      |
+
+
+**Combination of predicates**:
+
+
+|  Validity of the String parameter RFID | Valid / Invalid | Description of the test case                      | JUnit test case   |
+|----------------------------------------|-----------------|---------------------------------------------------|-------------------|
+| Valid RFID                             |  V              | nextRFID("000000001009")  <br /><br />-> "000000001010" <br /><br /> nextRFID("999999999999")  <br /><br />-> "000000000000"     | TestProductImpl.testNextRFID()    |
+| Invalid RFID                           |  I              | nextRFID(null) <br />nextRFID("") <br />nextRFID("00000000100a") <br />nextRFID("00000000100") <br /><br />-> null     | TestProductImpl.testNextRFID()    |
+
 
 # White Box Unit Tests
 

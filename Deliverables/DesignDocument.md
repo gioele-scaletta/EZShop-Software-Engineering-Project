@@ -2,9 +2,9 @@
 
 Authors: Jose Antonio Antona Diaz, Giuseppe D'Andrea, Marco Riggio, Gioele Scaletta
 
-Date: 30/04/2021
+Date: 09/05/2021
 
-Version: 1.1
+Version: 1.2
 
 # Contents
 
@@ -77,6 +77,7 @@ interface EZShopInterface {
     + payOrderFor(String productCode, int quantity, double pricePerUnit): Integer
     + payOrder(Integer orderId): boolean
     + recordOrderArrival(Integer orderId): boolean
+    + recordOrderArrivalRFID(Integer orderId, String RFID): boolean
     + getAllOrders(): List<Order>
     .. FR5 ..
     + defineCustomer(String customerName): Integer
@@ -90,7 +91,9 @@ interface EZShopInterface {
     .. FR6 ..
     + startSaleTransaction(): Integer
     + addProductToSale(Integer transactionId, String productCode, int amount): boolean
+    + addProductToSaleRFID(Integer transactionId, String RFID): boolean
     + deleteProductFromSale(Integer transactionId, String productCode, int amount): boolean
+    + deleteProductFromSaleRFID(Integer transactionId, String RFID): boolean
     + applyDiscountRateToProduct(Integer transactionId, String productCode, double discountRate): boolean
     + applyDiscountRateToSale(Integer transactionId, double discountRate): boolean
     + computePointsForSale(Integer transactionId): Integer
@@ -99,6 +102,7 @@ interface EZShopInterface {
     + getSaleTransaction(Integer transactionId): SaleTransaction
     + startReturnTransaction(Integer transactionId): Integer
     + returnProduct(Integer returnId, String productCode, int amount): boolean
+    + returnProductRFID(Integer returnId, String RFID): boolean
     + endReturnTransaction(Integer returnId, boolean commit): boolean
     + deleteReturnTransaction(Integer returnId): boolean
     .. FR7 ..
@@ -114,11 +118,11 @@ interface EZShopInterface {
 
 class EZShop{
     - customersList: Map<String, Customer>
-    - loyaltyCardsList: Map<String, LoyaltyCard>
     - ordersList: Map<Integer, Order>
     - salesList: Map<Integer, SaleTransaction>
     - returnsList: Map<Integer, ReturnTransaction>
-    - productsList: Map<Integer,ProductType>
+    - productTypesList: Map<Integer,ProductType>
+    - productsList: Map<Integer, String>
     - balanceOperationsList: Map<Integer, BalanceOperation>
     - usersList: Map<Integer, User>
     - loggedIn: User
@@ -166,16 +170,7 @@ class User{
 class Customer{
     - customerName: String
     - customerId: Integer
-
-    - customerCard: LoyaltyCard
-}
-
-class LoyaltyCard{
-    - cardId: String
-    - cardPoints: Integer
-    - isAttached: boolean
-
-    + updatePoints(Integer points) : boolean
+    - customerCard: String
 }
 
 class SaleTransaction {
@@ -185,7 +180,6 @@ class SaleTransaction {
     - amount: Double
     - salediscountRate: Double
 
-    - transactionCard: LoyaltyCard
     - saleOperationRecord: BalanceOperation
     - listOfProductsSale: Map<ProductType, Integer>
 
@@ -247,6 +241,14 @@ class ProductType{
     + updateProductQuantity(Integer quantityDiff): boolean
 }
 
+class Product{
+    - productId: Integer
+    - RFID: String
+
+    + isValidRFID(String rfid): static boolean
+    + nextRFID(String rfid): static String
+}
+
 EZShop -|> EZShopInterface : <<implements>>
 
 User "*" <- EZShop
@@ -256,10 +258,7 @@ EZShop --> "*" ReturnTransaction
 EZShop --> "*" Order
 EZShop --> "*" ProductType
 EZShop --> "*" BalanceOperation
-EZShop --> "*" LoyaltyCard
-
-Customer --> "0..1" LoyaltyCard
-SaleTransaction "1..*" --> "0..1" LoyaltyCard
+EZShop --> "*" Product
 
 SaleTransaction "1" <- "0..*" ReturnTransaction
 
@@ -267,6 +266,7 @@ SaleTransaction "*" --> "*" ProductType
 ReturnTransaction "0..*" --> "1..*" ProductType
 Order "*" --> ProductType
 
+ProductType ---> "0..*" Product
 SaleTransaction ---> BalanceOperation
 ReturnTransaction ---> BalanceOperation
 Order ---> BalanceOperation
@@ -283,15 +283,15 @@ end note
 
 # Verification traceability matrix
 
-|FR ID|EZShop|Customer|LoyaltyCard|SaleTransaction|BalanceOperation|Order|ProductType|User|ReturnTransaction|
-|-------------| :-------------: | :-------------: | :-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
-| FR1 | X |   |   |   |   |   |   | X |   |
-| FR3 | X |   |   |   |   |   | X |   |   |
-| FR4 | X |   |   |   |   | X | X |   |   |
-| FR5 | X | X | X |   |   |   |   |   |   |
-| FR6 | X |   | X | X | X |   | X | X | X |
-| FR7 | X |   |   | X | X |   |   | X | X |
-| FR8 | X |   |   |   | X |   |   | X |   |
+|FR ID|EZShop|Customer|SaleTransaction|BalanceOperation|Order|ProductType|Product|User|ReturnTransaction|
+|-------------|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| FR1 | X |   |   |   |   |   | | X |   |
+| FR3 | X |   |   |   |   | X | |   |   |
+| FR4 | X |   |   |   | X | X |X|   |   |
+| FR5 | X | X | X |   |   |   | |   |   |
+| FR6 | X |   | X | X |   | X |X| X | X |
+| FR7 | X |   |   | X |   |   | | X | X |
+| FR8 | X |   |   | X |   |   | | X |   |
 
 # Verification sequence diagrams
 
@@ -368,7 +368,7 @@ deactivate EZShop
 
 ## Use Case 3
 
-### Scenario 3.1 - Order od Product Type Issued
+### Scenario 3.1 - Order of Product Type Issued
 
 ```plantuml
 actor "Administrator\nShop Manager" as user
@@ -392,7 +392,7 @@ deactivate EZShop
 actor "Administrator\nShop Manager" as user
 autonumber
 
-user->EZShop : recordOrderArrival()
+user->EZShop : recordOrderArrivalRFID()
 activate EZShop
 EZShop->User : canManageInventory()
 User --> EZShop : Boolean
@@ -400,6 +400,9 @@ EZShop->EZShop : getOrderByID()
 EZShop->Order : setOrderState()
 EZShop->EZShop : getProductTypeByID()
 EZShop->ProductType : updateProductQuantity()
+loop forEach product in order
+    EZShop->EZShop : addProduct()
+end
 EZShop --> user: boolean
 deactivate EZShop
 ```
@@ -504,12 +507,12 @@ user <-- EZShop : Integer
 deactivate EZShop
 
 loop forEach product
-    user -> EZShop : addProductToSale()
+    user -> EZShop : addProductToSaleRFID()
     activate  EZShop
     'EZShop -> User : canManageSalesAndCustomers()
     'EZShop <-- User : Boolean
     EZShop -> EZShop : getSaleTransactionById()
-    EZShop-> EZShop : getProductTypeByCode()
+    EZShop-> EZShop : getProductTypeByRFID()
     EZShop -> SaleTransaction : EditProductInSale()
     SaleTransaction -> SaleTransaction : isProductInSale()
     SaleTransaction -> ProductType : getSellPrice()
@@ -618,12 +621,12 @@ user <-- EZShop : Integer
 deactivate EZShop
 
 loop forEach product
-    user -> EZShop : addProductToSale()
+    user -> EZShop : addProductToSaleRFID()
     activate  EZShop
     'EZShop -> User : canManageSalesAndCustomers()
     'EZShop <-- User : Boolean
     EZShop -> EZShop : getSaleTransactionById()
-    EZShop-> EZShop : getProductTypeByCode()
+    EZShop-> EZShop : getProductTypeByRFID()
     EZShop -> SaleTransaction : EditProductInSale()
     SaleTransaction -> SaleTransaction : isProductInSale()
     SaleTransaction -> ProductType : getSellPrice()
@@ -721,12 +724,12 @@ EZShop <-- ReturnTransaction : ReturnTransaction
 user <-- EZShop : Integer
 deactivate EZShop
 
-user -> EZShop : returnProduct()
+user -> EZShop : returnProductRFID()
 activate EZShop
 EZShop -> User : canManageSalesAndCustomers()
 EZShop <-- User : boolean
 EZShop -> EZShop : getSaleTransactionById()
-EZShop -> EZShop : getProductTypeByCode()
+EZShop -> EZShop : getProductTypeByRFID()
 EZShop -> TransactionSale : isProductInSale()
 EZShop <-- TransactionSale : boolean
 EZShop -> ReturnTransaction : addProductToReturn()
